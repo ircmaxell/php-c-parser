@@ -41,7 +41,6 @@ class Lexer
                 }
             }
             $startAttributes['startLine'] = $this->tokenPos + 1;
-            echo "% token from line {$this->tokenPos}\n";
             if (is_string($token)) {
                 $id = ord($token);
                 $value = $token;

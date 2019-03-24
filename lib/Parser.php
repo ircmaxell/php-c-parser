@@ -1047,10 +1047,10 @@ class Parser extends ParserAbstract
                 $this->semValue = $this->semStack[$stackPos];
             },
             90 => function ($stackPos) {
-                 $this->semValue = $this->semStack[$stackPos-(2-1)]; $this->semValue[2] = []; 
+                 $this->semValue = new IR\Declaration($this->semStack[$stackPos-(2-1)][0], $this->semStack[$stackPos-(2-1)][1], [], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             91 => function ($stackPos) {
-                 $this->semValue = $this->semStack[$stackPos-(3-1)]; $this->semValue[2] = $this->semStack[$stackPos-(3-2)]; 
+                 $this->semValue = new IR\Declaration($this->semStack[$stackPos-(3-1)][0], $this->semStack[$stackPos-(3-1)][1], $this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             92 => function ($stackPos) {
                 $this->semValue = $this->semStack[$stackPos];
@@ -1092,10 +1092,10 @@ class Parser extends ParserAbstract
                  $this->semStack[$stackPos-(3-1)][] = $this->semStack[$stackPos-(3-3)]; $this->semValue = $this->semStack[$stackPos-(3-1)]; 
             },
             105 => function ($stackPos) {
-                 $this->semValue = [$this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)]]; 
+                 $this->semValue = new IR\InitDeclarator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             106 => function ($stackPos) {
-                 $this->semValue = [$this->semStack[$stackPos-(1-1)], null]; 
+                 $this->semValue = new IR\InitDeclarator($this->semStack[$stackPos-(1-1)], null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             107 => function ($stackPos) {
                  $this->semValue = Node\Decl::KIND_TYPEDEF; 
@@ -1275,22 +1275,22 @@ class Parser extends ParserAbstract
                 $this->semValue = $this->semStack[$stackPos];
             },
             166 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\Declarator($this->semStack[$stackPos-(2-1)], $this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             167 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\Declarator(null, $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             168 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\DirectDeclarator\Identifier($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             169 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\DirectDeclarator\Declarator($this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             170 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\DirectDeclarator\IncompleteArray($this->semStack[$stackPos-(3-1)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             171 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\DirectDeclarator\IncompleteArray($this->semStack[$stackPos-(4-1)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             172 => function ($stackPos) {
                 $this->semValue = $this->semStack[$stackPos];
@@ -1323,16 +1323,16 @@ class Parser extends ParserAbstract
                 $this->semValue = $this->semStack[$stackPos];
             },
             182 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\QualifiedPointer($this->semStack[$stackPos-(3-2)], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             183 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\QualifiedPointer($this->semStack[$stackPos-(2-2)], null, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             184 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\QualifiedPointer(0, $this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             185 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = new IR\QualifiedPointer(0, null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             186 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 

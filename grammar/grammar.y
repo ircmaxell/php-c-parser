@@ -193,8 +193,8 @@ constant_expression
     ;
 
 declaration
-    : declaration_specifiers ';'                        { $$ = $1; $$[2] = []; }
-    | declaration_specifiers init_declarator_list ';'   { $$ = $1; $$[2] = $2; }
+    : declaration_specifiers ';'                        { $$ = IR\Declaration[$1[0], $1[1], []]; }
+    | declaration_specifiers init_declarator_list ';'   { $$ = IR\Declaration[$1[0], $1[1], $2]; }
     | static_assert_declaration                         
     ;
 
@@ -217,8 +217,8 @@ init_declarator_list
     ;
 
 init_declarator
-    : declarator '=' initializer                    { $$ = [$1, $3]; }
-    | declarator                                    { $$ = [$1, null]; }
+    : declarator '=' initializer                    { $$ = IR\InitDeclarator[$1, $3]; }
+    | declarator                                    { $$ = IR\InitDeclarator[$1, null]; }
     ; 
 
 storage_class_specifier
@@ -329,15 +329,15 @@ alignment_specifier
     ;
 
 declarator
-    : pointer direct_declarator     {  }
-    | direct_declarator             { $$ = $1; }
+    : pointer direct_declarator     { $$ = IR\Declarator[$1, $2]; }
+    | direct_declarator             { $$ = IR\Declarator[null, $1]; }
     ;
 
 direct_declarator
-    : IDENTIFIER                                                                    { }
-    | '(' declarator ')'                                                            
-    | direct_declarator '[' ']'                                                     
-    | direct_declarator '[' '*' ']'                                                 
+    : IDENTIFIER                                                                    { $$ = IR\DirectDeclarator\Identifier[$1]; }
+    | '(' declarator ')'                                                            { $$ = IR\DirectDeclarator\Declarator[$2]; }
+    | direct_declarator '[' ']'                                                     { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
+    | direct_declarator '[' '*' ']'                                                 { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
     | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'    
     | direct_declarator '[' STATIC assignment_expression ']'                        
     | direct_declarator '[' type_qualifier_list '*' ']'                             
@@ -351,10 +351,10 @@ direct_declarator
     ;
 
 pointer
-    : '*' type_qualifier_list pointer       
-    | '*' type_qualifier_list               
-    | '*' pointer                           
-    | '*'                                   { $$ = 1; }
+    : '*' type_qualifier_list pointer       { $$ = IR\QualifiedPointer[$2, $3]; }
+    | '*' type_qualifier_list               { $$ = IR\QualifiedPointer[$2, null]; }
+    | '*' pointer                           { $$ = IR\QualifiedPointer[0, $2]; }
+    | '*'                                   { $$ = IR\QualifiedPointer[0, null]; }
     ;
 
 type_qualifier_list

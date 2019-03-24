@@ -15,20 +15,12 @@ class Compiler
         $this->scope = $scope;
     }
 
-    public function compileExternalDeclaration(array $declaration, array $attributes = []): array {
-        if (count($declaration) !== 3) {
-            throw new \LogicException('Expected external declarations to have 3 members');
-        }
-        if ($declaration[0] === Decl::KIND_TYPEDEF) {
-            $type = $this->compileType($declaration[1]);
+    public function compileExternalDeclaration(IR\Declaration $declaration, array $attributes = []): array {
+        if ($declaration->qualifiers === Decl::KIND_TYPEDEF) {
+            $type = $this->compileType($declaration->types);
             $result = [];
-            foreach ($declaration[2] as $names) {
-                if (!$names[1] === null) {
-                    // provided an initializer to a typedef
-                    throw new \LogicException('Typedefs cannot have initializers');
-                }
-                $result[] = new TypedefDecl($names[0], $type, $attributes);
-                $this->scope->typedef($names[0], $type);
+            foreach ($declaration->declarators as $declarator) {
+                $result[] = $this->compileTypedef($declarator, $type, $attributes);;
             }
             return $result;
         }
@@ -51,5 +43,57 @@ restart:
         }
         var_dump($types);
         // Todo
+    }
+
+    public function compileQualifiedPointer(IR\QualifiedPointer $pointer, Type $type): Type {
+restart:
+        if ($pointer->qualification === 0) {
+            $type = new Type\PointerType($type);
+        } else {
+            throw new \LogicException('Qualified Pointers not implemented yet');
+        }
+        if ($pointer->parent !== null) {
+            $pointer = $pointer->parent;
+            goto restart;
+        }
+        return $type;
+    }
+
+    public function compileTypedef(IR\InitDeclarator $init, Type $type, array $attributes = []): Decl {
+        if (!$init->initializer === null) {
+            throw new \LogicException("Typedef cannot come with an initializer");
+        }
+        $declarator = $init->declarator;
+        return $this->compileTypedefDeclarator($declarator, $type, $attributes);
+
+
+        foreach ($name[0] as $qualifiedPointer) {
+            $type = $this->compileQualifiedPointer($qualifiedPointer, $type);
+        }
+        if (is_string($name[1])) {
+            $this->scope->typedef($name[1], $type);
+            return new TypedefDecl($name[1], $type, $attributes);
+        }
+    }
+
+    public function compileTypedefDeclarator(IR\Declarator $declarator, Type $type, array $attributes = []): Decl {
+restart:
+        if ($declarator->pointer !== null) {
+            $type = $this->compileQualifiedPointer($declarator->pointer, $type);
+        }
+        $directdeclarator = $declarator->declarator;
+restart_direct:
+        if ($directdeclarator instanceof IR\DirectDeclarator\Identifier) {
+            return new TypedefDecl($directdeclarator->name, $type, $attributes);
+        } elseif ($directdeclarator instanceof IR\DirectDeclarator\IncompleteArray) {
+            $type = new Type\ArrayType\IncompleteArrayType($type);
+            $directdeclarator = $directdeclarator->declarator;
+            goto restart_direct;
+        } elseif ($directdeclarator instanceof IR\DirectDeclarator\Declarator) {
+            $type = new Type\ParenType($type);
+            $declarator = $directdeclarator->declarator;
+            goto restart;
+        }
+        throw new \LogicException("Unknown declarator found for typedef");
     }
 }
