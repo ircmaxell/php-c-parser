@@ -1,0 +1,22 @@
+{
+    "name": "ircmaxell/php-c-parser",
+    "description": "Parse C when using PHP",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anthony Ferrara",
+            "email": "ircmaxell@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "ircmaxell/php-yacc": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "PHPCParser\\": "lib/"
+        }
+    }
+}
