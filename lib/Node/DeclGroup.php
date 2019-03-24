@@ -10,7 +10,13 @@ class DeclGroup extends NodeAbstract
 
     public function __construct(array $declarations, array $attributes = []) {
         parent::__construct($attributes);
-        $this->declarations = $declarations;
+        $this->addDecl(...$declarations);
+    }
+
+    public function addDecl(Decl ...$declarations): void {
+        foreach ($declarations as $declaration) {
+            $this->declarations[] = $declaration;
+        }
     }
 
     public function getSubNodeNames(): array {

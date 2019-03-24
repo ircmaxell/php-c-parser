@@ -29,8 +29,11 @@ class Scope {
         '__gnuc_va_list' => Tokens::T_TYPEDEF_NAME,
     ];
 
-    public function typedef(string $identifier): void {
+    private array $types = [];
+
+    public function typedef(string $identifier, Node\Type $type): void {
         $this->entries[$identifier] = Tokens::T_TYPEDEF_NAME;
+        $this->types[$identifier] = $type;
     }
 
     public function enum(string $identifier): void {
@@ -42,5 +45,12 @@ class Scope {
             return $this->entries[$identifier];
         }
         return Tokens::T_IDENTIFIER;
+    }
+
+    public function lookupType(string $identifier): Node\Type {
+        if (!isset($this->types[$identifier])) {
+            throw new \LogicException("Attempt to lookup unknown type '$identifier'");
+        }
+        return $this->types[$identifier];
     }
 }

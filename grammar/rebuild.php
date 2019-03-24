@@ -22,6 +22,7 @@ $generator = new Generator;
 
 $grammarCode = file_get_contents(__DIR__ . '/grammar.y');
 
+$grammarCode = resolveCompiles($grammarCode);
 $grammarCode = resolveNodes($grammarCode);
 $grammarCode = resolveMacros($grammarCode);
 $grammarCode = resolveStackAccess($grammarCode);
@@ -64,6 +65,25 @@ function resolveNodes($code) {
                 $paramCode .= $param . ', ';
             }
             return 'new ' . $matches['name'] . '(' . $paramCode . 'attributes())';
+        },
+        $code
+    );
+}
+function resolveCompiles($code) {
+    return preg_replace_callback(
+        '~\b(?<name>compile[a-zA-Z_]++)\s*' . PARAMS . '~',
+        function($matches) {
+            // recurse
+            $matches['params'] = resolveNodes($matches['params']);
+            $params = magicSplit(
+                '(?:' . PARAMS . '|' . ARGS . ')(*SKIP)(*FAIL)|,',
+                $matches['params']
+            );
+            $paramCode = '';
+            foreach ($params as $param) {
+                $paramCode .= $param . ', ';
+            }
+            return '$$ = $this->compiler->' . $matches['name'] . '(' . $paramCode . 'attributes())';
         },
         $code
     );

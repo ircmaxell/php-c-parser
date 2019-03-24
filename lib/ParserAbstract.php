@@ -84,6 +84,7 @@ abstract class ParserAbstract
     protected $errorState;
 
     protected Scope $scope;
+    protected Compiler $compiler;
 
     /**
      * Initialize $reduceCallbacks map.
@@ -92,11 +93,13 @@ abstract class ParserAbstract
 
     public function __construct(Lexer $lexer) {
         $this->lexer = $lexer;
+        $this->compiler = new Compiler;
         $this->initReduceCallbacks();
     }
 
     public function parse(array $tokens) {
         $this->scope = new Scope;
+        $this->compiler->begin($this->scope);
         $this->lexer->begin($this->scope, $tokens);
         $result = $this->doParse();
         $this->startAttributeStack = [];

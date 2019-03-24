@@ -3,6 +3,7 @@
 namespace PHPCParser;
 
 use PHPCParser\PreProcessor\Context;
+use PHPCParser\Node\TranslationUnitDecl;
 
 class CParser
 {
@@ -13,7 +14,7 @@ class CParser
         $this->parser = new Parser(new Lexer);
     }
 
-    public function parse(string $filename, ?Context $context = null): array {
+    public function parse(string $filename, ?Context $context = null): TranslationUnitDecl {
         // Create the preprocessor every time, since it shouldn't ever share state
         $context = $context ?? new Context;
         $preprocessor = new PreProcessor($context);

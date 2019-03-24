@@ -2,19 +2,8 @@
 
 namespace PHPCParser\Node;
 
-use PHPCParser\NodeAbstract;
 
-abstract class DeclContext extends NodeAbstract
+abstract class DeclContext extends DeclGroup
 {
-    public array $declarations;
-
-    public function __construct(array $declarations, array $attributes = []) {
-        parent::__construct($attributes);
-        $this->declarations = $declarations;
-    }
-
-    public function getSubNodeNames() : array {
-        return ['declarations'];
-    }
 
 }

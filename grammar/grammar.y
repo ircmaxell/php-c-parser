@@ -193,32 +193,32 @@ constant_expression
     ;
 
 declaration
-    : declaration_specifiers ';'                        
-    | declaration_specifiers init_declarator_list ';'   
+    : declaration_specifiers ';'                        { $$ = $1; $$[2] = []; }
+    | declaration_specifiers init_declarator_list ';'   { $$ = $1; $$[2] = $2; }
     | static_assert_declaration                         
     ;
 
 declaration_specifiers
-    : storage_class_specifier declaration_specifiers    { $$ = $2; $2[0] |= $1; }
+    : storage_class_specifier declaration_specifiers    { $$ = $2; $$[0] |= $1; }
     | storage_class_specifier                           { $$ = [$1, []]; }
-    | type_specifier declaration_specifiers             { $$ = $2; $2[1][] = $1; }
+    | type_specifier declaration_specifiers             { $$ = $2; array_unshift($$[1], $1); }
     | type_specifier                                    { $$ = [0, [$1]]; }
-    | type_qualifier declaration_specifiers             { $$ = $2; $2[0] |= $1; }
+    | type_qualifier declaration_specifiers             { $$ = $2; $$[0] |= $1; }
     | type_qualifier                                    { $$ = [$1, []]; }
-    | function_specifier declaration_specifiers         { $$ = $2; $2[0] |= $1; }
+    | function_specifier declaration_specifiers         { $$ = $2; $$[0] |= $1; }
     | function_specifier                                { $$ = [$1, []]; }
-    | alignment_specifier declaration_specifiers        { $$ = $2; $2[0] |= $1; }
+    | alignment_specifier declaration_specifiers        { $$ = $2; $$[0] |= $1; }
     | alignment_specifier                               { $$ = [$1, []]; }
     ;
 
 init_declarator_list
-    : init_declarator                               
-    | init_declarator_list ',' init_declarator     
+    : init_declarator                               { init($1); }
+    | init_declarator_list ',' init_declarator      { push($1, $3); }
     ;
 
 init_declarator
-    : declarator '=' initializer                    
-    | declarator                                   
+    : declarator '=' initializer                    { $$ = [$1, $3]; }
+    | declarator                                    { $$ = [$1, null]; }
     ; 
 
 storage_class_specifier
@@ -329,12 +329,12 @@ alignment_specifier
     ;
 
 declarator
-    : pointer direct_declarator     
-    | direct_declarator             
+    : pointer direct_declarator     {  }
+    | direct_declarator             { $$ = $1; }
     ;
 
 direct_declarator
-    : IDENTIFIER                                                                    
+    : IDENTIFIER                                                                    { }
     | '(' declarator ')'                                                            
     | direct_declarator '[' ']'                                                     
     | direct_declarator '[' '*' ']'                                                 
@@ -354,7 +354,7 @@ pointer
     : '*' type_qualifier_list pointer       
     | '*' type_qualifier_list               
     | '*' pointer                           
-    | '*'                                   
+    | '*'                                   { $$ = 1; }
     ;
 
 type_qualifier_list
@@ -510,17 +510,17 @@ jump_statement
 
 translation_unit
     : external_declaration                      { $$ = Node\TranslationUnitDecl[$1]; }
-    | translation_unit external_declaration     { $$ = $1; $$->addDecl($2); }
+    | translation_unit external_declaration     { $$ = $1; $$->addDecl(...$2); }
     ;
 
 external_declaration
     : function_definition   { $$ = $1; }
-    | declaration           { $$ = $1; }
+    | declaration           { compileExternalDeclaration[$1]; }
     ;
 
 function_definition
-    : declaration_specifiers declarator declaration_list compound_statement     { $$ = $this->compileFunction($1, $2, $3, $4, attributes()); }
-    | declaration_specifiers declarator compound_statement                      { $$ = $this->compileFunction($1, $2, [], $3, attributes()); }
+    : declaration_specifiers declarator declaration_list compound_statement     { compileFunction[$1, $2, $3, $4]; }
+    | declaration_specifiers declarator compound_statement                      { compileFunction[$1, $2, [], $3]; }
     ;
 
 declaration_list

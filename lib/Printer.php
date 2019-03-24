@@ -1,9 +1,16 @@
 <?php declare(strict_types=1);
 namespace PHPCParser;
 
+use PHPCParser\Node\TranslationUnitDecl;
+
 class Printer
 {
-    public function print(array $nodes, int $level = 0): void {
+
+    public function print(TranslationUnitDecl $node): void {
+        $this->printNode($node, 0);
+    }
+
+    public function printNodes(array $nodes, int $level): void {
         foreach ($nodes as $node) {
             echo str_repeat('  ', $level), 
             $this->printNode($node, $level);
@@ -23,7 +30,7 @@ class Printer
                 echo '"', $subNode, "\"\n";
             } elseif (is_array($subNode)) {
                 echo "[\n";
-                $this->print($subNode, $level + 2);
+                $this->printNodes($subNode, $level + 2);
                 echo str_repeat('  ', $level + 1), "]\n";
             } elseif (is_int($subNode)) {
                 echo $subNode, "\n";
