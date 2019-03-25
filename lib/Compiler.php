@@ -27,8 +27,14 @@ class Compiler
             foreach ($declaration->types as $type) {
                 if ($type instanceof Type\TagType\RecordType) {
                     $result[] = $type->decl; 
+                } else {
+                    throw new \LogicException('Also not implemented yet');
                 }
             }
+        } elseif ($declaration->qualifiers === 0 && count($declaration->types) === 1) {
+            foreach ($declaration->declarators as $initDeclarator) {
+                $result[] = $this->compileTypedef($initDeclarator, $declaration->types[0], $attributes);
+            }                
         } else {
             var_dump($declaration);
             throw new \LogicException("Not implmented yet");
