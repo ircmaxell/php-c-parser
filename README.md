@@ -33,3 +33,9 @@ $ast = $parser->parse('path/to/file', $context);
 ```
 
 And that's all there is to it (until it is workting that is...)...
+
+## Generating AST from clang
+
+```console
+$ clang -cc1 -ast-dump test.c
+```

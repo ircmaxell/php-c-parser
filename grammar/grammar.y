@@ -244,49 +244,49 @@ type_specifier
     | COMPLEX                       { $$ = Node\Type\BuiltinType[$1]; }
     | IMAGINARY                     { $$ = Node\Type\BuiltinType[$1]; } /* non-mandated extension */
     | atomic_type_specifier         { $$ = $1; }
-    | struct_or_union_specifier     { $$ = $1; }
+    | struct_or_union_specifier     { $$ = Node\Type\TagType\RecordType[$1]; }
     | enum_specifier                { $$ = $1; }
     | TYPEDEF_NAME                  { $$ = Node\Type\TypedefType[$1]; } /* after it has been defined as such */
     ;
 
 struct_or_union_specifier
-    : struct_or_union '{' struct_declaration_list '}'               
-    | struct_or_union IDENTIFIER '{' struct_declaration_list '}'    
-    | struct_or_union IDENTIFIER                                    
+    : struct_or_union '{' struct_declaration_list '}'               { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, null, $3]; }
+    | struct_or_union IDENTIFIER '{' struct_declaration_list '}'    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, $4]; }
+    | struct_or_union IDENTIFIER                                    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, null]; }
     ;
 
 struct_or_union
-    : STRUCT        
-    | UNION         
+    : STRUCT        { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl::KIND_STRUCT; }
+    | UNION         { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl::KIND_UNION; }
     ;
 
 struct_declaration_list
-    : struct_declaration                            
-    | struct_declaration_list struct_declaration    
+    : struct_declaration                            { $$ = $1; }
+    | struct_declaration_list struct_declaration    { $$ = array_merge($1, $2); }
     ;
 
 struct_declaration
-    : specifier_qualifier_list ';'                           /* for anonymous struct/union */
-    | specifier_qualifier_list struct_declarator_list ';'   
+    : specifier_qualifier_list ';'                          { compileStructField[$1[0], $1[1], null]; } /* for anonymous struct/union */
+    | specifier_qualifier_list struct_declarator_list ';'   { compileStructField[$1[0], $1[1], $2]; }
     | static_assert_declaration                             
     ;
 
 specifier_qualifier_list                        
-    : type_specifier specifier_qualifier_list   
-    | type_specifier                            
-    | type_qualifier specifier_qualifier_list   
-    | type_qualifier                            
+    : type_specifier specifier_qualifier_list           { $$ = $2; array_unshift($$[1], $1); }
+    | type_specifier                                    { $$ = [0, [$1]]; }
+    | type_qualifier specifier_qualifier_list           { $$ = $2; $$[0] |= $1; }
+    | type_qualifier                                    { $$ = [$1, []]; }                            
     ;
 
 struct_declarator_list
-    : struct_declarator                             
-    | struct_declarator_list ',' struct_declarator  
+    : struct_declarator                                 { init($1); }
+    | struct_declarator_list ',' struct_declarator      { push($1, $3); }
     ;
 
 struct_declarator
-    : ':' constant_expression               
-    | declarator ':' constant_expression    
-    | declarator                            
+    : ':' constant_expression               { $$ = IR\FieldDeclaration[null, $1]; }
+    | declarator ':' constant_expression    { $$ = IR\FieldDeclaration[$1, $3]; }
+    | declarator                            { $$ = IR\FieldDeclaration[$1, null]; }
     ;
 
 enum_specifier

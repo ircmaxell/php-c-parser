@@ -16,15 +16,37 @@ class Compiler
     }
 
     public function compileExternalDeclaration(IR\Declaration $declaration, array $attributes = []): array {
+        $result = [];
         if ($declaration->qualifiers === Decl::KIND_TYPEDEF) {
             $type = $this->compileType($declaration->types);
-            $result = [];
             foreach ($declaration->declarators as $declarator) {
                 $result[] = $this->compileTypedef($declarator, $type, $attributes);;
             }
-            return $result;
+        } elseif ($declaration->qualifiers === 0 && empty($declaration->declarators)) {
+            // look for structs/unions
+            foreach ($declaration->types as $type) {
+                if ($type instanceof Type\TagType\RecordType) {
+                    $result[] = $type->decl; 
+                }
+            }
+        } else {
+            var_dump($declaration);
+            throw new \LogicException("Not implmented yet");
         }
-        // todo
+        return $result;
+    }
+
+    public function compileStructField(int $qualifiers, array $types, ?array $declarators, array $attributes = []): array {
+        $result = [];
+        $type = $this->compileType($types);
+        if (is_null($declarators)) {
+            throw new \LogicException("Not implemented yet: empty struct/union declarators");
+        }
+        foreach ($declarators as $fieldDeclarator) {
+            $parts = $this->compileNamedDeclarator($fieldDeclarator->declarator, $type);
+            $result[] = new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FieldDecl($parts[0], $parts[1], $fieldDeclarator->initializer, $attributes);
+        }
+        return $result;
     }
 
     public function compileType(array $types): Type {
@@ -77,6 +99,11 @@ restart:
     }
 
     public function compileTypedefDeclarator(IR\Declarator $declarator, Type $type, array $attributes = []): Decl {
+        $parts = $this->compileNamedDeclarator($declarator, $type, $attributes);
+        return new TypedefDecl($parts[0], $parts[1], $attributes);
+    }
+
+    public function compileNamedDeclarator(IR\Declarator $declarator, Type $type): array {
 restart:
         if ($declarator->pointer !== null) {
             $type = $this->compileQualifiedPointer($declarator->pointer, $type);
@@ -84,7 +111,7 @@ restart:
         $directdeclarator = $declarator->declarator;
 restart_direct:
         if ($directdeclarator instanceof IR\DirectDeclarator\Identifier) {
-            return new TypedefDecl($directdeclarator->name, $type, $attributes);
+            return [$directdeclarator->name, $type];
         } elseif ($directdeclarator instanceof IR\DirectDeclarator\IncompleteArray) {
             $type = new Type\ArrayType\IncompleteArrayType($type);
             $directdeclarator = $directdeclarator->declarator;
