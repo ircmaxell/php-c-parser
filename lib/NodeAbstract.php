@@ -159,4 +159,12 @@ abstract class NodeAbstract implements Node, \JsonSerializable
     public function getSubNodeNames(): array {
         return [];
     }
+
+    public function getType() : string {
+        $class = get_class($this);
+        $class = str_replace(Node::class, '', $class);
+        $class = substr($class, 1); // remove leading \
+        $class = str_replace('\\', '_', $class);
+        return preg_replace('(__+)', '_', $class);
+    }
 }

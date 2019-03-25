@@ -29,12 +29,25 @@ class Error extends \RuntimeException
         return $this->attributes['startLine'] ?? -1;
     }
 
+    public function setStartLine(int $line): void {
+        $this->attributes['startLine'] = $line;
+        $this->updateMessage();
+    }
+
     protected function updateMessage() {
         $this->message = $this->rawMessage;
         if (-1 === $this->getStartLine()) {
             $this->message .= ' on unknown line';
         } else {
             $this->message .= ' on line ' . $this->getStartLine();
+        }
+        if (isset($this->attributes['dump'])) {
+            $this->message .= " with dumped data: ";
+            foreach ($this->attributes['dump'] as $dump) {
+                ob_start();
+                var_dump($dump);
+                $this->message .= "\n" . ob_get_clean();
+            }
         }
     }
 }

@@ -49,6 +49,7 @@ class Lexer
                 $value = $token[1];
                 $id = $token[0];
             }
+            echo "% emitting {$id}[{$value}]:{$startAttributes['startLine']}\n";
             return $id;
         }
         throw new \LogicException("Reached the end of lexer loop, should never happen");
@@ -119,6 +120,80 @@ class Lexer
                     return [Tokens::T_MUL_ASSIGN, '*='];
                 }
                 goto emit_single;
+            case '%':
+                if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_MOD_ASSIGN, '%='];
+                }
+                goto emit_single;
+            case '/':
+                if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_DIV_ASSIGN, '/='];
+                }
+                goto emit_single;
+            case '=':
+                if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_EQ_OP, '=='];
+                }
+                goto emit_single;
+            case '!':
+                if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_NE_OP, '!='];
+                }
+                goto emit_single;
+            case '|':
+                if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_OR_ASSIGN, '|='];
+                } elseif ($this->currentToken !== null && $this->currentToken->value === '|') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_OR_OP, '||'];
+                }
+                goto emit_single;
+            case '&':
+                if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_AND_ASSIGN, '&='];
+                } elseif ($this->currentToken !== null && $this->currentToken->value === '&') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_AND_OP, '&&'];
+                }
+                goto emit_single;
+            case '^':
+                if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_XOR_ASSIGN, '^='];
+                }
+                goto emit_single;
+            case '>':
+                if ($this->currentToken !== null && $this->currentToken->value === '>') {
+                    $this->currentToken = $this->currentToken->next;
+                    if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                        $this->currentToken = $this->currentToken->next;
+                        return [Tokens::T_RIGHT_ASSIGN, '>>='];
+                    }
+                    return [Tokens::T_RIGHT_OP, '>>'];
+                } elseif ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_GE_OP, '>='];
+                }
+                goto emit_single;
+            case '<':
+                if ($this->currentToken !== null && $this->currentToken->value === '<') {
+                    $this->currentToken = $this->currentToken->next;
+                    if ($this->currentToken !== null && $this->currentToken->value === '=') {
+                        $this->currentToken = $this->currentToken->next;
+                        return [Tokens::T_LEFT_ASSIGN, '<<='];
+                    }
+                    return [Tokens::T_LEFT_OP, '<<'];
+                } elseif ($this->currentToken !== null && $this->currentToken->value === '=') {
+                    $this->currentToken = $this->currentToken->next;
+                    return [Tokens::T_LE_OP, '<='];
+                }
+                goto emit_single;
             case ';':
             case '(':
             case ')':
@@ -131,7 +206,7 @@ class Lexer
 emit_single:
                 return [ord($value), $value];
         }
-        var_dump($value);
+        throw new \LogicException("Unsure how to extract unknown punctuator '$value'");
     }
 
     private const IDENTIFIER_MAP = [

@@ -7,6 +7,8 @@ $meta #
 
 namespace PHPCParser;
 
+use PHPCParser\Node\Stmt\ValueStmt\Expr;
+
 #include;
 
 /* This is an automatically GENERATED file, which should not be manually edited.

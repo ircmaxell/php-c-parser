@@ -3,13 +3,13 @@
 namespace PHPCParser\Node\Type\TagType;
 
 use PHPCParser\Node\Type\TagType;
-use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl;
+use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl;
 
-class RecordType extends TagType
+class EnumType extends TagType
 {
-    public RecordDecl $decl;
+    public EnumDecl $decl;
 
-    public function __construct(RecordDecl $decl, array $attributes = []) {
+    public function __construct(EnumDecl $decl, array $attributes = []) {
         parent::__construct($attributes);
         $this->decl = $decl;
     }

@@ -2,6 +2,8 @@
 
 namespace PHPCParser;
 
+use PHPCParser\Node\Stmt\ValueStmt\Expr;
+
 
 /* This is an automatically GENERATED file, which should not be manually edited.
  */
@@ -795,16 +797,16 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             6 => function ($stackPos) {
-                 throw new Error('int constant not implemented'); 
+                 $this->semValue = new Node\Stmt\ValueStmt\Expr\IntegerLiteral((int) $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             7 => function ($stackPos) {
-                 throw new Error('float constant not implemented'); 
+                 $this->semValue = new Node\Stmt\ValueStmt\Expr\FloatLiteral((float) $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             8 => function ($stackPos) {
-                 throw new Error('enumeration constant not implemented'); 
+                 $this->semValue = new Node\Stmt\ValueStmt\Expr\DeclRefExpr($this->semStack[$stackPos-(1-1)], $this->scope->lookupDecl($this->semStack[$stackPos-(1-1)]), $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             9 => function ($stackPos) {
-                 throw new Error('enumeration_constant identifier not implemented'); 
+                 $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             10 => function ($stackPos) {
                  throw new Error('string_literal not implemented'); 
@@ -846,10 +848,10 @@ class Parser extends ParserAbstract
                  throw new Error('->identifier not implemented'); 
             },
             23 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Node\Stmt\Expr\UnaryOperator::KIND_POSTINC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_POSTINC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             24 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Node\Stmt\Expr\UnaryOperator::KIND_POSTDEC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_POSTDEC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             25 => function ($stackPos) {
                  throw new Error('initializer list no trailing not implemented'); 
@@ -867,40 +869,40 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             30 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Node\Stmt\Expr\UnaryOperator::KIND_PREINC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_PREINC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             31 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Node\Stmt\Expr\UnaryOperator::KIND_PREDEC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_PREDEC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             32 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], $this->semStack[$stackPos-(2-1)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], $this->semStack[$stackPos-(2-1)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             33 => function ($stackPos) {
-                 throw new Error('sizeof expression not implemented'); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_SIZEOF, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             34 => function ($stackPos) {
-                 throw new Error('sizeof type not implemented'); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(4-3)], Expr\UnaryOperator::KIND_SIZEOF, $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             35 => function ($stackPos) {
-                 throw new Error('alignof type not implemented'); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(4-3)], Expr\UnaryOperator::KIND_ALIGNOF, $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             36 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\UnaryOperator::KIND_ADDRESS_OF; 
+                 $this->semValue = Expr\UnaryOperator::KIND_ADDRESS_OF; 
             },
             37 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\UnaryOperator::KIND_DEREF; 
+                 $this->semValue = Expr\UnaryOperator::KIND_DEREF; 
             },
             38 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\UnaryOperator::KIND_PLUS; 
+                 $this->semValue = Expr\UnaryOperator::KIND_PLUS; 
             },
             39 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\UnaryOperator::KIND_MINUS; 
+                 $this->semValue = Expr\UnaryOperator::KIND_MINUS; 
             },
             40 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\UnaryOperator::KIND_BITWISE_NOT; 
+                 $this->semValue = Expr\UnaryOperator::KIND_BITWISE_NOT; 
             },
             41 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\UnaryOperator::KIND_LOGICAL_NOT; 
+                 $this->semValue = Expr\UnaryOperator::KIND_LOGICAL_NOT; 
             },
             42 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
@@ -912,85 +914,85 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             45 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_MUL, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_MUL, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             46 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_DIV, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_DIV, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             47 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_REM, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_REM, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             48 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             49 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_ADD, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_ADD, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             50 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_SUB, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_SUB, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             51 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             52 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_SHL, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_SHL, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             53 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_SHR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_SHR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             54 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             55 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_LT, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_LT, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             56 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_GT, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_GT, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             57 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_LE, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_LE, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             58 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_GE, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_GE, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             59 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             60 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_EQ, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_EQ, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             61 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_NE, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_NE, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             62 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             63 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_BITWISE_AND, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_BITWISE_AND, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             64 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             65 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_BITWISE_XOR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_BITWISE_XOR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             66 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             67 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_BITWISE_OR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_BITWISE_OR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             68 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             69 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_LOGICAL_AND, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_LOGICAL_AND, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             70 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             71 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Node\Stmt\Expr\BinaryOperator::KIND_LOGICAL_OR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], Expr\BinaryOperator::KIND_LOGICAL_OR, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             72 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
@@ -1002,40 +1004,40 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             75 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], $this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\BinaryOperator($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], $this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             76 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_ASSIGN; 
             },
             77 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_MUL_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_MUL_ASSIGN; 
             },
             78 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_DIV_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_DIV_ASSIGN; 
             },
             79 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_REM_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_REM_ASSIGN; 
             },
             80 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_ADD_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_ADD_ASSIGN; 
             },
             81 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_SUB_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_SUB_ASSIGN; 
             },
             82 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_SHL_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_SHL_ASSIGN; 
             },
             83 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_SHR_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_SHR_ASSIGN; 
             },
             84 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_AND_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_AND_ASSIGN; 
             },
             85 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_XOR_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_XOR_ASSIGN; 
             },
             86 => function ($stackPos) {
-                 $this->semValue = Node\Stmt\Expr\BinaryOperator::KIND_OR_ASSIGN; 
+                 $this->semValue = Expr\BinaryOperator::KIND_OR_ASSIGN; 
             },
             87 => function ($stackPos) {
                  throw new Error('expression assignment expression not implemented'); 
@@ -1158,7 +1160,7 @@ class Parser extends ParserAbstract
                  $this->semValue = new Node\Type\TagType\RecordType($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             127 => function ($stackPos) {
-                 $this->semValue = $this->semStack[$stackPos-(1-1)]; 
+                 $this->semValue = new Node\Type\TagType\EnumType($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             128 => function ($stackPos) {
                  $this->semValue = new Node\Type\TypedefType($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
@@ -1221,19 +1223,19 @@ class Parser extends ParserAbstract
                  $this->semValue = new IR\FieldDeclaration($this->semStack[$stackPos-(1-1)], null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             148 => function ($stackPos) {
-                 throw new Error('enum list no trailing not implemented'); 
+                 $this->semValue = new Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl(null, $this->semStack[$stackPos-(4-3)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             149 => function ($stackPos) {
-                 throw new Error('enum list trailing not implemented'); 
+                 $this->semValue = new Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl(null, $this->semStack[$stackPos-(5-3)], $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             150 => function ($stackPos) {
-                 throw new Error('enum identifier list no trailing not implemented'); 
+                 $this->semValue = new Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl($this->semStack[$stackPos-(5-2)], $this->semStack[$stackPos-(5-4)], $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             151 => function ($stackPos) {
-                 throw new Error('enum identifier list trailing not implemented'); 
+                 $this->semValue = new Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl($this->semStack[$stackPos-(6-2)], $this->semStack[$stackPos-(6-4)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes); 
             },
             152 => function ($stackPos) {
-                 throw new Error('enum identifier not implemented'); 
+                 $this->semValue = new Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl($this->semStack[$stackPos-(2-2)], null, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             153 => function ($stackPos) {
                  $this->semValue = array($this->semStack[$stackPos-(1-1)]); 
@@ -1242,10 +1244,10 @@ class Parser extends ParserAbstract
                  $this->semStack[$stackPos-(3-1)][] = $this->semStack[$stackPos-(3-3)]; $this->semValue = $this->semStack[$stackPos-(3-1)]; 
             },
             155 => function ($stackPos) {
-                 throw new Error('enumerator enumeration_constant constant_expression not implemented'); 
+                 $this->semValue = new Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); $this->scope->enum($this->semStack[$stackPos-(3-1)], $this->semValue); 
             },
             156 => function ($stackPos) {
-                 throw new Error('enumerator enumeration_constant not implemented'); 
+                 $this->semValue = new Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl($this->semStack[$stackPos-(1-1)], null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); $this->scope->enum($this->semStack[$stackPos-(1-1)], $this->semValue); 
             },
             157 => function ($stackPos) {
                  throw new Error('atomic type_name not implemented'); 
@@ -1311,13 +1313,13 @@ class Parser extends ParserAbstract
                  throw new Error('direct_declarator bracket type_qualifier_list not implemented'); 
             },
             178 => function ($stackPos) {
-                 throw new Error('direct_declarator bracket assignment_expression not implemented'); 
+                 $this->semValue = new IR\DirectDeclarator\CompleteArray($this->semStack[$stackPos-(4-1)], $this->semStack[$stackPos-(4-3)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             179 => function ($stackPos) {
-                 throw new Error('direct_declarator params parameter_type_list not implemented'); 
+                 $this->semValue = new IR\DirectDeclarator\Function_($this->semStack[$stackPos-(4-1)], $this->semStack[$stackPos-(4-3)][0], $this->semStack[$stackPos-(4-3)][1], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             180 => function ($stackPos) {
-                 throw new Error('direct_declarator params empty not implemented'); 
+                 $this->semValue = new IR\DirectDeclarator\Function_($this->semStack[$stackPos-(3-1)], [], false, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             181 => function ($stackPos) {
                  throw new Error('direct_declarator params identifier list not implemented'); 
@@ -1341,10 +1343,10 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(2-1)] | $this->semStack[$stackPos-(2-2)]; 
             },
             188 => function ($stackPos) {
-                 throw new Error('parameter_type_list variadic not implemented'); 
+                 $this->semValue = [$this->semStack[$stackPos-(3-1)], true]; 
             },
             189 => function ($stackPos) {
-                 throw new Error('parameter_type_list normal not implemented'); 
+                 $this->semValue = [$this->semStack[$stackPos-(1-1)], false]; 
             },
             190 => function ($stackPos) {
                  $this->semValue = array($this->semStack[$stackPos-(1-1)]); 
@@ -1353,13 +1355,13 @@ class Parser extends ParserAbstract
                  $this->semStack[$stackPos-(3-1)][] = $this->semStack[$stackPos-(3-3)]; $this->semValue = $this->semStack[$stackPos-(3-1)]; 
             },
             192 => function ($stackPos) {
-                 throw new Error('parameter_declaration declaration_specifiers declarator not implemented'); 
+                 $this->semValue = $this->compiler->compileParamVarDeclaration($this->semStack[$stackPos-(2-1)][0], $this->semStack[$stackPos-(2-1)][1], $this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             193 => function ($stackPos) {
-                 throw new Error('parameter_declaration declaration_specifiers abstract_declarator not implemented'); 
+                 $this->semValue = $this->compiler->compileParamAbstractDeclaration($this->semStack[$stackPos-(2-1)][0], $this->semStack[$stackPos-(2-1)][1], $this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             194 => function ($stackPos) {
-                 throw new Error('parameter_declaration declaration_specifiers not implemented'); 
+                 $this->semValue = $this->compiler->compileParamAbstractDeclaration($this->semStack[$stackPos-(1-1)][0], $this->semStack[$stackPos-(1-1)][1], null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             195 => function ($stackPos) {
                  throw new Error('identifier_list identifier not implemented'); 
@@ -1368,25 +1370,25 @@ class Parser extends ParserAbstract
                  throw new Error('identifier_list identifier_list identifier not implemented'); 
             },
             197 => function ($stackPos) {
-                 throw new Error('type_name specifier qualifier list abstract_declarator not implemented'); 
+                 $this->semValue = $this->compiler->compileTypeReference($this->semStack[$stackPos-(2-1)][0], $this->semStack[$stackPos-(2-1)][1], $this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             198 => function ($stackPos) {
-                 throw new Error('type_name specifier qualifier list not implemented'); 
+                 $this->semValue = $this->compiler->compileTypeReference($this->semStack[$stackPos-(1-1)][0], $this->semStack[$stackPos-(1-1)][1], null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             199 => function ($stackPos) {
-                 throw new Error('abstract declarator pointer direct abstract declarator not implemented'); 
+                 $this->semValue = new IR\AbstractDeclarator($this->semStack[$stackPos-(2-1)], $this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             200 => function ($stackPos) {
-                 throw new Error('abstract declarator pointer not implemented'); 
+                 $this->semValue = new IR\AbstractDeclarator($this->semStack[$stackPos-(1-1)], null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             201 => function ($stackPos) {
-                 throw new Error('abstract declarator direct abstract declarator not implemented'); 
+                 $this->semValue = new IR\AbstractDeclarator(null, $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             202 => function ($stackPos) {
-                 throw new Error('direct_abstract_declarator wrapped not implemented'); 
+                 $this->semValue = new IR\DirectAbstractDeclarator\AbstractDeclarator($this->semStack[$stackPos-(3-1)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             203 => function ($stackPos) {
-                 throw new Error('direct_abstract_declarator bracket not implemented'); 
+                 $this->semValue = new IR\DirectAbstractDeclarator\IncompleteArray($this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             204 => function ($stackPos) {
                  throw new Error('direct_abstract_declarator bracket star not implemented'); 

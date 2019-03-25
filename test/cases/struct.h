@@ -12,6 +12,13 @@ struct z {
 
 typedef something something_else;
 
+struct nested {
+    union {
+        int a;
+        float b;
+    } x1;
+};
+
 //------------
 
 TranslationUnitDecl
@@ -63,4 +70,28 @@ TranslationUnitDecl
       name: "something_else"
       type: Type_TypedefType
           name: "something"
+    Decl_NamedDecl_TypeDecl_TagDecl_RecordDecl
+      kind: 1
+      name: "nested"
+      fields: [
+        Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
+          name: "x1"
+          type: Type_TagType_RecordType
+              decl: Decl_NamedDecl_TypeDecl_TagDecl_RecordDecl
+                  kind: 2
+                  name: null
+                  fields: [
+                    Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
+                      name: "a"
+                      type: Type_BuiltinType
+                          name: "int"
+                      initializer: null
+                    Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
+                      name: "b"
+                      type: Type_BuiltinType
+                          name: "float"
+                      initializer: null
+                  ]
+          initializer: null
+      ]
   ]
