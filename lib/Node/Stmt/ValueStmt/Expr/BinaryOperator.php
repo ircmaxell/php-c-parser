@@ -25,6 +25,7 @@ class BinaryOperator extends Expr
     const KIND_BITWISE_OR  = 0b0010000;
     const KIND_LOGICAL_AND = 0b0010001;
     const KIND_LOGICAL_OR  = 0b0010010;
+    const KIND_COMMA       = 0b0010011;
 
     const KIND_ASSIGN      = 0b1100000;
 

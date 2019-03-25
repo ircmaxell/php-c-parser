@@ -22,11 +22,15 @@ restart:
         $result = [];
         $type = $this->compileType($declaration->types);
         if ($declaration->qualifiers & Decl::KIND_TYPEDEF) {
+            var_dump($declaration);
             foreach ($declaration->declarators as $declarator) {
                 $result[] = $this->compileTypedef($declarator, $type, $attributes);;
             }
         } elseif ($qualifiers === 0 && empty($declaration->declarators)) {
             if ($type instanceof Type\TagType) {
+                if ($type->decl->name !== null) {
+                    $this->scope->structdef($type->decl->name, $type->decl);
+                }
                 return [$type->decl];
             }
             throw new \LogicException('Also not implemented yet');
@@ -37,7 +41,11 @@ restart:
         } elseif ($qualifiers & Decl::KIND_EXTERN) {
             // we don't care about extern *for now*
             $qualifiers &= ~Decl::KIND_EXTERN;
-            goto restart;           
+            goto restart;
+        } elseif ($qualifiers > 0) {
+            $qualifiers = 0;
+            $type = Type\AttributedType::fromDecl($qualifiers, $type, $attributes);
+            goto restart;
         } else {
             var_dump($declaration);
             throw new \LogicException("Not implmented yet");
@@ -107,10 +115,9 @@ restart:
 
     public function compileQualifiedPointer(IR\QualifiedPointer $pointer, Type $type): Type {
 restart:
-        if ($pointer->qualification === 0) {
-            $type = new Type\PointerType($type);
-        } else {
-            throw new \LogicException('Qualified Pointers not implemented yet');
+        $type = new Type\PointerType($type);
+        if ($pointer->qualification > 0) {
+            $type = Type\AttributedType::fromDecl($pointer->qualification, $type);
         }
         if ($pointer->parent !== null) {
             $pointer = $pointer->parent;

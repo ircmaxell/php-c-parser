@@ -45,4 +45,16 @@ class Printer
         return $result;
     }
 
+    public function printTokens(array $tokens): string {
+        $result = '';
+        foreach ($tokens as $token) {
+            while ($token) {
+                $result .= $token->value . ' ';
+                $token = $token->next;
+            }
+            $result .= "\n";
+        }
+        return $result;
+    }
+
 }

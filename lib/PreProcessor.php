@@ -248,6 +248,7 @@ class PreProcessor {
                 }
             }
         }
+        var_dump($this->context->headerSearchPaths);
         throw new \LogicException("Could not find header file: $header given context $contextDir (called from $contextFile)");
     }
 

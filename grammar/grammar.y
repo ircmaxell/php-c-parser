@@ -23,7 +23,7 @@
 %%
 
 primary_expression
-    : IDENTIFIER            { throw new Error('identifier not implemented'); }
+    : IDENTIFIER            { $$ = Expr\DeclRefExpr[$1, null]; }
     | constant              { $$ = $1; }
     | string                { $$ = $1; }
     | '(' expression ')'    { $$ = $2; }
@@ -33,7 +33,7 @@ primary_expression
 constant
     : I_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\IntegerLiteral[(int) $1]; } /* includes character_constant */
     | F_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\FloatLiteral[(float) $1]; }
-    | ENUMERATION_CONSTANT  { $$ = Node\Stmt\ValueStmt\Expr\DeclRefExpr[$1, $this->scope->lookupDecl($1)]; }  /* after it has been defined as such */
+    | ENUMERATION_CONSTANT  { $$ = Node\Stmt\ValueStmt\Expr\DeclRefExpr[$1, $this->scope->enum($1)]; }  /* after it has been defined as such */
     ;
 
 enumeration_constant        /* before it has been defined as such */
@@ -98,7 +98,7 @@ unary_operator
 
 cast_expression
     : unary_expression                      { $$ = $1; }
-    | '(' type_name ')' cast_expression     { throw new Error('cast not implemented'); }
+    | '(' type_name ')' cast_expression     { $$ = Expr\CastExpr[$4, $2]; }
     ;
 
 multiplicative_expression
@@ -184,8 +184,8 @@ assignment_operator
     ;
 
 expression
-    : assignment_expression                     { throw new Error('expression assignment expression not implemented'); }
-    | expression ',' assignment_expression      { throw new Error('expression list not implemented'); }  
+    : assignment_expression                     { $$ = $1; }
+    | expression ',' assignment_expression      { $$ = Expr\BinaryOperator[$1, $3, Expr\BinaryOperator::KIND_COMMA]; }  
     ;
 
 constant_expression
@@ -253,6 +253,8 @@ struct_or_union_specifier
     : struct_or_union '{' struct_declaration_list '}'               { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, null, $3]; }
     | struct_or_union IDENTIFIER '{' struct_declaration_list '}'    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, $4]; }
     | struct_or_union IDENTIFIER                                    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, null]; }
+    | struct_or_union TYPEDEF_NAME '{' struct_declaration_list '}'    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, $4]; }
+    | struct_or_union TYPEDEF_NAME                                    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, null]; }
     ;
 
 struct_or_union
@@ -303,8 +305,8 @@ enumerator_list
     ;
 
 enumerator  /* identifiers must be flagged as ENUMERATION_CONSTANT */
-    : enumeration_constant '=' constant_expression      { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, $3]; $this->scope->enum($1, $$); }
-    | enumeration_constant                              { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, null]; $this->scope->enum($1, $$); }
+    : enumeration_constant '=' constant_expression      { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, $3]; $this->scope->enumdef($1, $$); }
+    | enumeration_constant                              { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, null]; $this->scope->enumdef($1, $$); }
     ;
 
 atomic_type_specifier
@@ -477,7 +479,7 @@ block_item_list
 
 block_item
     : declaration           { throw new Error('block_item declaration not implemented'); }
-    | statement             { throw new Error('block_item statement not implemented'); }
+    | statement             { $$ = $1; }
     ;
 
 expression_statement
@@ -504,8 +506,8 @@ jump_statement
     : GOTO IDENTIFIER ';'       { throw new Error('goto identifier not implemented'); }
     | CONTINUE ';'              { throw new Error('continue not implemented'); }
     | BREAK ';'                 { throw new Error('break not implemented'); }
-    | RETURN ';'                { throw new Error('return not implemented'); }
-    | RETURN expression ';'     { throw new Error('return expr not implemented'); }
+    | RETURN ';'                { $$ = Node\Stmt\ReturnStmt[null]; }
+    | RETURN expression ';'     { $$ = Node\Stmt\ReturnStmt[$2]; }
     ;
 
 translation_unit
