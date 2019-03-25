@@ -87,19 +87,11 @@ restart:
         }
         $declarator = $init->declarator;
         return $this->compileTypedefDeclarator($declarator, $type, $attributes);
-
-
-        foreach ($name[0] as $qualifiedPointer) {
-            $type = $this->compileQualifiedPointer($qualifiedPointer, $type);
-        }
-        if (is_string($name[1])) {
-            $this->scope->typedef($name[1], $type);
-            return new TypedefDecl($name[1], $type, $attributes);
-        }
     }
 
     public function compileTypedefDeclarator(IR\Declarator $declarator, Type $type, array $attributes = []): Decl {
         $parts = $this->compileNamedDeclarator($declarator, $type, $attributes);
+        $this->scope->typedef($parts[0], $parts[1]);
         return new TypedefDecl($parts[0], $parts[1], $attributes);
     }
 

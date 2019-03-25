@@ -23,7 +23,7 @@
 %%
 
 primary_expression
-    : IDENTIFIER            
+    : IDENTIFIER            { throw new Error('identifier not implemented'); }
     | constant              { $$ = $1; }
     | string                { $$ = $1; }
     | '(' expression ')'    { $$ = $2; }
@@ -31,22 +31,22 @@ primary_expression
     ;
 
 constant
-    : I_CONSTANT             /* includes character_constant */
-    | F_CONSTANT            
-    | ENUMERATION_CONSTANT    /* after it has been defined as such */
+    : I_CONSTANT            { throw new Error('int constant not implemented'); } /* includes character_constant */
+    | F_CONSTANT            { throw new Error('float constant not implemented'); }
+    | ENUMERATION_CONSTANT  { throw new Error('enumeration constant not implemented'); }  /* after it has been defined as such */
     ;
 
 enumeration_constant        /* before it has been defined as such */
-    : IDENTIFIER            
+    : IDENTIFIER            { throw new Error('enumeration_constant identifier not implemented'); }
     ;
 
 string
-    : STRING_LITERAL        
-    | FUNC_NAME             
+    : STRING_LITERAL        { throw new Error('string_literal not implemented'); }
+    | FUNC_NAME             { throw new Error('func name not implemented'); }
     ;
 
 generic_selection
-    : GENERIC '(' assignment_expression ',' generic_assoc_list ')'  
+    : GENERIC '(' assignment_expression ',' generic_assoc_list ')'  { throw new Error('generic not implemented'); }
     ;
 
 generic_assoc_list
@@ -55,21 +55,21 @@ generic_assoc_list
     ;
 
 generic_association
-    : type_name ':' assignment_expression           
-    | DEFAULT ':' assignment_expression             
+    : type_name ':' assignment_expression           { throw new Error('generic association typename not implemented'); }
+    | DEFAULT ':' assignment_expression             { throw new Error('generic association default not implemented'); }
     ;
 
 postfix_expression
     : primary_expression                                   { $$ = $1; }
-    | postfix_expression '[' expression ']'                
-    | postfix_expression '(' ')'                           
-    | postfix_expression '(' argument_expression_list ')'  
-    | postfix_expression '.' IDENTIFIER                    
-    | postfix_expression PTR_OP IDENTIFIER                 
+    | postfix_expression '[' expression ']'                { throw new Error('dim fetch not implemented'); }
+    | postfix_expression '(' ')'                           { throw new Error('call no args not implemented'); }
+    | postfix_expression '(' argument_expression_list ')'  { throw new Error('call with args not implemented'); }
+    | postfix_expression '.' IDENTIFIER                    { throw new Error('.identifier not implemented'); }
+    | postfix_expression PTR_OP IDENTIFIER                 { throw new Error('->identifier not implemented'); }
     | postfix_expression INC_OP                            { $$ = Node\Stmt\Expr\UnaryOperator[$2, Node\Stmt\Expr\UnaryOperator::KIND_POSTINC]; }
     | postfix_expression DEC_OP                            { $$ = Node\Stmt\Expr\UnaryOperator[$2, Node\Stmt\Expr\UnaryOperator::KIND_POSTDEC]; }
-    | '(' type_name ')' '{' initializer_list '}'           
-    | '(' type_name ')' '{' initializer_list ',' '}'       
+    | '(' type_name ')' '{' initializer_list '}'           { throw new Error('initializer list no trailing not implemented'); }
+    | '(' type_name ')' '{' initializer_list ',' '}'       { throw new Error('initializer list trailing not implemented'); }
     ;
 
 argument_expression_list
@@ -82,9 +82,9 @@ unary_expression
     | INC_OP unary_expression           { $$ = Node\Stmt\Expr\UnaryOperator[$2, Node\Stmt\Expr\UnaryOperator::KIND_PREINC]; }
     | DEC_OP unary_expression           { $$ = Node\Stmt\Expr\UnaryOperator[$2, Node\Stmt\Expr\UnaryOperator::KIND_PREDEC]; }
     | unary_operator cast_expression    { $$ = Node\Stmt\Expr\UnaryOperator[$2, $1]; }
-    | SIZEOF unary_expression           
-    | SIZEOF '(' type_name ')'          
-    | ALIGNOF '(' type_name ')'         
+    | SIZEOF unary_expression           { throw new Error('sizeof expression not implemented'); }
+    | SIZEOF '(' type_name ')'          { throw new Error('sizeof type not implemented'); }
+    | ALIGNOF '(' type_name ')'         { throw new Error('alignof type not implemented'); }
     ;
 
 unary_operator
@@ -98,7 +98,7 @@ unary_operator
 
 cast_expression
     : unary_expression                      { $$ = $1; }
-    | '(' type_name ')' cast_expression     
+    | '(' type_name ')' cast_expression     { throw new Error('cast not implemented'); }
     ;
 
 multiplicative_expression
@@ -161,7 +161,7 @@ logical_or_expression
 
 conditional_expression
     : logical_or_expression                                             { $$ = $1; }
-    | logical_or_expression '?' expression ':' conditional_expression   
+    | logical_or_expression '?' expression ':' conditional_expression   { throw new Error('ternary not implemented'); }
     ;
 
 assignment_expression
@@ -184,12 +184,12 @@ assignment_operator
     ;
 
 expression
-    : assignment_expression                     
-    | expression ',' assignment_expression      
+    : assignment_expression                     { throw new Error('expression assignment expression not implemented'); }
+    | expression ',' assignment_expression      { throw new Error('expression list not implemented'); }  
     ;
 
 constant_expression
-    : conditional_expression                   /* with constraints */
+    : conditional_expression    { $$ = $1; }  /* with constraints */
     ;
 
 declaration
@@ -290,25 +290,25 @@ struct_declarator
     ;
 
 enum_specifier
-    : ENUM '{' enumerator_list '}'                  
-    | ENUM '{' enumerator_list ',' '}'              
-    | ENUM IDENTIFIER '{' enumerator_list '}'       
-    | ENUM IDENTIFIER '{' enumerator_list ',' '}'   
-    | ENUM IDENTIFIER                               
+    : ENUM '{' enumerator_list '}'                  { throw new Error('enum list no trailing not implemented'); }
+    | ENUM '{' enumerator_list ',' '}'              { throw new Error('enum list trailing not implemented'); }
+    | ENUM IDENTIFIER '{' enumerator_list '}'       { throw new Error('enum identifier list no trailing not implemented'); }
+    | ENUM IDENTIFIER '{' enumerator_list ',' '}'   { throw new Error('enum identifier list trailing not implemented'); }
+    | ENUM IDENTIFIER                               { throw new Error('enum identifier not implemented'); }
     ;
 
 enumerator_list
-    : enumerator                        
-    | enumerator_list ',' enumerator    
+    : enumerator                        { init($1); }
+    | enumerator_list ',' enumerator    { push($1, $3); }
     ;
 
 enumerator  /* identifiers must be flagged as ENUMERATION_CONSTANT */
-    : enumeration_constant '=' constant_expression      
-    | enumeration_constant                              
+    : enumeration_constant '=' constant_expression      { throw new Error('enumerator enumeration_constant constant_expression not implemented'); }
+    | enumeration_constant                              { throw new Error('enumerator enumeration_constant not implemented'); }
     ;
 
 atomic_type_specifier
-    : ATOMIC '(' type_name ')'          
+    : ATOMIC '(' type_name ')'          { throw new Error('atomic type_name not implemented'); }
     ;
 
 type_qualifier
@@ -324,8 +324,8 @@ function_specifier
     ;
 
 alignment_specifier
-    : ALIGNAS '(' type_name ')'             
-    | ALIGNAS '(' constant_expression ')'   
+    : ALIGNAS '(' type_name ')'             { throw new Error('alignas type_name not implemented'); }
+    | ALIGNAS '(' constant_expression ')'   { throw new Error('alignas constant_expression not implemented'); }
     ;
 
 declarator
@@ -338,16 +338,16 @@ direct_declarator
     | '(' declarator ')'                                                            { $$ = IR\DirectDeclarator\Declarator[$2]; }
     | direct_declarator '[' ']'                                                     { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
     | direct_declarator '[' '*' ']'                                                 { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
-    | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'    
-    | direct_declarator '[' STATIC assignment_expression ']'                        
-    | direct_declarator '[' type_qualifier_list '*' ']'                             
-    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'    
-    | direct_declarator '[' type_qualifier_list assignment_expression ']'           
-    | direct_declarator '[' type_qualifier_list ']'                                 
-    | direct_declarator '[' assignment_expression ']'                               
-    | direct_declarator '(' parameter_type_list ')'                                 
-    | direct_declarator '(' ')'                                                     
-    | direct_declarator '(' identifier_list ')'                                     
+    | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'    { throw new Error('direct_declarator bracket static type_qualifier_list assignment_expression not implemented'); }
+    | direct_declarator '[' STATIC assignment_expression ']'                        { throw new Error('direct_declarator bracket static assignment_expression not implemented'); }
+    | direct_declarator '[' type_qualifier_list '*' ']'                             { throw new Error('direct_declarator bracket type_qualifier_list star not implemented'); }
+    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'    { throw new Error('direct_declarator bracket type_qualifier_list static assignment_expression not implemented'); }
+    | direct_declarator '[' type_qualifier_list assignment_expression ']'           { throw new Error('direct_declarator bracket type_qualifier_list assignment_expression not implemented'); }
+    | direct_declarator '[' type_qualifier_list ']'                                 { throw new Error('direct_declarator bracket type_qualifier_list not implemented'); }
+    | direct_declarator '[' assignment_expression ']'                               { throw new Error('direct_declarator bracket assignment_expression not implemented'); }
+    | direct_declarator '(' parameter_type_list ')'                                 { throw new Error('direct_declarator params parameter_type_list not implemented'); }
+    | direct_declarator '(' ')'                                                     { throw new Error('direct_declarator params empty not implemented'); }
+    | direct_declarator '(' identifier_list ')'                                     { throw new Error('direct_declarator params identifier list not implemented'); }
     ;
 
 pointer
@@ -364,72 +364,72 @@ type_qualifier_list
 
 
 parameter_type_list
-    : parameter_list ',' ELLIPSIS       
-    | parameter_list                    
+    : parameter_list ',' ELLIPSIS           { throw new Error('parameter_type_list variadic not implemented'); }
+    | parameter_list                        { throw new Error('parameter_type_list normal not implemented'); }
     ;
 
 parameter_list
-    : parameter_declaration                     
-    | parameter_list ',' parameter_declaration  
+    : parameter_declaration                         { init($1); }
+    | parameter_list ',' parameter_declaration      { push($1, $3); }
     ;
 
 parameter_declaration
-    : declaration_specifiers declarator             
-    | declaration_specifiers abstract_declarator    
-    | declaration_specifiers                        
+    : declaration_specifiers declarator             { throw new Error('parameter_declaration declaration_specifiers declarator not implemented'); }
+    | declaration_specifiers abstract_declarator    { throw new Error('parameter_declaration declaration_specifiers abstract_declarator not implemented'); }
+    | declaration_specifiers                        { throw new Error('parameter_declaration declaration_specifiers not implemented'); }
     ;
 
 identifier_list
-    : IDENTIFIER                        
-    | identifier_list ',' IDENTIFIER    
+    : IDENTIFIER                        { throw new Error('identifier_list identifier not implemented'); }
+    | identifier_list ',' IDENTIFIER    { throw new Error('identifier_list identifier_list identifier not implemented'); }
     ;
 
 type_name
-    : specifier_qualifier_list abstract_declarator  
-    | specifier_qualifier_list                      
+    : specifier_qualifier_list abstract_declarator  { throw new Error('type_name specifier qualifier list abstract_declarator not implemented'); }
+    | specifier_qualifier_list                      { throw new Error('type_name specifier qualifier list not implemented'); }
     ;
 
 abstract_declarator
-    : pointer direct_abstract_declarator    
-    | pointer                               
-    | direct_abstract_declarator           
+    : pointer direct_abstract_declarator    { throw new Error('abstract declarator pointer direct abstract declarator not implemented'); }
+    | pointer                               { throw new Error('abstract declarator pointer not implemented'); }
+    | direct_abstract_declarator            { throw new Error('abstract declarator direct abstract declarator not implemented'); }
     ;
 
 direct_abstract_declarator
-    : '(' abstract_declarator ')'
-    | '[' ']'
-    | '[' '*' ']'
-    | '[' STATIC type_qualifier_list assignment_expression ']'
-    | '[' STATIC assignment_expression ']'
-    | '[' type_qualifier_list STATIC assignment_expression ']'
-    | '[' type_qualifier_list assignment_expression ']'
-    | '[' type_qualifier_list ']'
-    | '[' assignment_expression ']'
-    | direct_abstract_declarator '[' ']'
-    | direct_abstract_declarator '[' '*' ']'
-    | direct_abstract_declarator '[' STATIC type_qualifier_list assignment_expression ']'
-    | direct_abstract_declarator '[' STATIC assignment_expression ']'
-    | direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'
-    | direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'
-    | direct_abstract_declarator '[' type_qualifier_list ']'
-    | direct_abstract_declarator '[' assignment_expression ']'
-    | '(' ')'
-    | '(' parameter_type_list ')'
-    | direct_abstract_declarator '(' ')'
-    | direct_abstract_declarator '(' parameter_type_list ')'
+    : '(' abstract_declarator ')'                                                           { throw new Error('direct_abstract_declarator wrapped not implemented'); }
+    | '[' ']'                                                                               { throw new Error('direct_abstract_declarator bracket not implemented'); }
+    | '[' '*' ']'                                                                           { throw new Error('direct_abstract_declarator bracket star not implemented'); }
+    | '[' STATIC type_qualifier_list assignment_expression ']'                              { throw new Error('direct_abstract_declarator bracket static type qualifier list assignment not implemented'); }
+    | '[' STATIC assignment_expression ']'                                                  { throw new Error('direct_abstract_declarator bracket static assignment not implemented'); }
+    | '[' type_qualifier_list STATIC assignment_expression ']'                              { throw new Error('direct_abstract_declarator bracket type qualifier list static assignment not implemented'); }
+    | '[' type_qualifier_list assignment_expression ']'                                     { throw new Error('direct_abstract_declarator bracket type qualifier list assignment not implemented'); }
+    | '[' type_qualifier_list ']'                                                           { throw new Error('direct_abstract_declarator bracket type qualifier list not implemented'); }
+    | '[' assignment_expression ']'                                                         { throw new Error('direct_abstract_declarator bracket assignment_expr not implemented'); }
+    | direct_abstract_declarator '[' ']'                                                    { throw new Error('direct_abstract_declarator with bracket not implemented'); }
+    | direct_abstract_declarator '[' '*' ']'                                                { throw new Error('direct_abstract_declarator with bracket star not implemented'); }
+    | direct_abstract_declarator '[' STATIC type_qualifier_list assignment_expression ']'   { throw new Error('direct_abstract_declarator with bracket static type qualifier list assignment not implemented'); }
+    | direct_abstract_declarator '[' STATIC assignment_expression ']'                       { throw new Error('direct_abstract_declarator with bracket static assignment not implemented'); }
+    | direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'          { throw new Error('direct_abstract_declarator with bracket type qualifier list assignment not implemented'); }
+    | direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'   { throw new Error('direct_abstract_declarator with bracket type qualifier list static asssignment not implemented'); }
+    | direct_abstract_declarator '[' type_qualifier_list ']'                                { throw new Error('direct_abstract_declarator with bracket type qualifier list not implemented'); }
+    | direct_abstract_declarator '[' assignment_expression ']'                              { throw new Error('direct_abstract_declarator with bracket assignment_expr not implemented'); }
+    | '(' ')'                                                                               { throw new Error('direct_abstract_declarator empty parameter list not implemented'); }
+    | '(' parameter_type_list ')'                                                           { throw new Error('direct_abstract_declarator parameter list not implemented'); }
+    | direct_abstract_declarator '(' ')'                                                    { throw new Error('direct_abstract_declarator with empty parameter list not implemented'); }
+    | direct_abstract_declarator '(' parameter_type_list ')'                                { throw new Error('direct_abstract_declarator with parameter list not implemented'); }
     ;
 
 initializer
-    : '{' initializer_list '}'      
-    | '{' initializer_list ',' '}'  
-    | assignment_expression         
+    : '{' initializer_list '}'      { throw new Error('initializer brackend no trailing not implemented'); }
+    | '{' initializer_list ',' '}'  { throw new Error('initializer brackeded trailing not implemented'); }
+    | assignment_expression         { throw new Error('initializer assignment_expression not implemented'); }
     ;
 
 initializer_list
-    : designation initializer                           
-    | initializer                                       
-    | initializer_list ',' designation initializer      
-    | initializer_list ',' initializer                  
+    : designation initializer                           { throw new Error('initializer_list designator initializer not implemented'); }
+    | initializer                                       { throw new Error('initializer_list initializer not implemented'); }
+    | initializer_list ',' designation initializer      { throw new Error('initializer_list initializer_list designator initializer not implemented'); }
+    | initializer_list ',' initializer                  { throw new Error('initializer_list initializer_list initializer not implemented'); }
     ;
 
 designation
@@ -437,17 +437,17 @@ designation
     ;
 
 designator_list
-    : designator                    
-    | designator_list designator    
+    : designator                    { init($1); }
+    | designator_list designator    { push($1, $2); }
     ;
 
 designator
-    : '[' constant_expression ']'   
-    | '.' IDENTIFIER                
+    : '[' constant_expression ']'   { throw new Error('[] designator not implemented'); }
+    | '.' IDENTIFIER                { throw new Error('. designator not implemented'); }
     ;
 
 static_assert_declaration
-    : STATIC_ASSERT '(' constant_expression ',' STRING_LITERAL ')' ';'      
+    : STATIC_ASSERT '(' constant_expression ',' STRING_LITERAL ')' ';'      { throw new Error('static assert declaration not implemented'); }
     ;
 
 statement
@@ -456,13 +456,13 @@ statement
     | expression_statement  { $$ = $1; }
     | selection_statement   { $$ = $1; }
     | iteration_statement   { $$ = $1; }
-    | jump_statement        { $$ = $1; }
+    | jump_statement        { $$ = $1; } 
     ;
 
 labeled_statement
-    : IDENTIFIER ':' statement                  
-    | CASE constant_expression ':' statement    
-    | DEFAULT ':' statement                     
+    : IDENTIFIER ':' statement                  { throw new Error('labeled_statement identifier not implemented'); }
+    | CASE constant_expression ':' statement    { throw new Error('labeled_statement case not implemented'); }
+    | DEFAULT ':' statement                     { throw new Error('labeled_statement default not implemented'); }
     ;
 
 compound_statement
@@ -471,41 +471,41 @@ compound_statement
     ;
 
 block_item_list
-    : block_item                    
-    | block_item_list block_item    
+    : block_item                    { init($1); }
+    | block_item_list block_item    { push($1, $2); }
     ;
 
 block_item
-    : declaration           
-    | statement            
+    : declaration           { throw new Error('block_item declaration not implemented'); }
+    | statement             { throw new Error('block_item statement not implemented'); }
     ;
 
 expression_statement
-    : ';'                   
-    | expression ';'        
+    : ';'                   { throw new Error('empty expression statement not implemented'); }
+    | expression ';'        { throw new Error('expression statement not implemented'); }
     ;
 
 selection_statement
-    : IF '(' expression ')' statement ELSE statement    
-    | IF '(' expression ')' statement                   
-    | SWITCH '(' expression ')' statement               
+    : IF '(' expression ')' statement ELSE statement    { throw new Error('if else not implemented'); }
+    | IF '(' expression ')' statement                   { throw new Error('if not implemented'); }
+    | SWITCH '(' expression ')' statement               { throw new Error('switch not implemented'); }
     ;
 
 iteration_statement
-    : WHILE '(' expression ')' statement                                            
-    | DO statement WHILE '(' expression ')' ';'                                     
-    | FOR '(' expression_statement expression_statement ')' statement               
-    | FOR '(' expression_statement expression_statement expression ')' statement    
-    | FOR '(' declaration expression_statement ')' statement                        
-    | FOR '(' declaration expression_statement expression ')' statement             
+    : WHILE '(' expression ')' statement                                            { throw new Error('iteration 0 not implemented'); }
+    | DO statement WHILE '(' expression ')' ';'                                     { throw new Error('iteration 1 not implemented'); }
+    | FOR '(' expression_statement expression_statement ')' statement               { throw new Error('iteration 2 not implemented'); }
+    | FOR '(' expression_statement expression_statement expression ')' statement    { throw new Error('iteration 3 not implemented'); }
+    | FOR '(' declaration expression_statement ')' statement                        { throw new Error('iteration 4 not implemented'); }
+    | FOR '(' declaration expression_statement expression ')' statement             { throw new Error('iteration 5 not implemented'); }
     ;
 
 jump_statement
-    : GOTO IDENTIFIER ';'       
-    | CONTINUE ';'              
-    | BREAK ';'                 
-    | RETURN ';'                
-    | RETURN expression ';'     
+    : GOTO IDENTIFIER ';'       { throw new Error('goto identifier not implemented'); }
+    | CONTINUE ';'              { throw new Error('continue not implemented'); }
+    | BREAK ';'                 { throw new Error('break not implemented'); }
+    | RETURN ';'                { throw new Error('return not implemented'); }
+    | RETURN expression ';'     { throw new Error('return expr not implemented'); }
     ;
 
 translation_unit

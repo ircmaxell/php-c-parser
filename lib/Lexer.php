@@ -41,6 +41,7 @@ class Lexer
                 }
             }
             $startAttributes['startLine'] = $this->tokenPos + 1;
+
             if (is_string($token)) {
                 $id = ord($token);
                 $value = $token;
