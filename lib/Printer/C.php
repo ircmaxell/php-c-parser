@@ -36,7 +36,7 @@ class C implements Printer
         if ($node instanceof TranslationUnitDecl) {
             return $this->printNodes($node->declarations, $level);
         } elseif ($node instanceof Decl) {
-            return $this->printDecl($node, $level);
+            return $this->printDecl($node, $level) . ';';
         } elseif ($level === 0) {
             throw new \LogicException('Unexpected node type found for level 0: ' . get_class($node));
         } elseif ($node instanceof Expr) {
@@ -51,14 +51,14 @@ class C implements Printer
 
     protected function printDecl(Decl $decl, int $level): string {
         if ($decl instanceof Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl) {
-            return 'typedef ' . $this->printType($decl->type, $level) . ' ' . $decl->name . ';';
+            return 'typedef ' . $this->printType($decl->type, $level) . ' ' . $decl->name . '';
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl) {
             $result = $this->printType($decl->type, $level) . ' ' . $decl->name;
             if ($decl->initializer !== null) {
                 $result .= ' = ' . $this->printExpr($decl->initializer, $level);
             }
-            return $result . ';';
+            return $result . '';
         }
         if ($decl instanceof EnumDecl) {
             $result = 'enum';
