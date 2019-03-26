@@ -40,21 +40,36 @@ const UNSUPPORTED_SECTIONS = [
 
 
 
-foreach (provideTestsFromDir(__DIR__ . '/cases') as $test) {
+foreach (provideTestsFromDir(__DIR__ . '/cases/dump') as $test) {
     $path = str_replace(__DIR__ . '/cases/', '', $test[0]);
     $targetName = 'PHPCParser\\Test\\' . str_replace(['/', '.phpt'], ['\\', ''], $path) . 'Test';
     $targetFile = __DIR__ . '/generated/' . str_replace('.phpt', 'Test', $path);
 
+    $targetDir = dirname($targetFile);
+    @mkdir($targetDir, 0777, true);
+
     $namespace = explode('\\', $targetName);
     $class = array_pop($namespace);
-    compileTest($targetFile, implode('\\', $namespace), $class, $test);
+    compileTest($targetFile, implode('\\', $namespace), $class, $test, true);
+}
+
+foreach (provideTestsFromDir(__DIR__ . '/cases/c') as $test) {
+    $path = str_replace(__DIR__ . '/cases/', '', $test[0]);
+    $targetName = 'PHPCParser\\Test\\' . str_replace(['/', '.phpt'], ['\\', ''], $path) . 'Test';
+    $targetFile = __DIR__ . '/generated/' . str_replace('.phpt', 'Test', $path);
+
+    $targetDir = dirname($targetFile);
+    @mkdir($targetDir, 0777, true);
+    
+    $namespace = explode('\\', $targetName);
+    $class = array_pop($namespace);
+    compileTest($targetFile, implode('\\', $namespace), $class, $test, false);
 }
 
 
 
 
-
-function compileTest(string $targetFile, string $namespace, string $class, array $test): void {
+function compileTest(string $targetFile, string $namespace, string $class, array $test, bool $isDump): void {
     file_put_contents($targetFile . '.c', $test[2]);
     $parts = explode('/', $targetFile);
     $relativeTarget = array_pop($parts);
@@ -73,8 +88,12 @@ namespace ' . $namespace . ';
 use PHPCParser\\CParser;
 use PHPCParser\\Printer;
 use PHPCParser\\Printer\\Dumper;
+use PHPCParser\\Printer\\C;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Note: this is a generated file, do not edit this!!!
+ */
 class ' . $class . ' extends TestCase {
 
     const EXPECTED = ' . var_export($expected, true) . ';
@@ -85,7 +104,7 @@ class ' . $class . ' extends TestCase {
     public function setUp(): void {
         $this->parser = new CParser;
         $this->parser->addSearchPath(__DIR__);
-        $this->printer = new Dumper;
+        $this->printer = new ' . ($isDump ? 'Dumper' : 'C') . ';
     }
 
     /**

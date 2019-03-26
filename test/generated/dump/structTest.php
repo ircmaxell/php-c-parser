@@ -1,10 +1,14 @@
 <?php declare(strict_types=1);
-namespace PHPCParser\Test;
+namespace PHPCParser\Test\dump;
 use PHPCParser\CParser;
 use PHPCParser\Printer;
 use PHPCParser\Printer\Dumper;
+use PHPCParser\Printer\C;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Note: this is a generated file, do not edit this!!!
+ */
 class structTest extends TestCase {
 
     const EXPECTED = 'TranslationUnitDecl
