@@ -3,58 +3,9 @@ namespace PHPCParser;
 
 use PHPCParser\Node\TranslationUnitDecl;
 
-class Printer
+interface Printer
 {
 
-    public function print(TranslationUnitDecl $node): string {
-        return $this->printNode($node, 0);
-    }
-
-    public function printNodes(array $nodes, int $level): string {
-        $result = '';
-        foreach ($nodes as $node) {
-            $result .= str_repeat('  ', $level);
-            $result .= $this->printNode($node, $level);
-        }
-        return $result;
-    }
-
-    public function printNode(Node $node, int $level): string {
-        $result = $node->getType() . "\n";
-        foreach ($node->getSubnodeNames() as $name) {
-            $result .= str_repeat('  ', $level + 1) . $name . ': ';
-            $subNode = $node->$name;
-            if ($subNode === null) {
-                $result .= "null\n";
-            } elseif ($subNode instanceof Node) {
-                $result .= $this->printNode($subNode, $level + 2);
-            } elseif (is_string($subNode)) {
-                $result .= '"' . $subNode . "\"\n";
-            } elseif (is_array($subNode)) {
-                $result .= "[\n";
-                $result .= $this->printNodes($subNode, $level + 2);
-                $result .= str_repeat('  ', $level + 1) . "]\n";
-            } elseif (is_int($subNode)) {
-                $result .= $subNode . "\n";
-            } elseif (is_bool($subNode)) {
-                $result .= ($subNode ? 'true' : 'false') . "\n";
-            } else {
-                throw new \LogicException("Unknown subnode type encountered: " . gettype($subNode));
-            }
-        }
-        return $result;
-    }
-
-    public function printTokens(array $tokens): string {
-        $result = '';
-        foreach ($tokens as $token) {
-            while ($token) {
-                $result .= $token->value . ' ';
-                $token = $token->next;
-            }
-            $result .= "\n";
-        }
-        return $result;
-    }
+    public function print(TranslationUnitDecl $node): string;
 
 }

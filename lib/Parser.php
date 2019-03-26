@@ -790,10 +790,10 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             6 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\ValueStmt\Expr\IntegerLiteral((int) $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
+                 $this->semValue = new Node\Stmt\ValueStmt\Expr\IntegerLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             7 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\ValueStmt\Expr\FloatLiteral((float) $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
+                 $this->semValue = new Node\Stmt\ValueStmt\Expr\FloatLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             8 => function ($stackPos) {
                  $this->semValue = new Node\Stmt\ValueStmt\Expr\DeclRefExpr($this->semStack[$stackPos-(1-1)], $this->scope->enum($this->semStack[$stackPos-(1-1)]), $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 

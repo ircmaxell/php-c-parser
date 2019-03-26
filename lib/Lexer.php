@@ -49,7 +49,6 @@ class Lexer
                 $value = $token[1];
                 $id = $token[0];
             }
-            echo "% emitting {$id}[{$value}]:{$startAttributes['startLine']}\n";
             return $id;
         }
         throw new \LogicException("Reached the end of lexer loop, should never happen");
@@ -81,11 +80,15 @@ class Lexer
         $number = $this->currentToken->value;
         $this->currentToken = $this->currentToken->next;
         // TODO: fix this
-        if (strpos($number, '.') !== false) {
-            return [Tokens::T_F_CONSTANT, (string) floatval($number)];
+        if (ctype_digit($number)) {
+            return [Tokens::T_I_CONSTANT, $number];
         }
-        return [Tokens::T_I_CONSTANT, (string) intval($number)];
+        if (strpos($number, '.') !== false) {
+            return [Tokens::T_F_CONSTANT, $number];
+        }
+        return [Tokens::T_I_CONSTANT, $number];
     }
+
 
     private function extractPunctuation(): array {
         $value = $this->currentToken->value;

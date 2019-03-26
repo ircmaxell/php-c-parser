@@ -20,7 +20,6 @@ class CParser
         $context = $context ?? new Context($this->headerSearchPaths);
         $preprocessor = new PreProcessor($context);
         $tokens = $preprocessor->process($filename);
-        file_put_contents($filename . '.debug', (new Printer)->printTokens($tokens));
         return $this->parser->parse($tokens);
     }
 

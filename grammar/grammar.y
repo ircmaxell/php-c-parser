@@ -31,8 +31,8 @@ primary_expression
     ;
 
 constant
-    : I_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\IntegerLiteral[(int) $1]; } /* includes character_constant */
-    | F_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\FloatLiteral[(float) $1]; }
+    : I_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\IntegerLiteral[$1]; } /* includes character_constant */
+    | F_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\FloatLiteral[$1]; }
     | ENUMERATION_CONSTANT  { $$ = Node\Stmt\ValueStmt\Expr\DeclRefExpr[$1, $this->scope->enum($1)]; }  /* after it has been defined as such */
     ;
 

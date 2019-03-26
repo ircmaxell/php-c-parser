@@ -6,9 +6,9 @@ use PHPCParser\Node\Stmt\ValueStmt\Expr;
 
 class FloatLiteral extends Expr
 {
-    public float $value;
+    public string $value;
 
-    public function __construct(float $value, array $attributes = []) {
+    public function __construct(string $value, array $attributes = []) {
         parent::__construct($attributes);
         $this->value = $value;
     }
