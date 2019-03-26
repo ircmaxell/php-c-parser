@@ -262,9 +262,8 @@ emit_single:
         $tok = $this->currentToken;
         $this->currentToken = $this->currentToken->next;
 
-        $lowerToken = strtolower($tok->value);
-        if (isset(self::IDENTIFIER_MAP[$lowerToken])) {
-            return [self::IDENTIFIER_MAP[$lowerToken], $tok->value];
+        if (isset(self::IDENTIFIER_MAP[$tok->value])) {
+            return [self::IDENTIFIER_MAP[$tok->value], $tok->value];
         }
         return [$this->scope->lookup($tok->value), $tok->value];
     }

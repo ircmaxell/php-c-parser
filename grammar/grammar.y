@@ -468,8 +468,8 @@ labeled_statement
     ;
 
 compound_statement
-    : '{' '}'                   { $$ = []; }
-    | '{'  block_item_list '}'  { $$ = $2; }
+    : '{' '}'                   { $$ = Node\Stmt\CompoundStmt[[]]; }
+    | '{'  block_item_list '}'  { $$ = Node\Stmt\CompoundStmt[$2]; }
     ;
 
 block_item_list
@@ -521,8 +521,8 @@ external_declaration
     ;
 
 function_definition
-    : declaration_specifiers declarator declaration_list compound_statement     { compileFunction[$1, $2, $3, $4]; }
-    | declaration_specifiers declarator compound_statement                      { compileFunction[$1, $2, [], $3]; }
+    : declaration_specifiers declarator declaration_list compound_statement     { compileFunction[$1[0], $1[1], $2, $3, $4]; }
+    | declaration_specifiers declarator compound_statement                      { compileFunction[$1[0], $1[1], $2, [], $3]; }
     ;
 
 declaration_list

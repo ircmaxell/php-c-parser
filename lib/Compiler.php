@@ -6,6 +6,7 @@ use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl;
 use PHPCParser\Node\Decl;
 use PHPCParser\Node\Type;
 use PHPCParser\Node\Stmt\ValueStmt\Expr;
+use PHPCParser\Node\Stmt;
 
 class Compiler
 {
@@ -16,13 +17,28 @@ class Compiler
         $this->scope = $scope;
     }
 
+    public function compileFunction(int $qualifiers, array $types, IR\Declarator $declarator, array $declarations, Stmt\CompoundStmt $stmts, array $attributes = []): array {
+        $type = $this->compileType($types);
+        $parts = $this->compileNamedDeclarator($declarator, $type);
+        $name = $parts[0];
+        $signature = $parts[1];
+        if ($qualifiers !== 0) {
+            $signature = Type\AttributedType::fromDecl($qualifiers, $signature, $attributes);
+        }
+        if (empty($declarations)) {
+            return [new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($name, $signature, $stmts)];
+        }
+        throw new \LogicException('Not implemented (yet)');
+    }
+
     public function compileExternalDeclaration(IR\Declaration $declaration, array $attributes = []): array {
         $qualifiers = $declaration->qualifiers;
+        $isTypedef = false;
 restart:
         $result = [];
         $type = $this->compileType($declaration->types);
         if ($declaration->qualifiers & Decl::KIND_TYPEDEF) {
-            var_dump($declaration);
+            // this is wrong
             foreach ($declaration->declarators as $declarator) {
                 $result[] = $this->compileTypedef($declarator, $type, $attributes);;
             }
@@ -140,7 +156,7 @@ restart:
         }
         $parts = $this->compileNamedDeclarator($initDeclarator->declarator, $type, $attributes);
         if ($parts[1] instanceof Type\FunctionType) {
-            return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($parts[0], $parts[1], $attributes);
+            return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($parts[0], $parts[1], null, $attributes);
         }
         return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl($parts[0], $parts[1], $initDeclarator->initializer, $attributes);
     }

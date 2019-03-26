@@ -1513,10 +1513,10 @@ class Parser extends ParserAbstract
                  throw new Error('labeled_statement default not implemented'); 
             },
             247 => function ($stackPos) {
-                 $this->semValue = []; 
+                 $this->semValue = new Node\Stmt\CompoundStmt([], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             248 => function ($stackPos) {
-                 $this->semValue = $this->semStack[$stackPos-(3-2)]; 
+                 $this->semValue = new Node\Stmt\CompoundStmt($this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             249 => function ($stackPos) {
                  $this->semValue = array($this->semStack[$stackPos-(1-1)]); 
@@ -1591,10 +1591,10 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->compiler->compileExternalDeclaration($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             273 => function ($stackPos) {
-                 $this->semValue = $this->compiler->compileFunction($this->semStack[$stackPos-(4-1)], $this->semStack[$stackPos-(4-2)], $this->semStack[$stackPos-(4-3)], $this->semStack[$stackPos-(4-4)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
+                 $this->semValue = $this->compiler->compileFunction($this->semStack[$stackPos-(4-1)][0], $this->semStack[$stackPos-(4-1)][1], $this->semStack[$stackPos-(4-2)], $this->semStack[$stackPos-(4-3)], $this->semStack[$stackPos-(4-4)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             274 => function ($stackPos) {
-                 $this->semValue = $this->compiler->compileFunction($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-2)], [], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = $this->compiler->compileFunction($this->semStack[$stackPos-(3-1)][0], $this->semStack[$stackPos-(3-1)][1], $this->semStack[$stackPos-(3-2)], [], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             275 => function ($stackPos) {
                  $this->semValue = array($this->semStack[$stackPos-(1-1)]); 
