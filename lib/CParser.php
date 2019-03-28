@@ -19,7 +19,7 @@ class CParser
     public function parse(string $filename, ?Context $context = null): TranslationUnitDecl {
         // Create the preprocessor every time, since it shouldn't ever share state
         $this->context = $context ?? new Context($this->headerSearchPaths);
-        $preprocessor = new PreProcessor($context);
+        $preprocessor = new PreProcessor($this->context);
         $tokens = $preprocessor->process($filename);
         return $this->parser->parse($tokens);
     }
