@@ -9,11 +9,9 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class varsTest extends TestCase {
+class function_pointersTest extends TestCase {
 
-    const EXPECTED = 'extern int foo;
-int bar;
-int baz[];';
+    const EXPECTED = 'typedef void*(*test_func)(int);';
 
     protected CParser $parser;
     protected Printer $printer;
@@ -25,10 +23,10 @@ int baz[];';
     }
 
     /**
-     * @textdox Test basic parsing of vars
+     * @textdox Test basic parsing of function pointers
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/varsTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/function_pointersTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

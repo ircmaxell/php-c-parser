@@ -8,6 +8,7 @@ use PHPCParser\Node\Decl;
 class AttributedType extends Type
 {
 
+    const KIND_EXTERN       = 1;
     const KIND_STATIC       = 2;
     const KIND_THREAD_LOCAL = 3;
     const KIND_AUTO         = 4;
@@ -37,6 +38,9 @@ class AttributedType extends Type
     public static function fromDecl(int $kind, Type $parent, array $attributes = []): Type {
         if ($kind & Decl::KIND_TYPEDEF) {
             throw new \LogicException('Cannot compile typedef AttributedType');
+        }
+        if ($kind & Decl::KIND_EXTERN) {
+            $parent = new self(self::KIND_EXTERN, $parent, $attributes);
         }
         if ($kind & Decl::KIND_STATIC) {
             $parent = new self(self::KIND_STATIC, $parent, $attributes);

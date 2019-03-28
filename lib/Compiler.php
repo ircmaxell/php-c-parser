@@ -34,9 +34,9 @@ class Compiler
     public function compileExternalDeclaration(IR\Declaration $declaration, array $attributes = []): array {
         $qualifiers = $declaration->qualifiers;
         $isTypedef = false;
+        $type = $this->compileType($declaration->types);
 restart:
         $result = [];
-        $type = $this->compileType($declaration->types);
         if ($declaration->qualifiers & Decl::KIND_TYPEDEF) {
             // this is wrong
             foreach ($declaration->declarators as $declarator) {
@@ -54,13 +54,9 @@ restart:
             foreach ($declaration->declarators as $initDeclarator) {
                 $result[] = $this->compileInitDeclarator($initDeclarator, $type, $attributes);
             }     
-        } elseif ($qualifiers & Decl::KIND_EXTERN) {
-            // we don't care about extern *for now*
-            $qualifiers &= ~Decl::KIND_EXTERN;
-            goto restart;
         } elseif ($qualifiers > 0) {
-            $qualifiers = 0;
             $type = Type\AttributedType::fromDecl($qualifiers, $type, $attributes);
+            $qualifiers = 0;
             goto restart;
         } else {
             var_dump($declaration);

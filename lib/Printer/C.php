@@ -36,7 +36,7 @@ class C implements Printer
         if ($node instanceof TranslationUnitDecl) {
             return $this->printNodes($node->declarations, $level);
         } elseif ($node instanceof Decl) {
-            return $this->printDecl($node, $level) . ';';
+            return $this->printDecl($node, $level) . ($level === 0 ? ';' : '');
         } elseif ($level === 0) {
             throw new \LogicException('Unexpected node type found for level 0: ' . get_class($node));
         } elseif ($node instanceof Expr) {
@@ -51,14 +51,14 @@ class C implements Printer
 
     protected function printDecl(Decl $decl, int $level): string {
         if ($decl instanceof Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl) {
-            return 'typedef ' . $this->printType($decl->type, $level) . ' ' . $decl->name . '';
+            return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl) {
-            $result = $this->printType($decl->type, $level) . ' ' . $decl->name;
+            $result = $this->printType($decl->type, $decl->name, $level);
             if ($decl->initializer !== null) {
                 $result .= ' = ' . $this->printExpr($decl->initializer, $level);
             }
-            return $result . '';
+            return $result;
         }
         if ($decl instanceof EnumDecl) {
             $result = 'enum';
@@ -95,10 +95,7 @@ class C implements Printer
                 $return .= " {\n";
                 foreach ($decl->fields as $field) {
                     $return .= str_repeat('  ', $level + 1);
-                    $return .= $this->printType($field->type, $level + 1);
-                    if ($field->name !== null) {
-                        $return .= ' ' . $field->name;
-                    }
+                    $return .= $this->printType($field->type, $field->name, $level + 1);
                     if ($field->initializer !== null) {
                         $return .= ': ' . $this->printExpr($field->initializer, $level + 1);
                     }
@@ -124,11 +121,11 @@ class C implements Printer
                 }
                 $type = $type->parent;
             }
-            $return .= $this->printType($type->return, $level);
+            $return .= $this->printType($type->return, null, $level);
             $return .= ' ' . $decl->name . '(';
             $next = '';
             foreach ($type->params as $param) {
-                $return .= $next . $this->printType($param, $level);
+                $return .= $next . $this->printType($param, $param->name, $level);
                 $next = ', ';
             }
             if ($type->isVariadic) {
@@ -136,8 +133,6 @@ class C implements Printer
             }
             $return .= ')';
             if ($decl->stmts === null) {
-                $return .= ';';
-            } else {
                 $return .= $this->printCompoundStmt($decl->stmts, $level);
             }
             return $return;
@@ -153,6 +148,7 @@ class C implements Printer
     }
 
     const ATTRIBUTED_MAP = [
+        Type\AttributedType::KIND_EXTERN => 'extern',
         Type\AttributedType::KIND_STATIC => 'static',
         Type\AttributedType::KIND_THREAD_LOCAL => 'thread_local',
         Type\AttributedType::KIND_AUTO => 'auto',
@@ -165,42 +161,58 @@ class C implements Printer
         Type\AttributedType::KIND_NORETURN => 'noreturn',
     ];
 
-    protected function printType(Type $type, int $level): string {
+    protected function printType(Type $type, ?string $name, int $level): string {
         if ($type instanceof Type\BuiltinType || $type instanceof Type\TypedefType) {
-            return $type->name;
+            return $type->name . ($name !== null ? ' ' . $name : '');
         }
         if ($type instanceof Type\TagType\RecordType) {
-            return $this->printDecl($type->decl, $level);
+            return $this->printDecl($type->decl, $level) . ($name !== null ? ' ' . $name : '') ;
         }
         if ($type instanceof Type\TagType\EnumType) {
-            return $this->printDecl($type->decl, $level);
+            return $this->printDecl($type->decl, $level) . ($name !== null ? ' ' . $name : '');
         }
         if ($type instanceof Type\AttributedType) {
             if ($type->kind === Type\AttributedType::KIND_CONST && $this->omitConst) {
-                return $this->printType($type->parent, $level);
+                return $this->printType($type->parent, $name, $level);
             }
             if (isset(self::ATTRIBUTED_MAP[$type->kind])) {
-                return self::ATTRIBUTED_MAP[$type->kind] . ' ' . $this->printType($type->parent, $level);
+                return self::ATTRIBUTED_MAP[$type->kind] . ' ' . $this->printType($type->parent, $name, $level);
             }
             throw new \LogicException('Unknown attributed type kind: ' . $type->kind);
         }
         if ($type instanceof Type\PointerType) {
-            return $this->printType($type->parent, $level) . '*';
+            if ($type->parent instanceof Type\ParenType && $type->parent->parent instanceof Type\FunctionType\FunctionProtoType) {
+                $func = $type->parent->parent;
+                // function pointer
+                $result = $this->printType($func->return, null, $level) . '(*' . $name . ')(';
+                $next = '';
+                foreach ($func->params as $param) {
+                    $result .= $next . $this->printType($param, null, $level);
+                    $next = ', ';
+                }
+                if ($func->isVariadic) {
+                    $result .= $next . '...';
+                }
+                return $result . ')';
+            }
+            return $this->printType($type->parent, $name, $level) . '*';
         }
         if ($type instanceof Type\ParenType) {
-            return '(' . $this->printType($type->parent, $level) . ')';
+            return '(' . $this->printType($type->parent, $name, $level) . ')';
         }
         if ($type instanceof Type\ArrayType\IncompleteArrayType) {
-            return $this->printType($type->parent, $level) . '[]';
+            $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
+            return str_replace('__NAME_PLACEHOLDER__', $name . '[]', $subType);
         }
         if ($type instanceof Type\ArrayType\ConstantArrayType) {
-            return $this->printType($type->parent, $level) . '[' . $this->printExpr($type->size, $level) . ']';
+            $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
+            return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']', $subType);
         }
         if ($type instanceof Type\FunctionType\FunctionProtoType) {
-            $result = $this->printType($type->return, $level) . '(';
+            $result = $this->printType($type->return, null, $level) . '(';
             $next = '';
             foreach ($type->params as $param) {
-                $result .= $next . $this->printType($param, $level);
+                $result .= $next . $this->printType($param, null, $level);
                 $next = ', ';
             }
             if ($type->isVariadic) {
