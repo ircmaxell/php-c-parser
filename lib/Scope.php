@@ -27,7 +27,7 @@ class Scope {
 //        'va_list' => Tokens::T_TYPEDEF_NAME,
         '__builtin_va_list' => Tokens::T_TYPEDEF_NAME,
         '__gnuc_va_list' => Tokens::T_TYPEDEF_NAME,
-        'wchar_t' => Tokens::T_TYPEDEF_NAME,
+//        'wchar_t' => Tokens::T_TYPEDEF_NAME,
     ];
 
     private array $types = [];

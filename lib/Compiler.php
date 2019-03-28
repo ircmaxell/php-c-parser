@@ -120,6 +120,10 @@ restart:
             $first = array_shift($types);
             $types[0] = new Type\BuiltinType($first->name . ' ' . $types[0]->name, $first->getAttributes());
             goto restart;
+        } elseif ($types[0] instanceof Type\BuiltinType && $types[1] instanceof Type\TypedefType) {
+            $first = array_shift($types);
+            $types[0] = new Type\BuiltinType($first->name . ' ' . $types[0]->name, $first->getAttributes());
+            goto restart;
         }
         var_dump($types);
         // Todo
