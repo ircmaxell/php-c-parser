@@ -51,7 +51,7 @@ class C implements Printer
 
     protected function printDecl(Decl $decl, int $level): string {
         if ($decl instanceof Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl) {
-            if ($this->isFunctionPointer($decl->type)) {
+            if ($this->isFunction($decl->type)) {
                 return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
             }
             return 'typedef ' . $this->printType($decl->type, null, $level) . ' ' . $decl->name;
@@ -164,6 +164,13 @@ class C implements Printer
         Type\AttributedType::KIND_NORETURN => 'noreturn',
     ];
 
+    protected function isFunction(Type $type): bool {
+        if ($type instanceof Type\FunctionType\FunctionProtoType) {
+            return true;
+        }
+        return $this->isFunctionPointer($type);
+    }
+
     protected function isFunctionPointer(Type $type): bool {
         if (!$type instanceof Type\PointerType) {
             return false;
@@ -196,13 +203,25 @@ class C implements Printer
             }
             throw new \LogicException('Unknown attributed type kind: ' . $type->kind);
         }
+        if ($type instanceof Type\FunctionType\FunctionProtoType) {
+            $result = $this->printType($type->return, $name, $level) . '(';
+            $next = '';
+            foreach ($type->params as $idx => $param) {
+                $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
+                $next = ', ';
+            }
+            if ($type->isVariadic) {
+                $result .= $next . '...';
+            }
+            return $result . ')';
+        }
         if ($this->isFunctionPointer($type)) {
             $func = $type->parent->parent;
             // function pointer
             $result = $this->printType($func->return, null, $level) . '(*' . $name . ')(';
             $next = '';
-            foreach ($func->params as $param) {
-                $result .= $next . $this->printType($param, null, $level);
+            foreach ($func->params as $idx => $param) {
+                $result .= $next . $this->printType($param, $func->paramNames[$idx], $level);
                 $next = ', ';
             }
             if ($func->isVariadic) {
@@ -225,18 +244,7 @@ class C implements Printer
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']', $subType);
         }
-        if ($type instanceof Type\FunctionType\FunctionProtoType) {
-            $result = $this->printType($type->return, null, $level) . '(';
-            $next = '';
-            foreach ($type->params as $param) {
-                $result .= $next . $this->printType($param, null, $level);
-                $next = ', ';
-            }
-            if ($type->isVariadic) {
-                $result .= $next . '...';
-            }
-            return $result . ')';
-        }
+        
         var_dump($type);
 
     }
