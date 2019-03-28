@@ -132,7 +132,7 @@ class C implements Printer
                 $return .= $next . '...';
             }
             $return .= ')';
-            if ($decl->stmts === null) {
+            if ($decl->stmts !== null) {
                 $return .= $this->printCompoundStmt($decl->stmts, $level);
             }
             return $return;
