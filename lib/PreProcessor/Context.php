@@ -13,7 +13,6 @@ class Context {
         '/usr/local/include',
         '/usr/include',
         '/usr/include/x86_64-linux-gnu',
-        '/usr/include/linux',
     ];
 
     public function __construct(array $headerSearchPaths = []) {
