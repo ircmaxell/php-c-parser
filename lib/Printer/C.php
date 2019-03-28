@@ -295,7 +295,7 @@ class C implements Printer
             throw new \LogicException('Unknown unary operator kind: ' . $expr->kind);
         }
         if ($expr instanceof Expr\TypeRefExpr) {
-            return '(' . $this->printType($expr->type, $level) . ')';
+            return '(' . $this->printType($expr->type, null, $level) . ')';
         }
         if ($expr instanceof Expr\CastExpr) {
             return '(' . $this->printExpr($expr->type, $level) . $this->printExpr($expr->expr, $level) . ')';
