@@ -40,12 +40,27 @@ class Context {
     }
 
     public function getDefines(): array {
-        return $this->definitions();
+        return $this->definitions;
+    }
+
+    protected function trim(?Token $token): ?Token {
+        if (is_null($token)) {
+            return $token;
+        }
+        $first = $next = new Token(0, '', 'computed');
+        while ($token !== null) {
+            if ($token->type !== Token::WHITESPACE) {
+               $next = $next->next = new Token($token->type, $token->value, $token->file);
+            }
+            $token = $token->next;
+        }
+        return $first->next;
     }
 
     public function getNumericDefines(): array {
         $result = [];
         foreach ($this->definitions as $identifier => $token) {
+            $token = $this->trim($token);
             if ($token instanceof Token && $token->type === Token::NUMBER && $token->next === null) {
                 $result[$identifier] = $token->value;
             }
