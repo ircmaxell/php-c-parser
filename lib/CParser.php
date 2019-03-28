@@ -8,6 +8,7 @@ use PHPCParser\Node\TranslationUnitDecl;
 class CParser
 {
 
+    private Context $context;
     private Parser $parser;
     private array $headerSearchPaths = [];
 
@@ -17,10 +18,14 @@ class CParser
 
     public function parse(string $filename, ?Context $context = null): TranslationUnitDecl {
         // Create the preprocessor every time, since it shouldn't ever share state
-        $context = $context ?? new Context($this->headerSearchPaths);
+        $this->context = $context ?? new Context($this->headerSearchPaths);
         $preprocessor = new PreProcessor($context);
         $tokens = $preprocessor->process($filename);
         return $this->parser->parse($tokens);
+    }
+
+    public function getLastContext(): Context {
+        return $this->context;
     }
 
     public function addSearchPath(string $path) {

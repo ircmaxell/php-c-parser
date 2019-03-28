@@ -39,6 +39,20 @@ class Context {
         }
     }
 
+    public function getDefines(): array {
+        return $this->definitions();
+    }
+
+    public function getNumericDefines(): array {
+        $result = [];
+        foreach ($this->definitions as $identifier => $token) {
+            if ($token instanceof Token && $token->type === Token::NUMBER && $token->next === null) {
+                $result[] = $token->value;
+            }
+        }
+        return $result;
+    }
+
     public function defineIdentifier(string $identifier, string $value) {
         $this->definitions[$identifier] = new Token(Token::IDENTIFIER, $value, 'predefined');
     }
