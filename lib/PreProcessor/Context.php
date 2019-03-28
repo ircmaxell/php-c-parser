@@ -47,7 +47,7 @@ class Context {
         $result = [];
         foreach ($this->definitions as $identifier => $token) {
             if ($token instanceof Token && $token->type === Token::NUMBER && $token->next === null) {
-                $result[] = $token->value;
+                $result[$identifier] = $token->value;
             }
         }
         return $result;
