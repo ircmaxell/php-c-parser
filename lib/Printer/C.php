@@ -51,7 +51,10 @@ class C implements Printer
 
     protected function printDecl(Decl $decl, int $level): string {
         if ($decl instanceof Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl) {
-            return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
+            if ($this->isFunctionPointer($decl->type)) {
+                return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
+            }
+            return 'typedef ' . $this->printType($decl->type, null, $level) . ' ' . $decl->name;
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl) {
             $result = $this->printType($decl->type, $decl->name, $level);
@@ -161,6 +164,19 @@ class C implements Printer
         Type\AttributedType::KIND_NORETURN => 'noreturn',
     ];
 
+    protected function isFunctionPointer(Type $type): bool {
+        if (!$type instanceof Type\PointerType) {
+            return false;
+        }
+        if (!$type->parent instanceof Type\ParenType) {
+            return false;
+        }
+        if (!$type->parent->parent instanceof Type\FunctionType\FunctionProtoType) {
+            return false;
+        }
+        return true;
+    }
+
     protected function printType(Type $type, ?string $name, int $level): string {
         if ($type instanceof Type\BuiltinType || $type instanceof Type\TypedefType) {
             return $type->name . ($name !== null ? ' ' . $name : '');
@@ -180,21 +196,21 @@ class C implements Printer
             }
             throw new \LogicException('Unknown attributed type kind: ' . $type->kind);
         }
-        if ($type instanceof Type\PointerType) {
-            if ($type->parent instanceof Type\ParenType && $type->parent->parent instanceof Type\FunctionType\FunctionProtoType) {
-                $func = $type->parent->parent;
-                // function pointer
-                $result = $this->printType($func->return, null, $level) . '(*' . $name . ')(';
-                $next = '';
-                foreach ($func->params as $param) {
-                    $result .= $next . $this->printType($param, null, $level);
-                    $next = ', ';
-                }
-                if ($func->isVariadic) {
-                    $result .= $next . '...';
-                }
-                return $result . ')';
+        if ($this->isFunctionPointer($type)) {
+            $func = $type->parent->parent;
+            // function pointer
+            $result = $this->printType($func->return, null, $level) . '(*' . $name . ')(';
+            $next = '';
+            foreach ($func->params as $param) {
+                $result .= $next . $this->printType($param, null, $level);
+                $next = ', ';
             }
+            if ($func->isVariadic) {
+                $result .= $next . '...';
+            }
+            return $result . ')';
+        }
+        if ($type instanceof Type\PointerType) {
             return $this->printType($type->parent, $name, $level) . '*';
         }
         if ($type instanceof Type\ParenType) {
