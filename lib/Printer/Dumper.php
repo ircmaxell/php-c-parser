@@ -17,7 +17,11 @@ class Dumper implements Printer
         $result = '';
         foreach ($nodes as $node) {
             $result .= str_repeat('  ', $level);
-            $result .= $this->printNode($node, $level);
+            if ($node instanceof Node) {
+                $result .= $this->printNode($node, $level);
+            } elseif (is_string($node)) {
+                $result .= $node . "\n";
+            }
         }
         return $result;
     }

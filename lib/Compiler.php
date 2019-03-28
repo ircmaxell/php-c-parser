@@ -214,6 +214,7 @@ restart_direct:
             $type = new Type\FunctionType\FunctionProtoType(
                 $type,
                 $this->compileDirectParamTypes(...$directdeclarator->params),
+                $this->compileDirectParamTypeNames(...($directdeclarator->params)),
                 $directdeclarator->isVariadic
             );
             $directdeclarator = $directdeclarator->name;
@@ -227,6 +228,14 @@ restart_direct:
         $result = [];
         foreach ($params as $param) {
             $result[] = $param->type;
+        }
+        return $result;
+    }
+
+    public function compileDirectParamTypeNames(Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl ... $params): array {
+        $result = [];
+        foreach ($params as $param) {
+            $result[] = $param->name;
         }
         return $result;
     }

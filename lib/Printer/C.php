@@ -124,8 +124,8 @@ class C implements Printer
             $return .= $this->printType($type->return, null, $level);
             $return .= ' ' . $decl->name . '(';
             $next = '';
-            foreach ($type->params as $param) {
-                $return .= $next . $this->printType($param, $param->name, $level);
+            foreach ($type->params as $idx => $param) {
+                $return .= $next . $this->printType($param, $type->paramNames[$idx], $level);
                 $next = ', ';
             }
             if ($type->isVariadic) {
