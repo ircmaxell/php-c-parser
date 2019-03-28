@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  */
 class function_pointersTest extends TestCase {
 
-    const EXPECTED = 'typedef void*(*test_func)(int);';
+    const EXPECTED = 'typedef void *(*test_func)(int);';
 
     protected CParser $parser;
     protected Printer $printer;

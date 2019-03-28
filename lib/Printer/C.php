@@ -211,7 +211,8 @@ class C implements Printer
             return $result . ')';
         }
         if ($type instanceof Type\PointerType) {
-            return $this->printType($type->parent, $name, $level) . '*';
+            $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
+            return str_replace('__NAME_PLACEHOLDER__', '*' . $name, $subType);
         }
         if ($type instanceof Type\ParenType) {
             return '(' . $this->printType($type->parent, $name, $level) . ')';

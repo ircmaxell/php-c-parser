@@ -9,9 +9,13 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class typedefTest extends TestCase {
+class struct_pointersTest extends TestCase {
 
-    const EXPECTED = 'typedef void * foo;';
+    const EXPECTED = 'struct A;
+struct B {
+  struct A *a;
+  struct A *b;
+};';
 
     protected CParser $parser;
     protected Printer $printer;
@@ -23,10 +27,10 @@ class typedefTest extends TestCase {
     }
 
     /**
-     * @textdox Test basic parsing of vars
+     * @textdox Test basic parsing of struct pointers
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/typedefTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/struct_pointersTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }
