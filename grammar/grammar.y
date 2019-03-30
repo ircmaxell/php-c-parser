@@ -62,8 +62,8 @@ generic_association
 postfix_expression
     : primary_expression                                   { $$ = $1; }
     | postfix_expression '[' expression ']'                { throw new Error('dim fetch not implemented'); }
-    | postfix_expression '(' ')'                           { throw new Error('call no args not implemented'); }
-    | postfix_expression '(' argument_expression_list ')'  { throw new Error('call with args not implemented'); }
+    | postfix_expression '(' ')'                           { $$ = Expr\CallExpr[$1, []]; }
+    | postfix_expression '(' argument_expression_list ')'  { $$ = Expr\CallExpr[$1, $3]; }
     | postfix_expression '.' IDENTIFIER                    { throw new Error('.identifier not implemented'); }
     | postfix_expression PTR_OP IDENTIFIER                 { throw new Error('->identifier not implemented'); }
     | postfix_expression INC_OP                            { $$ = Expr\UnaryOperator[$2, Expr\UnaryOperator::KIND_POSTINC]; }
@@ -161,7 +161,7 @@ logical_or_expression
 
 conditional_expression
     : logical_or_expression                                             { $$ = $1; }
-    | logical_or_expression '?' expression ':' conditional_expression   { throw new Error('ternary not implemented'); }
+    | logical_or_expression '?' expression ':' conditional_expression   { $$ = Expr\AbstractConditionalOperator\ConditionalOperator[$1, $3, $5]; }
     ;
 
 assignment_expression
@@ -483,8 +483,8 @@ block_item
     ;
 
 expression_statement
-    : ';'                   { throw new Error('empty expression statement not implemented'); }
-    | expression ';'        { throw new Error('expression statement not implemented'); }
+    : ';'                   { $$ = null; }
+    | expression ';'        { $$ = $1; }
     ;
 
 selection_statement

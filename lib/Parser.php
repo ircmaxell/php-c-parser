@@ -829,10 +829,10 @@ class Parser extends ParserAbstract
                  throw new Error('dim fetch not implemented'); 
             },
             19 => function ($stackPos) {
-                 throw new Error('call no args not implemented'); 
+                 $this->semValue = new Expr\CallExpr($this->semStack[$stackPos-(3-1)], [], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             20 => function ($stackPos) {
-                 throw new Error('call with args not implemented'); 
+                 $this->semValue = new Expr\CallExpr($this->semStack[$stackPos-(4-1)], $this->semStack[$stackPos-(4-3)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             21 => function ($stackPos) {
                  throw new Error('.identifier not implemented'); 
@@ -991,7 +991,7 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             73 => function ($stackPos) {
-                 throw new Error('ternary not implemented'); 
+                 $this->semValue = new Expr\AbstractConditionalOperator\ConditionalOperator($this->semStack[$stackPos-(5-1)], $this->semStack[$stackPos-(5-3)], $this->semStack[$stackPos-(5-5)], $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             74 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
@@ -1531,10 +1531,10 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             253 => function ($stackPos) {
-                 throw new Error('empty expression statement not implemented'); 
+                 $this->semValue = null; 
             },
             254 => function ($stackPos) {
-                 throw new Error('expression statement not implemented'); 
+                 $this->semValue = $this->semStack[$stackPos-(2-1)]; 
             },
             255 => function ($stackPos) {
                  throw new Error('if else not implemented'); 

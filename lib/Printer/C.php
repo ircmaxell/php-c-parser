@@ -328,6 +328,16 @@ class C implements Printer
         if ($expr instanceof Expr\DeclRefExpr) {
             return $expr->name;
         }
+        if ($expr instanceof Expr\AbstractConditionalOperator\ConditionalOperator) {
+            return '(' . $this->printExpr($expr->cond, $level) . ' ? ' . $this->printExpr($expr->ifTrue, $level) . ' : ' . $this->printExpr($expr->ifFalse, $level) . ')';
+        }
+        if ($expr instanceof Expr\CallExpr) {
+            $args = [];
+            foreach ($expr->args as $arg) {
+                $args[] = $this->printExpr($arg, $level);
+            }
+            return $this->printExpr($expr->fn, $level) . '(' . implode(', ', $args) . ')';
+        }
         var_dump($expr);
     }
 
