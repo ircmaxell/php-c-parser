@@ -2,7 +2,6 @@
 
 namespace PHPCParser;
 
-use PHPCParser\PreProcessor\Context;
 use PHPCParser\Node\TranslationUnitDecl;
 
 class CParser
@@ -21,7 +20,7 @@ class CParser
         $this->context = $context ?? new Context($this->headerSearchPaths);
         $preprocessor = new PreProcessor($this->context);
         $tokens = $preprocessor->process($filename);
-        return $this->parser->parse($tokens);
+        return $this->parser->parse($tokens, $this->context);
     }
 
     public function getLastContext(): Context {

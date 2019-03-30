@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PHPCParser;
 use PHPCParser\PreProcessor\Token;
 use PHPCParser\PreProcessor\Parser;
-use PHPCParser\PreProcessor\Context;
 
 
 class PreProcessor {

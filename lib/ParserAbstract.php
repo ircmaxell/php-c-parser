@@ -97,8 +97,8 @@ abstract class ParserAbstract
         $this->initReduceCallbacks();
     }
 
-    public function parse(array $tokens) {
-        $this->scope = new Scope;
+    public function parse(array $tokens, Context $context) {
+        $this->scope = $context->scope;
         $this->compiler->begin($this->scope);
         $this->lexer->begin($this->scope, $tokens);
         $result = $this->doParse();

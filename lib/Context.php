@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace PHPCParser\PreProcessor;
+namespace PHPCParser;
+
+use PHPCParser\PreProcessor\Token;
 
 class Context {
     private array $definitions = [];
     
     public array $headerSearchPaths = [];
+
+    public Scope $scope;
 
     const DEFAULT_HEADER_SEARCH_PATHS = [
         '/usr/local/include',
@@ -26,6 +30,7 @@ class Context {
         $this->define('__STDC__', null);
         $this->headerSearchPaths = array_merge($headerSearchPaths, self::DEFAULT_HEADER_SEARCH_PATHS);
         $this->locateGCCHeaderPaths();
+        $this->scope = new Scope;
     }
 
     private function locateGCCHeaderPaths() {
