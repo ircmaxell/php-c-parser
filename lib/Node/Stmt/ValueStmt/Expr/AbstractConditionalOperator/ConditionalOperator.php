@@ -23,4 +23,8 @@ class ConditionalOperator extends AbstractConditionalOperator
     public function getSubNodeNames(): array {
         return ['cond', 'ifTrue', 'ifFalse'];
     }
+
+    public function isConstant(): bool {
+        return $this->cond->isConstant() ? $this->ifTrue->isConstant() && $this->ifFalse->isConstant : false;
+    }
 }

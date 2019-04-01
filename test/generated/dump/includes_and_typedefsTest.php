@@ -9,41 +9,22 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class structTest extends TestCase {
+class includes_and_typedefsTest extends TestCase {
 
     const EXPECTED = 'TranslationUnitDecl
   declarations: [
-    Decl_NamedDecl_TypeDecl_TagDecl_RecordDecl
-      kind: 1
-      name: "foo"
-      fields: [
-        Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
-          name: "x"
-          type: Type_BuiltinType
-              name: "int"
-          initializer: null
-        Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
-          name: "y"
-          type: Type_BuiltinType
-              name: "int"
-          initializer: null
-        Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
-          name: "z"
-          type: Type_BuiltinType
-              name: "float"
-          initializer: null
-      ]
     Decl_NamedDecl_TypeDecl_TypedefNameDecl_TypedefDecl
-      name: "foo"
+      name: "TEST"
       type: Type_BuiltinType
           name: "int"
     Decl_NamedDecl_TypeDecl_TypedefNameDecl_TypedefDecl
-      name: "bar"
-      type: Type_TagType_RecordType
-          decl: Decl_NamedDecl_TypeDecl_TagDecl_RecordDecl
-              kind: 1
-              name: "foo"
-              fields: null
+      name: "A"
+      type: Type_BuiltinType
+          name: "int"
+    Decl_NamedDecl_TypeDecl_TypedefNameDecl_TypedefDecl
+      name: "D"
+      type: Type_BuiltinType
+          name: "int"
   ]';
 
     protected CParser $parser;
@@ -57,10 +38,10 @@ class structTest extends TestCase {
     }
 
     /**
-     * @textdox Test basic parsing of structs
+     * @textdox Test basic includes and typedefs
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/structTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/includes_and_typedefsTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

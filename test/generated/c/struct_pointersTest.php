@@ -23,6 +23,7 @@ struct B {
     public function setUp(): void {
         $this->parser = new CParser;
         $this->parser->addSearchPath(__DIR__);
+        $this->parser->addSearchPath(__DIR__ . '/../../include');
         $this->printer = new C;
     }
 

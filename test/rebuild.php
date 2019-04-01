@@ -74,6 +74,15 @@ function compileTest(string $targetFile, string $namespace, string $class, array
     $parts = explode('/', $targetFile);
     $relativeTarget = array_pop($parts);
 
+
+    $searchParts = explode('/', str_replace(__DIR__ .  '/', '', $targetFile));
+    array_pop($searchParts);
+    $searchPath = '/';
+    foreach ($searchParts as $relative) {
+        $searchPath .= '../';
+    }
+    $searchPath .= 'include';
+
     $expected = '';
     $assert = '';
     if (isset($test[3]['EXPECT'])) {
@@ -104,6 +113,7 @@ class ' . $class . ' extends TestCase {
     public function setUp(): void {
         $this->parser = new CParser;
         $this->parser->addSearchPath(__DIR__);
+        $this->parser->addSearchPath(__DIR__ . ' . var_export($searchPath, true) . ');
         $this->printer = new ' . ($isDump ? 'Dumper' : 'C') . ';
     }
 
