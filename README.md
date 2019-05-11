@@ -20,7 +20,7 @@ If you need to set a pre-processor define, you can use a context;
 ```php
 $parser = new PHPCParser\CParser;
 
-$context = new PHPCParser\PreProcessor\Context;
+$context = new PHPCParser\Context;
 // #define A 42
 $context->defineInt('A', 42);
 // #define B "testing"
