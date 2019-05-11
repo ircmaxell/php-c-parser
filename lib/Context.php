@@ -137,7 +137,7 @@ class Context {
             switch ($expr->type) {
                 case Token::IDENTIFIER:
                     if ($this->isDefined($expr->value)) {
-                        return $this->evaluate(...$this->definitions[$expr->value]);
+                        return $this->evaluate($this->definitions[$expr->value]);
                     }
                     return new Token(Token::NUMBER, '0', 'computed');
             }
