@@ -32,7 +32,7 @@ $context->defineIdentifier('C', 'testing');
 $ast = $parser->parse('path/to/file', $context);
 ```
 
-And that's all there is to it (until it is workting that is...)...
+And that's all there is to it (until it is working that is...)...
 
 ## Generating AST from clang
 
