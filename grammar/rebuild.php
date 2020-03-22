@@ -27,7 +27,7 @@ $grammarCode = resolveNodes($grammarCode);
 $grammarCode = resolveMacros($grammarCode);
 $grammarCode = resolveStackAccess($grammarCode);
 
-$debufFile = null;
+$debugFile = null;
 // $debugFile = fopen(__DIR__ . '/y.phpyacc.out', 'w');
 
 $generator->generate(
