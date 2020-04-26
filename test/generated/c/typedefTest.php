@@ -11,7 +11,9 @@ use PHPUnit\Framework\TestCase;
  */
 class typedefTest extends TestCase {
 
-    const EXPECTED = 'typedef void * foo;';
+    const EXPECTED = 'typedef void *foo;
+typedef unsigned char bar[23];
+typedef long baz[][];';
 
     protected CParser $parser;
     protected Printer $printer;
