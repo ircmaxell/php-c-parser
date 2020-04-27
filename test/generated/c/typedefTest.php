@@ -13,7 +13,11 @@ class typedefTest extends TestCase {
 
     const EXPECTED = 'typedef void *foo;
 typedef unsigned char bar[23];
-typedef long baz[][];';
+typedef long baz[][];
+typedef enum qux {
+  QUUX,
+  CORGE,
+} grault;';
 
     protected CParser $parser;
     protected Printer $printer;

@@ -13,7 +13,10 @@ class varsTest extends TestCase {
 
     const EXPECTED = 'extern int foo;
 int bar;
-int baz[];';
+int baz[][];
+char **qux;
+int *quux;
+int corge;';
 
     protected CParser $parser;
     protected Printer $printer;

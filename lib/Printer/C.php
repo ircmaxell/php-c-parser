@@ -51,10 +51,7 @@ class C implements Printer
 
     protected function printDecl(Decl $decl, int $level): string {
         if ($decl instanceof Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl) {
-            if ($this->isFunction($decl->type)) {
-                return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
-            }
-            return 'typedef ' . $this->printType($decl->type, null, $level) . ' ' . $decl->name;
+            return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl) {
             $result = $this->printType($decl->type, $decl->name, $level);
@@ -125,7 +122,7 @@ class C implements Printer
                 $type = $type->parent;
             }
             $return .= $this->printType($type->return, null, $level);
-            $return .= ' ' . $decl->name . '(';
+            $return .= $decl->name . '(';
             $next = '';
             foreach ($type->params as $idx => $param) {
                 $return .= $next . $this->printType($param, $type->paramNames[$idx], $level);
@@ -157,19 +154,12 @@ class C implements Printer
         Type\AttributedType::KIND_AUTO => 'auto',
         Type\AttributedType::KIND_REGISTER => 'register',
         Type\AttributedType::KIND_CONST => 'const',
-        Type\AttributedType::KIND_RESTRICT => 'restrict', 
-        Type\AttributedType::KIND_VOLATILE => 'volatile', 
+        Type\AttributedType::KIND_RESTRICT => 'restrict',
+        Type\AttributedType::KIND_VOLATILE => 'volatile',
         Type\AttributedType::KIND_ATOMIC => 'atomic',
         Type\AttributedType::KIND_INLINE => 'inline',
         Type\AttributedType::KIND_NORETURN => 'noreturn',
     ];
-
-    protected function isFunction(Type $type): bool {
-        if ($type instanceof Type\FunctionType\FunctionProtoType) {
-            return true;
-        }
-        return $this->isFunctionPointer($type);
-    }
 
     protected function isFunctionPointer(Type $type): bool {
         if (!$type instanceof Type\PointerType) {
@@ -186,7 +176,7 @@ class C implements Printer
 
     protected function printType(Type $type, ?string $name, int $level): string {
         if ($type instanceof Type\BuiltinType || $type instanceof Type\TypedefType) {
-            return $type->name . ($name !== null ? ' ' . $name : '');
+            return $type->name . ($name !== null ? ' ' . $name : ' ');
         }
         if ($type instanceof Type\TagType\RecordType) {
             return $this->printDecl($type->decl, $level) . ($name !== null ? ' ' . $name : '') ;

@@ -4,10 +4,15 @@ Test basic parsing of vars
 
 extern int foo;
 int bar;
-int baz[];
+int baz[][];
+char** qux;
+int* quux, corge;
 
 --EXPECT--
 
 extern int foo;
 int bar;
-int baz[];
+int baz[][];
+char **qux;
+int *quux;
+int corge;
