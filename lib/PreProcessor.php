@@ -225,7 +225,7 @@ class PreProcessor {
     }
 
     private function findHeaderFile(string $header, string $contextDir, string $contextFile): string {
-        if ($header[0] === '/') {
+        if ($header[0] === '/' || ($header[1] === ':' && $header[2] === '\\')) {
             if (file_exists($header)) {
                 return $header;
             }
