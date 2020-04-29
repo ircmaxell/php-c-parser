@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 namespace PHPCParser\Printer;
 
-use PHPCParser\Printer;
 use PHPCParser\Node;
+use PHPCParser\Node\Decl;
+use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl;
+use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl;
 use PHPCParser\Node\Stmt;
 use PHPCParser\Node\Stmt\ValueStmt\Expr;
-use PHPCParser\Node\Decl;
-use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl;
-use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl;
-use PHPCParser\Node\Type;
 use PHPCParser\Node\TranslationUnitDecl;
+use PHPCParser\Node\Type;
+use PHPCParser\Printer;
 
 
 class C implements Printer
@@ -207,8 +207,7 @@ class C implements Printer
         }
         if ($this->isFunctionPointer($type)) {
             $func = $type->parent->parent;
-            // function pointer
-            $result = $this->printType($func->return, null, $level) . '(*' . $name . ')(';
+            $result = '(*' . $name . ')(';
             $next = '';
             foreach ($func->params as $idx => $param) {
                 $result .= $next . $this->printType($param, $func->paramNames[$idx], $level);
@@ -217,14 +216,15 @@ class C implements Printer
             if ($func->isVariadic) {
                 $result .= $next . '...';
             }
-            return $result . ')';
+            $result .= ')';
+            return $this->printType($func->return, $result, $level);
         }
         if ($type instanceof Type\PointerType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', '*' . $name, $subType);
         }
         if ($type instanceof Type\ParenType) {
-            return '(' . $this->printType($type->parent, $name, $level) . ')';
+            return $this->printType($type->parent, '(' . $name . ')', $level);
         }
         if ($type instanceof Type\ArrayType\IncompleteArrayType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
@@ -232,11 +232,10 @@ class C implements Printer
         }
         if ($type instanceof Type\ArrayType\ConstantArrayType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
-            return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']', $subType);
+            return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']' , $subType);
         }
         
         var_dump($type);
-
     }
 
     const BINARYOPERATOR_MAP = [

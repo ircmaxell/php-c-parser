@@ -17,7 +17,9 @@ typedef long baz[][];
 typedef enum qux {
   QUUX,
   CORGE,
-} grault;';
+} grault;
+typedef char *(*(waldos))[5];
+typedef char *(*(**hairy[][8])())[];';
 
     protected CParser $parser;
     protected Printer $printer;
