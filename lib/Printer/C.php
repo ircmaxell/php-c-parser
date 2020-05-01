@@ -125,7 +125,7 @@ class C implements Printer
             $return .= $decl->name . '(';
             $next = '';
             foreach ($type->params as $idx => $param) {
-                $return .= $next . $this->printType($param, $type->paramNames[$idx], $level);
+                $return .= $next . trim($this->printType($param, $type->paramNames[$idx], $level));
                 $next = ', ';
             }
             if ($type->isVariadic) {
@@ -197,7 +197,7 @@ class C implements Printer
             $result = $this->printType($type->return, $name, $level) . '(';
             $next = '';
             foreach ($type->params as $idx => $param) {
-                $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
+                $result .= $next . trim($this->printType($param, $type->paramNames[$idx], $level));
                 $next = ', ';
             }
             if ($type->isVariadic) {
@@ -210,7 +210,7 @@ class C implements Printer
             $result = '(*' . $name . ')(';
             $next = '';
             foreach ($func->params as $idx => $param) {
-                $result .= $next . $this->printType($param, $func->paramNames[$idx], $level);
+                $result .= $next . trim($this->printType($param, $func->paramNames[$idx], $level));
                 $next = ', ';
             }
             if ($func->isVariadic) {
