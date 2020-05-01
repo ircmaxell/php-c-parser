@@ -107,35 +107,35 @@ class C implements Printer
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl) {
             $type = $decl->type;
-            $return = '';
+            $attribute = '';
             while ($type instanceof Type\AttributedType) {
                 switch ($type->kind) {
                     case Type\AttributedType::KIND_STATIC:
-                        $return .= 'static ';
+                        $attribute .= 'static ';
                         break;
                     case Type\AttributedType::KIND_INLINE:
-                        $return .= 'inline ';
+                        $attribute .= 'inline ';
                         break;
                     default:
                         throw new \LogicException('Unknown function attributed type qualifier: ' . $type->kind);
                 }
                 $type = $type->parent;
             }
-            $return .= $this->printType($type->return, null, $level);
-            $return .= $decl->name . '(';
+            $result = $decl->name . '(';
             $next = '';
             foreach ($type->params as $idx => $param) {
-                $return .= $next . trim($this->printType($param, $type->paramNames[$idx], $level));
+                $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
                 $next = ', ';
             }
             if ($type->isVariadic) {
-                $return .= $next . '...';
+                $result .= $next . '...';
             }
-            $return .= ')';
+            $result .= ')';
             if ($decl->stmts !== null) {
-                $return .= $this->printCompoundStmt($decl->stmts, $level);
+                $result .= $this->printCompoundStmt($decl->stmts, $level);
             }
-            return $return;
+            $subType = $this->printType($type->return, '__NAME_PLACEHOLDER__', $level);
+            return $attribute . str_replace('__NAME_PLACEHOLDER__', $result, $subType);
         }
         var_dump($decl);
     }
@@ -176,7 +176,7 @@ class C implements Printer
 
     protected function printType(Type $type, ?string $name, int $level): string {
         if ($type instanceof Type\BuiltinType || $type instanceof Type\TypedefType) {
-            return $type->name . ($name !== null ? ' ' . $name : ' ');
+            return $type->name . ($name !== null ? ' ' . $name : '');
         }
         if ($type instanceof Type\TagType\RecordType) {
             return $this->printDecl($type->decl, $level) . ($name !== null ? ' ' . $name : '') ;
@@ -197,7 +197,7 @@ class C implements Printer
             $result = $this->printType($type->return, $name, $level) . '(';
             $next = '';
             foreach ($type->params as $idx => $param) {
-                $result .= $next . trim($this->printType($param, $type->paramNames[$idx], $level));
+                $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
                 $next = ', ';
             }
             if ($type->isVariadic) {
@@ -210,14 +210,15 @@ class C implements Printer
             $result = '(*' . $name . ')(';
             $next = '';
             foreach ($func->params as $idx => $param) {
-                $result .= $next . trim($this->printType($param, $func->paramNames[$idx], $level));
+                $result .= $next . $this->printType($param, $func->paramNames[$idx], $level);
                 $next = ', ';
             }
             if ($func->isVariadic) {
                 $result .= $next . '...';
             }
             $result .= ')';
-            return $this->printType($func->return, $result, $level);
+            $subType = $this->printType($func->return, '__NAME_PLACEHOLDER__', $level);
+            return str_replace('__NAME_PLACEHOLDER__', $result, $subType);
         }
         if ($type instanceof Type\PointerType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
@@ -234,7 +235,7 @@ class C implements Printer
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']' , $subType);
         }
-        
+
         var_dump($type);
     }
 
