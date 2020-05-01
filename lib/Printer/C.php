@@ -233,9 +233,8 @@ class C implements Printer
         }
         if ($type instanceof Type\ArrayType\ConstantArrayType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
-            return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']' , $subType);
+            return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']', $subType);
         }
-
         var_dump($type);
     }
 
