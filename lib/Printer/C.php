@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 namespace PHPCParser\Printer;
 
-use PHPCParser\Printer;
 use PHPCParser\Node;
+use PHPCParser\Node\Decl;
+use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl;
+use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl;
 use PHPCParser\Node\Stmt;
 use PHPCParser\Node\Stmt\ValueStmt\Expr;
-use PHPCParser\Node\Decl;
-use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl;
-use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TagDecl\EnumDecl;
-use PHPCParser\Node\Type;
 use PHPCParser\Node\TranslationUnitDecl;
+use PHPCParser\Node\Type;
+use PHPCParser\Printer;
 
 
 class C implements Printer
@@ -51,10 +51,7 @@ class C implements Printer
 
     protected function printDecl(Decl $decl, int $level): string {
         if ($decl instanceof Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl) {
-            if ($this->isFunction($decl->type)) {
-                return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
-            }
-            return 'typedef ' . $this->printType($decl->type, null, $level) . ' ' . $decl->name;
+            return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl) {
             $result = $this->printType($decl->type, $decl->name, $level);
@@ -110,35 +107,35 @@ class C implements Printer
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl) {
             $type = $decl->type;
-            $return = '';
+            $attribute = '';
             while ($type instanceof Type\AttributedType) {
                 switch ($type->kind) {
                     case Type\AttributedType::KIND_STATIC:
-                        $return .= 'static ';
+                        $attribute .= 'static ';
                         break;
                     case Type\AttributedType::KIND_INLINE:
-                        $return .= 'inline ';
+                        $attribute .= 'inline ';
                         break;
                     default:
                         throw new \LogicException('Unknown function attributed type qualifier: ' . $type->kind);
                 }
                 $type = $type->parent;
             }
-            $return .= $this->printType($type->return, null, $level);
-            $return .= ' ' . $decl->name . '(';
+            $result = $decl->name . '(';
             $next = '';
             foreach ($type->params as $idx => $param) {
-                $return .= $next . $this->printType($param, $type->paramNames[$idx], $level);
+                $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
                 $next = ', ';
             }
             if ($type->isVariadic) {
-                $return .= $next . '...';
+                $result .= $next . '...';
             }
-            $return .= ')';
+            $result .= ')';
             if ($decl->stmts !== null) {
-                $return .= $this->printCompoundStmt($decl->stmts, $level);
+                $result .= $this->printCompoundStmt($decl->stmts, $level);
             }
-            return $return;
+            $subType = $this->printType($type->return, '__NAME_PLACEHOLDER__', $level);
+            return $attribute . str_replace('__NAME_PLACEHOLDER__', $result, $subType);
         }
         var_dump($decl);
     }
@@ -157,19 +154,12 @@ class C implements Printer
         Type\AttributedType::KIND_AUTO => 'auto',
         Type\AttributedType::KIND_REGISTER => 'register',
         Type\AttributedType::KIND_CONST => 'const',
-        Type\AttributedType::KIND_RESTRICT => 'restrict', 
-        Type\AttributedType::KIND_VOLATILE => 'volatile', 
+        Type\AttributedType::KIND_RESTRICT => 'restrict',
+        Type\AttributedType::KIND_VOLATILE => 'volatile',
         Type\AttributedType::KIND_ATOMIC => 'atomic',
         Type\AttributedType::KIND_INLINE => 'inline',
         Type\AttributedType::KIND_NORETURN => 'noreturn',
     ];
-
-    protected function isFunction(Type $type): bool {
-        if ($type instanceof Type\FunctionType\FunctionProtoType) {
-            return true;
-        }
-        return $this->isFunctionPointer($type);
-    }
 
     protected function isFunctionPointer(Type $type): bool {
         if (!$type instanceof Type\PointerType) {
@@ -217,8 +207,7 @@ class C implements Printer
         }
         if ($this->isFunctionPointer($type)) {
             $func = $type->parent->parent;
-            // function pointer
-            $result = $this->printType($func->return, null, $level) . '(*' . $name . ')(';
+            $result = '(*' . $name . ')(';
             $next = '';
             foreach ($func->params as $idx => $param) {
                 $result .= $next . $this->printType($param, $func->paramNames[$idx], $level);
@@ -227,14 +216,16 @@ class C implements Printer
             if ($func->isVariadic) {
                 $result .= $next . '...';
             }
-            return $result . ')';
+            $result .= ')';
+            $subType = $this->printType($func->return, '__NAME_PLACEHOLDER__', $level);
+            return str_replace('__NAME_PLACEHOLDER__', $result, $subType);
         }
         if ($type instanceof Type\PointerType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', '*' . $name, $subType);
         }
         if ($type instanceof Type\ParenType) {
-            return '(' . $this->printType($type->parent, $name, $level) . ')';
+            return $this->printType($type->parent, '(' . $name . ')', $level);
         }
         if ($type instanceof Type\ArrayType\IncompleteArrayType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
@@ -244,9 +235,7 @@ class C implements Printer
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']', $subType);
         }
-        
         var_dump($type);
-
     }
 
     const BINARYOPERATOR_MAP = [

@@ -9,17 +9,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class typedefTest extends TestCase {
+class functionsTest extends TestCase {
 
-    const EXPECTED = 'typedef void *foo;
-typedef unsigned char bar[23];
-typedef long baz[][];
-typedef enum qux {
-  QUUX,
-  CORGE,
-} grault;
-typedef char *(*(waldos))[5];
-typedef char *(*(**hairy[][8])())[];';
+    const EXPECTED = 'extern char **bar(char *arg1, int *arg2);
+static void foobar(void);';
 
     protected CParser $parser;
     protected Printer $printer;
@@ -32,10 +25,10 @@ typedef char *(*(**hairy[][8])())[];';
     }
 
     /**
-     * @textdox Test basic parsing of vars
+     * @textdox Test basic parsing of functions
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/typedefTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/functionsTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

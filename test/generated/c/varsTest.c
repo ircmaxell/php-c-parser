@@ -1,5 +1,7 @@
 
 extern int foo;
 int bar;
-int baz[];
+int baz[][];
+char** qux;
+int* quux, corge;
 
