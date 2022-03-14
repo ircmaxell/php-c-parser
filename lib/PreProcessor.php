@@ -105,6 +105,9 @@ class PreProcessor {
                     case 'endif':
                         // ignore
                         break;
+                    case 'warning':
+                        // ignore
+                        break;
                     case 'error':
                         var_dump($this->context);
                         $this->debug($directive);
