@@ -50,6 +50,10 @@ class PreProcessor {
                         $tokens = $this->resolveInclude($line, $directive->file);
                         $lines = array_merge($tokens, $lines);
                         break;
+                    case 'include_next':
+                        $tokens = $this->resolveInclude($line, $directive->file, true);
+                        $lines = array_merge($tokens, $lines);
+                        break;
                     case 'define':
                         if (empty($line)) {
                             throw new \LogicException("#define must have a name");
@@ -113,6 +117,7 @@ class PreProcessor {
                         $this->debug($directive);
                         throw new \LogicException('We reached an error preprocessor token:');
                     default:
+                        var_dump($line);
                         var_dump($directive->value);
                         throw new \LogicException("Unknown directive found {$directive->value}");
                 }
@@ -187,15 +192,15 @@ class PreProcessor {
         return [];
     }
 
-    private function findAndParse(string $header, string $contextDir, string $contextFile): array {
+    private function findAndParse(string $header, string $contextDir, string $contextFile, bool $next = false): array {
         $contextDir = rtrim($contextDir, '/');
-        $file = $this->findHeaderFile($header, $contextDir, $contextFile);
+        $file = $this->findHeaderFile($header, $contextDir, $contextFile, $next);
         $code = file_get_contents($file);
         $lines = $this->parser->parse($file, $code);
         return $lines;
     }
 
-    private function resolveInclude(?Token $arg, string $contextFile): array {
+    private function resolveInclude(?Token $arg, string $contextFile, bool $next = false): array {
         $contextDir = dirname($contextFile);
         if (empty($arg)) {
             throw new \LogicException("Empty include declaration");
@@ -204,9 +209,9 @@ class PreProcessor {
         if ($type->type === Token::LITERAL) {
             $file = $type->value;
             if (!empty($args)) {
-                throw new \LogicException("extra tokens in #include directive");
+                throw new \LogicException("extra tokens in #include" . ($next ? "_next" : "") . " directive");
             }
-            return $this->findAndParse($file, $contextDir, $contextFile);
+            return $this->findAndParse($file, $contextDir, $contextFile, $next);
         } elseif ($type->type === Token::PUNCTUATOR && $type->value === '<' && !empty($arg->next)) {
             // handle <> include:
             $file = '';
@@ -218,37 +223,18 @@ class PreProcessor {
                 $file .= $arg->value;
             }
             if (!empty($args)) {
-                throw new \LogicException("extra tokens in #include directive");
+                throw new \LogicException("extra tokens in #include" . ($next ? "_next" : "") . " directive");
             }
             // always a system import
-            return $this->findAndParse($file, $contextDir, $contextFile);
+            return $this->findAndParse($file, $contextDir, $contextFile, $next);
         }
         var_dump($type, $arg);
         throw new \LogicException("Illegal include directive");
     }
 
-    private function findHeaderFile(string $header, string $contextDir, string $contextFile): string {
-        if ($header[0] === '/' || ($header[1] === ':' && $header[2] === '\\')) {
-            if (file_exists($header)) {
-                return $header;
-            }
-        } else {
-            if ($contextDir) {
-                $dir = $contextDir;
-                while (!empty($dir) && $dir !== '/') {
-                    $file = "$dir/$header";
-                    if (file_exists($file)) {
-                        return $file;
-                    }
-                    $dir = dirname($dir);
-                }
-            }
-            foreach ($this->context->headerSearchPaths as $path) {
-                $test = $path . '/' . $header;
-                if (file_exists($test)) {
-                    return $test;
-                }
-            }
+    private function findHeaderFile(string $header, string $contextDir, string $contextFile, bool $next): string {
+        if ($headerFile = $this->context->findHeaderFile($header, $contextDir, $contextFile, $next)) {
+            return $headerFile;
         }
         var_dump($this->context->headerSearchPaths);
         throw new \LogicException("Could not find header file: $header given context $contextDir (called from $contextFile)");
@@ -256,6 +242,9 @@ class PreProcessor {
 
     private function debug(?Token $token): void {
         echo "T: ";
+        if ($token) {
+            echo "@{$token->file} :";
+        }
         while ($token !== null) {
             echo $token->value . ' ';
             $token = $token->next;
@@ -263,7 +252,7 @@ class PreProcessor {
         echo "\n";
     }
 
-    
+
     private function prepareAndDoCall(string $identifier, array $rawargs): ?Token {
         $args = [];
         $first = null;
@@ -313,7 +302,7 @@ restart:
                         $this->callStack = new CallStack($expr->value, $this->callStack);
                         $result = $this->callStack->currentArg;
                         goto next;
-                    } 
+                    }
                     // It's not a call, so treat it literally
                     $result = $result->next = new Token($expr->type, $expr->value, $expr->file);
                     goto next;
