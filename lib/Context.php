@@ -427,6 +427,8 @@ result:
                     throw new \LogicException("Base mismatch for {$str}, found $chr for $idx");
                 }
                 $result = ($result * $base) + $chr;
+            } elseif ($str[$idx] === 'U') {
+                // unsigned number, let's not touch it
             } elseif ($str[$idx] === 'L') {
                 // indicates number is a long, return as is
                 if ($idx + 1 !== $length) {
