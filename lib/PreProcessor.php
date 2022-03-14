@@ -109,11 +109,24 @@ class PreProcessor {
                     case 'endif':
                         // ignore
                         break;
+                    case 'pragma':
+                        if (empty($line)) {
+                            throw new \LogicException("At least one declaration is required for pragma");
+                        }
+                        $pragmaMode = $line;
+                        if ($pragmaMode->value === "once") {
+                            if (Token::skipWhitespace($pragmaMode->next)) {
+                                throw new \LogicException("pragma once has no further arguments");
+                            }
+                            $this->headers[$pragmaMode->file] = true;
+                        }
+                        break;
                     case 'warning':
                         // ignore
                         break;
                     case 'error':
-                        var_dump($this->context);
+                        //var_dump($this->context);
+                        //var_dump(array_keys($this->context->getDefines()));
                         $this->debug($directive);
                         throw new \LogicException('We reached an error preprocessor token:');
                     default:
@@ -178,6 +191,7 @@ class PreProcessor {
                             return $lines;
                         case 'define':
                         case 'include':
+                        case 'pragma': // there are no special pragmas supposed to be in #if's
                         case 'undef':
                         case 'error':
                         case 'warning':
@@ -195,6 +209,10 @@ class PreProcessor {
     private function findAndParse(string $header, string $contextDir, string $contextFile, bool $next = false): array {
         $contextDir = rtrim($contextDir, '/');
         $file = $this->findHeaderFile($header, $contextDir, $contextFile, $next);
+        if (($this->headers[$file] ?? false) === true) { // has pragma once
+            return [];
+        }
+        $this->headers[$file] = false;
         $code = file_get_contents($file);
         $lines = $this->parser->parse($file, $code);
         return $lines;
@@ -235,7 +253,7 @@ class PreProcessor {
     private function findHeaderFile(string $header, string $contextDir, string $contextFile, bool $next): string {
         if ($headerFile = $this->context->findHeaderFile($header, $contextDir, $contextFile, $next)) {
             return $headerFile;
-        }
+        } 
         var_dump($this->context->headerSearchPaths);
         throw new \LogicException("Could not find header file: $header given context $contextDir (called from $contextFile)");
     }
@@ -252,7 +270,7 @@ class PreProcessor {
         echo "\n";
     }
 
-
+    
     private function prepareAndDoCall(string $identifier, array $rawargs): ?Token {
         $args = [];
         $first = null;
@@ -302,7 +320,7 @@ restart:
                         $this->callStack = new CallStack($expr->value, $this->callStack);
                         $result = $this->callStack->currentArg;
                         goto next;
-                    }
+                    } 
                     // It's not a call, so treat it literally
                     $result = $result->next = new Token($expr->type, $expr->value, $expr->file);
                     goto next;
