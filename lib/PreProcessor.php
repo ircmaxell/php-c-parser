@@ -104,7 +104,7 @@ class PreProcessor {
                         break;
                     case 'else':
                     case 'elif':
-                        $lines = $this->skipIf($lines);
+                        $lines = $this->skipIf($lines, true);
                         break;
                     case 'endif':
                         // ignore
