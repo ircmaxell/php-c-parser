@@ -454,7 +454,28 @@ result:
         $argIdx = 0;
         if ($token->value === '(') {
             $token = Token::skipWhitespace($token->next);
+            $isVariadic = false;
             while ($token !== null && $token->value !== ')') {
+                if ($isVariadic) {
+                    throw new \LogicException('Unexpected token found, expecting ) after ... found ' . $token->value);
+                }
+                if ($token->type === Token::PUNCTUATOR && $token->value === "...") {
+                    $isVariadic = true;
+                    if (isset($args[$argIdx])) {
+                        $argMap["__VA_ARGS__"] = $variadic = $args[$argIdx++];
+                        while (isset($args[$argIdx])) {
+                            while ($variadic->next) {
+                                $variadic = $variadic->next;
+                            }
+                            $variadic->next = $args[$argIdx++];
+                        }
+                    } else {
+                        $argMap["__VA_ARGS__"] = new Token(Token::OTHER, '', 'computed');
+                    }
+                    $token = Token::skipWhitespace($token->next);
+                    continue;
+                }
+
                 if ($token->type !== Token::IDENTIFIER) {
                     throw new \LogicException('Unexpected argument found, expecting IDENTIFIER found ' . $token->value);
                 } elseif (!array_key_exists($argIdx, $args)) {
@@ -478,6 +499,16 @@ result:
         // Copy token stream
         $first = $newToken = new Token(0, '', 'internal');
         while ($token !== null) {
+            // handle , ##__VA_ARGS__
+            if ($token->type === Token::PUNCTUATOR && $token->value === ',') {
+                $nextToken = Token::skipWhitespace($token);
+                if ($nextToken->type === Token::PUNCTUATOR && $token->value === '##') {
+                    if (\count($argMap) > $argIdx) {
+                        $newToken = $newToken->next = new Token($token->type, $token->value, $token->file);
+                    }
+                    $token = Token::skipWhitespace($nextToken);
+                }
+            }
             if ($token->type === Token::IDENTIFIER && array_key_exists($token->value, $argMap)) {
                 $arg = $argMap[$token->value];
                 $toAdd = $toAddNext = new Token(Token::OTHER, '', 'computed');
