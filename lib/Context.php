@@ -44,6 +44,38 @@ class Context {
         }
     }
 
+    public function findHeaderFile(string $header, string $contextDir, string $contextFile, bool $next): ?string {
+        if ($header[0] === '/' || ($header[1] === ':' && $header[2] === '\\')) {
+            if (file_exists($header)) {
+                return $header;
+            }
+        } else {
+            if ($contextDir && !$next) {
+                $dir = $contextDir;
+                while (!empty($dir) && $dir !== '/') {
+                    $file = "$dir/$header";
+                    if (file_exists($file)) {
+                        return $file;
+                    }
+                    $dir = dirname($dir);
+                }
+            }
+            foreach ($this->headerSearchPaths as $path) {
+                if ($next) {
+                    if ($contextDir === $path) {
+                        $next = false;
+                    }
+                    break;
+                }
+                $test = $path . '/' . $header;
+                if (file_exists($test)) {
+                    return $test;
+                }
+            }
+        }
+        return null;
+    }
+
     public function getDefines(): array {
         return $this->definitions;
     }
@@ -142,7 +174,7 @@ class Context {
                     return new Token(Token::NUMBER, '0', 'computed');
             }
             return $expr;
-        } 
+        }
         list ($result, $expr) = $this->evaluateInternal($expr);
         if ($expr !== null) {
             throw new \LogicException('Syntax error: unknown trailing expr: ' . $expr->value);
@@ -187,6 +219,38 @@ restart:
             } else {
                 throw new \LogicException("Syntax Error for #defined expression, expecting ( or IDENTIFIER, found " . $expr->value);
             }
+        } elseif ($expr->type === Token::IDENTIFIER && $expr->value === '__has_include') {
+            $expr = Token::skipWhitespace($expr->next);
+            if ($expr === null) {
+                throw new \LogicException("Syntax Error for __has_include() expression: not enough tokens");
+            }
+            if ($expr->type === Token::PUNCTUATOR && $expr->value === '(') {
+                $expr = Token::skipWhitespace($expr->next);
+                if ($expr->type === Token::LITERAL) {
+                    $file = $expr->value;
+                } elseif ($expr->type === Token::PUNCTUATOR && $expr->value === '<') {
+                    // handle <> include:
+                    $file = '';
+                    while (!empty($expr->next)) {
+                        $expr = $expr->next;
+                        if ($expr->type === Token::PUNCTUATOR && $expr->value === '>') {
+                            break;
+                        }
+                        $file .= $expr->value;
+                    }
+                } else {
+                    throw new \LogicException("Syntax Error for __has_include() expression, expecting < or LITERAL, found " . $expr->value);
+                }
+                $expr = Token::skipWhitespace($expr->next);
+                if ($expr === null || $expr->type !== Token::PUNCTUATOR && $expr->value !== ')') {
+                    throw new \LogicException("Syntax Error for __has_include() expression: ) not found");
+                }
+                $contextDir = dirname($expr->file);
+                $result = new Token(Token::NUMBER, $this->findHeaderFile($file, $contextDir, $expr->file, false) !== null ? '1' : '0', 'computed');
+                $expr = Token::skipWhitespace($expr->next);
+            } else {
+                throw new \LogicException("Syntax Error for #__has_include expression, expecting (, found " . $expr->value);
+            }
         } elseif ($expr->type === Token::IDENTIFIER) {
             $next = Token::skipWhitespace($expr->next);
             if ($next !== null && $next->value === '(') {
@@ -221,6 +285,7 @@ restart:
             $result = new Token(Token::NUMBER, $expr->value, 'computed');
             $expr = Token::skipWhitespace($expr->next);
         } else {
+            var_dump($expr);
             throw new \LogicException('Unknown operator ' . $expr->value);
         }
         if ($negate) {
@@ -362,6 +427,8 @@ result:
                     throw new \LogicException("Base mismatch for {$str}, found $chr for $idx");
                 }
                 $result = ($result * $base) + $chr;
+            } elseif ($str[$idx] === 'U') {
+                // unsigned number, let's not touch it
             } elseif ($str[$idx] === 'L') {
                 // indicates number is a long, return as is
                 if ($idx + 1 !== $length) {
@@ -389,7 +456,28 @@ result:
         $argIdx = 0;
         if ($token->value === '(') {
             $token = Token::skipWhitespace($token->next);
+            $isVariadic = false;
             while ($token !== null && $token->value !== ')') {
+                if ($isVariadic) {
+                    throw new \LogicException('Unexpected token found, expecting ) after ... found ' . $token->value);
+                }
+                if ($token->type === Token::PUNCTUATOR && $token->value === "...") {
+                    $isVariadic = true;
+                    if (isset($args[$argIdx])) {
+                        $argMap["__VA_ARGS__"] = $variadic = $args[$argIdx++];
+                        while (isset($args[$argIdx])) {
+                            while ($variadic->next) {
+                                $variadic = $variadic->next;
+                            }
+                            $variadic->next = $args[$argIdx++];
+                        }
+                    } else {
+                        $argMap["__VA_ARGS__"] = new Token(Token::OTHER, '', 'computed');
+                    }
+                    $token = Token::skipWhitespace($token->next);
+                    continue;
+                }
+
                 if ($token->type !== Token::IDENTIFIER) {
                     throw new \LogicException('Unexpected argument found, expecting IDENTIFIER found ' . $token->value);
                 } elseif (!array_key_exists($argIdx, $args)) {
@@ -413,6 +501,16 @@ result:
         // Copy token stream
         $first = $newToken = new Token(0, '', 'internal');
         while ($token !== null) {
+            // handle , ##__VA_ARGS__
+            if ($token->type === Token::PUNCTUATOR && $token->value === ',') {
+                $nextToken = Token::skipWhitespace($token);
+                if ($nextToken->type === Token::PUNCTUATOR && $token->value === '##') {
+                    if (\count($argMap) > $argIdx) {
+                        $newToken = $newToken->next = new Token($token->type, $token->value, $token->file);
+                    }
+                    $token = Token::skipWhitespace($nextToken);
+                }
+            }
             if ($token->type === Token::IDENTIFIER && array_key_exists($token->value, $argMap)) {
                 $arg = $argMap[$token->value];
                 $toAdd = $toAddNext = new Token(Token::OTHER, '', 'computed');
