@@ -11,6 +11,7 @@ class ReturnStmt extends Stmt
     public ?Expr $result;
 
     public function __construct(?Expr $result, array $attributes = []) {
+        parent::__construct($attributes);
         $this->result = $result;
     }
 

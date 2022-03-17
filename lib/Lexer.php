@@ -223,6 +223,9 @@ emit_single:
     }
 
     private const IDENTIFIER_MAP = [
+        'asm' => Tokens::T_ASM,
+        '__asm' => Tokens::T_ASM,
+        '__asm__' => Tokens::T_ASM,
         'auto' => Tokens::T_AUTO,
         'break' => Tokens::T_BREAK,
         'case' => Tokens::T_CASE,
@@ -258,6 +261,7 @@ emit_single:
         'unsigned' => Tokens::T_UNSIGNED,
         'void' => Tokens::T_VOID,
         'volatile' => Tokens::T_VOLATILE,
+        '__volatile__' => Tokens::T_VOLATILE,
         'while' => Tokens::T_WHILE,
         '_alignas' => Tokens::T_ALIGNAS,
         '_alignof' => Tokens::T_ALIGNOF,

@@ -289,22 +289,26 @@ class C implements Printer
         Expr\UnaryOperator::KIND_POSTDEC => '--',
     ];
 
+    protected function formatString(string $string): string {
+        static $replacements;
+        if (!$replacements) {
+            $replacements = ["\0" => '\0', "\n" => '\n', "\t" => '\t', "\v" => '\v', "\e" => '\e', '??' => '\??', '\\' => '\\\\', '"' => '\"'];
+            for ($i = 1; $i < 0x20; ++$i) {
+                $replacements[\chr($i)] = sprintf('\x%02x', $i);
+            }
+            for ($i = 0x7f; $i <= 0xFF; ++$i) {
+                $replacements[\chr($i)] = sprintf('\x%02x', $i);
+            }
+        }
+        return strtr($string, $replacements);
+    }
+
     protected function printExpr(Expr $expr, int $level): string {
         if ($expr instanceof Expr\IntegerLiteral) {
             return (string) $expr->value;
         }
         if ($expr instanceof Expr\StringLiteral) {
-            static $replacements;
-            if (!$replacements) {
-                $replacements = ["\0" => '\0', "\n" => '\n', "\t" => '\t', "\v" => '\v', "\e" => '\e', '??' => '\??', '\\' => '\\\\', '"' => '\"'];
-                for ($i = 1; $i < 0x20; ++$i) {
-                    $replacements[\chr($i)] = sprintf('\x%02x', $i);
-                }
-                for ($i = 0x7f; $i <= 0xFF; ++$i) {
-                    $replacements[\chr($i)] = sprintf('\x%02x', $i);
-                }
-            }
-            return '"' . strtr($expr->value, $replacements) . '"';
+            return '"' . $this->formatString($expr->value) . '"';
         }
         if ($expr instanceof Expr\BinaryOperator) {
             if (isset(self::BINARYOPERATOR_MAP[$expr->kind])) {
@@ -350,6 +354,21 @@ class C implements Printer
                 $return .= ' ' . $this->printExpr($stmt->result, $level);
             }
             return $return . ';';
+        }
+        if ($stmt instanceof Stmt\AsmStmt) {
+            $asm = '__asm__ ';
+            if ($stmt->modifiers & Stmt\AsmStmt::VOLATILE) {
+                $asm .= 'volatile ';
+            }
+            if ($stmt->modifiers & Stmt\AsmStmt::GOTO) {
+                $asm .= 'goto ';
+            }
+            $asm .= '(' . $this->formatString($stmt->asm) . ' : ';
+            $formatOperand = function ($op) { return $this->formatString($op->clobberMode) . ' (' . $op->variable . ') '; };
+            $asm .= implode(',', array_map($formatOperand, $stmt->outputOperands->operands)) . ': ';
+            $asm .= implode(',', array_map($formatOperand, $stmt->inputOperands->operands)) . ': ';
+            $asm .= implode(', ', array_map([$this, "formatString"], $stmt->registers->registers));
+            return $asm . ');';
         }
         var_dump($stmt);
     }

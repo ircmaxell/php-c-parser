@@ -27,11 +27,13 @@ $grammarCode = resolveNodes($grammarCode);
 $grammarCode = resolveMacros($grammarCode);
 $grammarCode = resolveStackAccess($grammarCode);
 
+$errorFile = null;
+// $errorFile = fopen(__DIR__ . '/y.phpyacc.err', 'w');
 $debugFile = null;
 // $debugFile = fopen(__DIR__ . '/y.phpyacc.out', 'w');
 
 $generator->generate(
-    new Context('grammar.y', $debugFile, true),
+    new Context('grammar.y', $errorFile, $debugFile, true),
     $grammarCode,
     file_get_contents(__DIR__ . '/parser.template.php'),
     __DIR__ . '/../lib/Parser.php'

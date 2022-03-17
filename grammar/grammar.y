@@ -2,7 +2,7 @@
 %expect 2
 
 
-%token  IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL FUNC_NAME SIZEOF
+%token  IDENTIFIER I_CONSTANT F_CONSTANT STRING_LITERAL FUNC_NAME SIZEOF ASM
 %token  PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token  AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token  SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
@@ -459,6 +459,7 @@ statement
     | selection_statement   { $$ = $1; }
     | iteration_statement   { $$ = $1; }
     | jump_statement        { $$ = $1; } 
+    | asm_statement        { $$ = $1; }
     ;
 
 labeled_statement
@@ -528,6 +529,42 @@ function_definition
 declaration_list
     : declaration                   { init($1); }
     | declaration_list declaration  { push($1, $2); }
+    ;
+
+asm_operand_list_non_empty
+    : asm_operand_list_non_empty ',' STRING_LITERAL '(' IDENTIFIER ')'    { $$ = $1; $$->operands[] = Node\Asm\Operand[$3, $5]; }
+    | STRING_LITERAL '(' IDENTIFIER ')'                                   { $$ = Node\Asm\Operands[]; $$->operands[] = Node\Asm\Operand[$1, $3]; }
+    ;
+
+asm_operand_list
+    : asm_operand_list_non_empty    { $$ = $1; }
+    | /* empty */                   { $$ = new Node\Asm\Operands; }
+    ;
+
+asm_register_list_non_empty
+    : asm_register_list_non_empty ',' STRING_LITERAL    { $$ = $1; $$->registers[] = $3; }
+    | STRING_LITERAL                                    { $$ = Node\Asm\Registers[]; $$->registers[] = $1; }
+    ;
+
+asm_register_list
+    : asm_register_list_non_empty   { $$ = $1; }
+    | /* empty */                   { $$ = new Node\Asm\Registers; }
+    ;
+
+asm_extended
+    : STRING_LITERAL                                                                     { $$ = Node\Stmt\AsmStmt[$1, new Node\Asm\Operands, new Node\Asm\Operands, new Node\Asm\Registers]; }
+    | STRING_LITERAL ':' asm_operand_list                                                { $$ = Node\Stmt\AsmStmt[$1, $3, new Node\Asm\Operands, new Node\Asm\Registers]; }
+    | STRING_LITERAL ':' asm_operand_list ':' asm_operand_list                           { $$ = Node\Stmt\AsmStmt[$1, $3, $5, new Node\Asm\Registers]; }
+    | STRING_LITERAL ':' asm_operand_list ':' asm_operand_list ':' asm_register_list     { $$ = Node\Stmt\AsmStmt[$1, $3, $5, $7]; }
+
+asm_modifiers
+    : asm_modifiers VOLATILE        { $$ = $1 | Node\Stmt\AsmStmt::VOLATILE; }
+    | asm_modifiers GOTO            { $$ = $1 | Node\Stmt\AsmStmt::GOTO; }
+    | /* empty */                   { $$ = 0; }
+    ;
+
+asm_statement
+    : ASM asm_modifiers '(' asm_extended ')' ';'  { $$ = $4; $$->modifiers = $2; }
     ;
 
 %%
