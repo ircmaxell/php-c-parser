@@ -232,6 +232,7 @@ emit_single:
         'if' => Tokens::T_IF,
         'inline' => Tokens::T_INLINE,
         '__inline' => Tokens::T_INLINE,
+		'__inline__' => Tokens::T_INLINE,
         'int' => Tokens::T_INT,
         'long' => Tokens::T_LONG,
         'register' => Tokens::T_REGISTER,
