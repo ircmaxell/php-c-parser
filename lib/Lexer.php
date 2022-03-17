@@ -89,6 +89,15 @@ class Lexer
         return [Tokens::T_I_CONSTANT, $number];
     }
 
+    private function extractLiteral(): array {
+        $string = $this->currentToken->value;
+        $this->currentToken = $this->currentToken->next;
+        while ($this->currentToken !== null && $this->currentToken->type === Token::LITERAL) {
+            $string .= $this->currentToken->value;
+            $this->currentToken = $this->currentToken->next;
+        }
+        return [Tokens::T_STRING_LITERAL, $string];
+    }
 
     private function extractPunctuation(): array {
         $value = $this->currentToken->value;
@@ -232,7 +241,7 @@ emit_single:
         'if' => Tokens::T_IF,
         'inline' => Tokens::T_INLINE,
         '__inline' => Tokens::T_INLINE,
-		'__inline__' => Tokens::T_INLINE,
+        '__inline__' => Tokens::T_INLINE,
         'int' => Tokens::T_INT,
         'long' => Tokens::T_LONG,
         'register' => Tokens::T_REGISTER,

@@ -41,7 +41,7 @@ enumeration_constant        /* before it has been defined as such */
     ;
 
 string
-    : STRING_LITERAL        { throw new Error('string_literal not implemented'); }
+    : STRING_LITERAL        { $$ = Node\Stmt\ValueStmt\Expr\StringLiteral[$1]; }
     | FUNC_NAME             { throw new Error('func name not implemented'); }
     ;
 

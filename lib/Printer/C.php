@@ -293,6 +293,19 @@ class C implements Printer
         if ($expr instanceof Expr\IntegerLiteral) {
             return (string) $expr->value;
         }
+        if ($expr instanceof Expr\StringLiteral) {
+            static $replacements;
+            if (!$replacements) {
+                $replacements = ["\0" => '\0', "\n" => '\n', "\t" => '\t', "\v" => '\v', "\e" => '\e', '??' => '\??', '\\' => '\\\\', '"' => '\"'];
+                for ($i = 1; $i < 0x20; ++$i) {
+                    $replacements[\chr($i)] = sprintf('\x%02x', $i);
+                }
+                for ($i = 0x7f; $i <= 0xFF; ++$i) {
+                    $replacements[\chr($i)] = sprintf('\x%02x', $i);
+                }
+            }
+            return '"' . strtr($expr->value, $replacements) . '"';
+        }
         if ($expr instanceof Expr\BinaryOperator) {
             if (isset(self::BINARYOPERATOR_MAP[$expr->kind])) {
                 return '(' . $this->printExpr($expr->left, $level) . ' ' . self::BINARYOPERATOR_MAP[$expr->kind] . ' ' . $this->printExpr($expr->right, $level) . ')';

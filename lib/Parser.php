@@ -802,7 +802,7 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             10 => function ($stackPos) {
-                 throw new Error('string_literal not implemented'); 
+                 $this->semValue = new Node\Stmt\ValueStmt\Expr\StringLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes);
             },
             11 => function ($stackPos) {
                  throw new Error('func name not implemented'); 
