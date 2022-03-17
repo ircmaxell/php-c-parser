@@ -40,6 +40,10 @@ class Scope {
         $this->parent = $parent;
     }
 
+    public function isBuiltinType(string $identifier) {
+        return isset($this->entries[$identifier]);
+    }
+
     public function typedef(string $identifier, Node\Type $type): void {
         $this->entries[$identifier] = Tokens::T_TYPEDEF_NAME;
         $this->types[$identifier] = $type;

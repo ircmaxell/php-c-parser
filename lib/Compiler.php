@@ -124,9 +124,20 @@ restart:
             $first = array_shift($types);
             $types[0] = new Type\BuiltinType($first->name . ' ' . $types[0]->name, $first->getAttributes());
             goto restart;
+        } else {
+            if (!($types[0] instanceof Type\TypedefType && $types[1] instanceof Type\TypedefType)) {
+                var_dump($types);
+                throw new \LogicException("Unexpected typedef");
+            }
+            // this can happen when typedef'ing already existing typedefs or having special typedefs for basic types like "typedef __SIZE_TYPE__ size_t;"
+            // in case the left operand is a primitive type, skip this. Otherwise error out that its a redefinition
+            if ($this->scope->isBuiltinType($types[count($types) - 1]->name)) {
+                return $types[count($types) - 1];
+            }
+
+            var_dump($types);
+            throw new \LogicException("typedef {$types[1]->name} cannot be redefined as {$types[0]->name}");
         }
-        var_dump($types);
-        // Todo
     }
 
     public function compileQualifiedPointer(IR\QualifiedPointer $pointer, Type $type): Type {
