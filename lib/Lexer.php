@@ -226,6 +226,7 @@ emit_single:
         'asm' => Tokens::T_ASM,
         '__asm' => Tokens::T_ASM,
         '__asm__' => Tokens::T_ASM,
+        '__attribute__' => Tokens::T_ATTRIBUTE,
         'auto' => Tokens::T_AUTO,
         'break' => Tokens::T_BREAK,
         'case' => Tokens::T_CASE,

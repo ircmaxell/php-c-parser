@@ -32,6 +32,7 @@ TranslationUnitDecl
               name: "float"
           initializer: null
       ]
+      attributeList: null
     Decl_NamedDecl_TypeDecl_TypedefNameDecl_TypedefDecl
       name: "foo"
       type: Type_BuiltinType
@@ -43,4 +44,5 @@ TranslationUnitDecl
               kind: 1
               name: "foo"
               fields: null
+              attributeList: null
   ]

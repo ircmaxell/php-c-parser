@@ -17,13 +17,13 @@ class Compiler
         $this->scope = $scope;
     }
 
-    public function compileFunction(int $qualifiers, array $types, IR\Declarator $declarator, array $declarations, Stmt\CompoundStmt $stmts, array $attributes = []): array {
+    public function compileFunction(int $qualifiers, array $attributeLists, array $types, IR\Declarator $declarator, array $declarations, Stmt\CompoundStmt $stmts, array $attributes = []): array {
         $type = $this->compileType($types);
         $parts = $this->compileNamedDeclarator($declarator, $type);
         $name = $parts[0];
         $signature = $parts[1];
-        if ($qualifiers !== 0) {
-            $signature = Type\AttributedType::fromDecl($qualifiers, $signature, $attributes);
+        if ($qualifiers !== 0 || $attributeLists) {
+            $signature = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $signature, $attributes);
         }
         if (empty($declarations)) {
             return [new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($name, $signature, $stmts)];
@@ -33,6 +33,7 @@ class Compiler
 
     public function compileExternalDeclaration(IR\Declaration $declaration, array $attributes = []): array {
         $qualifiers = $declaration->qualifiers;
+        $attributeLists = $declaration->attributeLists;
         $isTypedef = false;
         $type = $this->compileType($declaration->types);
 restart:
@@ -42,7 +43,7 @@ restart:
             foreach ($declaration->declarators as $declarator) {
                 $result[] = $this->compileTypedef($declarator, $type, $attributes);;
             }
-        } elseif ($qualifiers === 0 && empty($declaration->declarators)) {
+        } elseif ($qualifiers === 0 && empty($attributeLists) && empty($declaration->declarators)) {
             if ($type instanceof Type\TagType) {
                 if ($type->decl->name !== null) {
                     $this->scope->structdef($type->decl->name, $type->decl);
@@ -50,12 +51,12 @@ restart:
                 return [$type->decl];
             }
             throw new \LogicException('Also not implemented yet');
-        } elseif ($qualifiers === 0) {
+        } elseif ($qualifiers === 0 && empty($attributeLists)) {
             foreach ($declaration->declarators as $initDeclarator) {
                 $result[] = $this->compileInitDeclarator($initDeclarator, $type, $attributes);
             }     
-        } elseif ($qualifiers > 0) {
-            $type = Type\AttributedType::fromDecl($qualifiers, $type, $attributes);
+        } elseif ($qualifiers > 0 || !empty($attributeLists)) {
+            $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
             $qualifiers = 0;
             goto restart;
         } else {
@@ -65,7 +66,7 @@ restart:
         return $result;
     }
 
-    public function compileStructField(int $qualifiers, array $types, ?array $declarators, array $attributes = []): array {
+    public function compileStructField(int $qualifiers, array $attributeLists, array $types, ?array $declarators, array $attributes = []): array {
         $result = [];
         $type = $this->compileType($types);
         if (is_null($declarators)) {
@@ -78,31 +79,33 @@ restart:
         return $result;
     }
 
-    public function compileParamVarDeclaration(int $qualifiers, array $types, IR\Declarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
+    public function compileParamVarDeclaration(int $qualifiers, array $attributeLists, array $types, IR\Declarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
         $type = $this->compileType($types);
         $parts = $this->compileNamedDeclarator($declarator, $type);
-        if ($qualifiers !== 0) {
-            $parts[1] = Type\AttributedType::fromDecl($qualifiers, $parts[1], $attributes);
+        if ($qualifiers !== 0 || $attributeLists) {
+            $parts[1] = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $parts[1], $attributes);
         }
         return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl($parts[0], $parts[1], $attributes);
     }
 
-    public function compileParamAbstractDeclaration(int $qualifiers, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
+    public function compileParamAbstractDeclaration(int $qualifiers, array $attributeLists, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
         $type = $this->compileType($types);
         if ($declarator !== null) {
             $type = $this->compileAbstractDeclarator($declarator, $type);
         }
-        if ($qualifiers !== 0) {
-            $type = Type\AttributedType::fromDecl($qualifiers, $type, $attributes);
+        if ($qualifiers !== 0 || $attributeLists) {
+            $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
         }
         return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl(null, $type, $attributes);
     }
 
-    public function compileTypeReference(int $qualifiers, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Expr\TypeRefExpr {
-        assert($qualifiers === 0);
+    public function compileTypeReference(int $qualifiers, array $attributeLists, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Expr\TypeRefExpr {
         $type = $this->compileType($types);
         if ($declarator !== null) {
             $type = $this->compileAbstractDeclarator($declarator, $type);
+        }
+        if ($qualifiers !== 0 || $attributeLists) {
+            $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
         }
         return new Expr\TypeRefExpr($type);
     }
@@ -144,7 +147,7 @@ restart:
 restart:
         $type = new Type\PointerType($type);
         if ($pointer->qualification > 0) {
-            $type = Type\AttributedType::fromDecl($pointer->qualification, $type);
+            $type = Type\AttributedType::fromDecl($pointer->qualification, $pointer->attributesList, $type);
         }
         if ($pointer->parent !== null) {
             $pointer = $pointer->parent;

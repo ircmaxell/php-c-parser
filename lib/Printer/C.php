@@ -109,15 +109,25 @@ class C implements Printer
             $type = $decl->type;
             $attribute = '';
             while ($type instanceof Type\AttributedType) {
-                switch ($type->kind) {
-                    case Type\AttributedType::KIND_STATIC:
-                        $attribute .= 'static ';
-                        break;
-                    case Type\AttributedType::KIND_INLINE:
-                        $attribute .= 'inline ';
-                        break;
-                    default:
-                        throw new \LogicException('Unknown function attributed type qualifier: ' . $type->kind);
+                if ($type instanceof Type\ExplicitAttributedType) {
+                    switch ($type->kind) {
+                        case Type\ExplicitAttributedType::KIND_STATIC:
+                            $attribute .= 'static ';
+                            break;
+                        case Type\ExplicitAttributedType::KIND_INLINE:
+                            $attribute .= 'inline ';
+                            break;
+                        case Type\ExplicitAttributedType::KIND_ALWAYS_INLINE:
+                            $attribute .= '__attribute__((always_inline)) ';
+                            break;
+                        default:
+                            throw new \LogicException('Unknown function attributed type qualifier: ' . $type->kind);
+                    }
+                } elseif ($type instanceof Type\ArbitraryAttributedType) {
+                    $attr = $type->attribute;
+                    $attribute .= '__attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . ')) ';
+                } else {
+                    throw new \LogicException('Unknown AttributedType: ' . get_class($type));
                 }
                 $type = $type->parent;
             }
@@ -148,17 +158,18 @@ class C implements Printer
     }
 
     const ATTRIBUTED_MAP = [
-        Type\AttributedType::KIND_EXTERN => 'extern',
-        Type\AttributedType::KIND_STATIC => 'static',
-        Type\AttributedType::KIND_THREAD_LOCAL => 'thread_local',
-        Type\AttributedType::KIND_AUTO => 'auto',
-        Type\AttributedType::KIND_REGISTER => 'register',
-        Type\AttributedType::KIND_CONST => 'const',
-        Type\AttributedType::KIND_RESTRICT => 'restrict',
-        Type\AttributedType::KIND_VOLATILE => 'volatile',
-        Type\AttributedType::KIND_ATOMIC => 'atomic',
-        Type\AttributedType::KIND_INLINE => 'inline',
-        Type\AttributedType::KIND_NORETURN => 'noreturn',
+        Type\ExplicitAttributedType::KIND_EXTERN => 'extern',
+        Type\ExplicitAttributedType::KIND_STATIC => 'static',
+        Type\ExplicitAttributedType::KIND_THREAD_LOCAL => 'thread_local',
+        Type\ExplicitAttributedType::KIND_AUTO => 'auto',
+        Type\ExplicitAttributedType::KIND_REGISTER => 'register',
+        Type\ExplicitAttributedType::KIND_CONST => 'const',
+        Type\ExplicitAttributedType::KIND_RESTRICT => 'restrict',
+        Type\ExplicitAttributedType::KIND_VOLATILE => 'volatile',
+        Type\ExplicitAttributedType::KIND_ATOMIC => 'atomic',
+        Type\ExplicitAttributedType::KIND_INLINE => 'inline',
+        Type\ExplicitAttributedType::KIND_NORETURN => 'noreturn',
+        Type\ExplicitAttributedType::KIND_ALWAYS_INLINE => '__attribute__((always_inline))',
     ];
 
     protected function isFunctionPointer(Type $type): bool {
@@ -184,14 +195,18 @@ class C implements Printer
         if ($type instanceof Type\TagType\EnumType) {
             return $this->printDecl($type->decl, $level) . ($name !== null ? ' ' . $name : '');
         }
-        if ($type instanceof Type\AttributedType) {
-            if ($type->kind === Type\AttributedType::KIND_CONST && $this->omitConst) {
+        if ($type instanceof Type\ExplicitAttributedType) {
+            if ($type->kind === Type\ExplicitAttributedType::KIND_CONST && $this->omitConst) {
                 return $this->printType($type->parent, $name, $level);
             }
             if (isset(self::ATTRIBUTED_MAP[$type->kind])) {
                 return self::ATTRIBUTED_MAP[$type->kind] . ' ' . $this->printType($type->parent, $name, $level);
             }
             throw new \LogicException('Unknown attributed type kind: ' . $type->kind);
+        }
+        if ($type instanceof Type\ArbitraryAttributedType) {
+            $attr = $type->attribute;
+            return '__attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . '))' . ' ' . $this->printType($type->parent, $name, $level);
         }
         if ($type instanceof Type\FunctionType\FunctionProtoType) {
             $result = $this->printType($type->return, $name, $level) . '(';

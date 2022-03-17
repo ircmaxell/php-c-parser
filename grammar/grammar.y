@@ -9,7 +9,7 @@
 %token  XOR_ASSIGN OR_ASSIGN
 %token  TYPEDEF_NAME ENUMERATION_CONSTANT
 
-%token  TYPEDEF EXTERN STATIC AUTO REGISTER INLINE
+%token  TYPEDEF EXTERN STATIC AUTO REGISTER INLINE ATTRIBUTE
 %token  CONST RESTRICT VOLATILE
 %token  BOOL CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE VOID
 %token  COMPLEX IMAGINARY 
@@ -193,22 +193,24 @@ constant_expression
     ;
 
 declaration
-    : declaration_specifiers ';'                        { $$ = IR\Declaration[$1[0], $1[1], []]; }
-    | declaration_specifiers init_declarator_list ';'   { $$ = IR\Declaration[$1[0], $1[1], $2]; }
+    : declaration_specifiers ';'                        { $$ = IR\Declaration[$1[0], $1[1], $1[2], []]; }
+    | declaration_specifiers init_declarator_list ';'   { $$ = IR\Declaration[$1[0], $1[1], $1[2], $2]; }
     | static_assert_declaration                         
     ;
 
 declaration_specifiers
     : storage_class_specifier declaration_specifiers    { $$ = $2; $$[0] |= $1; }
-    | storage_class_specifier                           { $$ = [$1, []]; }
-    | type_specifier declaration_specifiers             { $$ = $2; array_unshift($$[1], $1); }
-    | type_specifier                                    { $$ = [0, [$1]]; }
+    | storage_class_specifier                           { $$ = [$1, [], []]; }
+    | type_specifier declaration_specifiers             { $$ = $2; array_unshift($$[2], $1); }
+    | type_specifier                                    { $$ = [0, [], [$1]]; }
     | type_qualifier declaration_specifiers             { $$ = $2; $$[0] |= $1; }
-    | type_qualifier                                    { $$ = [$1, []]; }
+    | type_qualifier                                    { $$ = [$1, [], []]; }
     | function_specifier declaration_specifiers         { $$ = $2; $$[0] |= $1; }
-    | function_specifier                                { $$ = [$1, []]; }
+    | function_specifier                                { $$ = [$1, [], []]; }
     | alignment_specifier declaration_specifiers        { $$ = $2; $$[0] |= $1; }
-    | alignment_specifier                               { $$ = [$1, []]; }
+    | alignment_specifier                               { $$ = [$1, [], []]; }
+    | attribute_specifier declaration_specifiers        { $$ = $2; $$[1][] = $1; }
+    | attribute_specifier                               { $$ = [0, [$1], []]; }
     ;
 
 init_declarator_list
@@ -250,11 +252,11 @@ type_specifier
     ;
 
 struct_or_union_specifier
-    : struct_or_union '{' struct_declaration_list '}'               { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, null, $3]; }
-    | struct_or_union IDENTIFIER '{' struct_declaration_list '}'    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, $4]; }
-    | struct_or_union IDENTIFIER                                    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, null]; }
-    | struct_or_union TYPEDEF_NAME '{' struct_declaration_list '}'    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, $4]; }
-    | struct_or_union TYPEDEF_NAME                                    { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $2, null]; }
+    : struct_or_union optional_attribute_specifier '{' struct_declaration_list '}' optional_attribute_specifier                { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, null, $4, $2 ?? $6]; }
+    | struct_or_union optional_attribute_specifier IDENTIFIER '{' struct_declaration_list '}' optional_attribute_specifier     { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, $5, $2 ?? $7]; }
+    | struct_or_union optional_attribute_specifier IDENTIFIER                                                                  { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, null, $2]; }
+    | struct_or_union optional_attribute_specifier TYPEDEF_NAME '{' struct_declaration_list '}' optional_attribute_specifier   { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, $5, $2 ?? $7]; }
+    | struct_or_union optional_attribute_specifier TYPEDEF_NAME                                                                { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, null, $2]; }
     ;
 
 struct_or_union
@@ -268,16 +270,18 @@ struct_declaration_list
     ;
 
 struct_declaration
-    : specifier_qualifier_list ';'                          { compileStructField[$1[0], $1[1], null]; } /* for anonymous struct/union */
-    | specifier_qualifier_list struct_declarator_list ';'   { compileStructField[$1[0], $1[1], $2]; }
+    : specifier_qualifier_list ';'                          { compileStructField[$1[0], $1[1], $1[2], null]; } /* for anonymous struct/union */
+    | specifier_qualifier_list struct_declarator_list ';'   { compileStructField[$1[0], $1[1], $1[2], $2]; }
     | static_assert_declaration                             
     ;
 
 specifier_qualifier_list                        
-    : type_specifier specifier_qualifier_list           { $$ = $2; array_unshift($$[1], $1); }
-    | type_specifier                                    { $$ = [0, [$1]]; }
+    : type_specifier specifier_qualifier_list           { $$ = $2; array_unshift($$[2], $1); }
+    | type_specifier                                    { $$ = [0, [], [$1]]; }
     | type_qualifier specifier_qualifier_list           { $$ = $2; $$[0] |= $1; }
-    | type_qualifier                                    { $$ = [$1, []]; }                            
+    | type_qualifier                                    { $$ = [$1, [], []]; }
+    | attribute_specifier specifier_qualifier_list      { $$ = $2; $$[1][] = $1; }
+    | attribute_specifier                               { $$ = [0, [$1], []]; }
     ;
 
 struct_declarator_list
@@ -305,8 +309,8 @@ enumerator_list
     ;
 
 enumerator  /* identifiers must be flagged as ENUMERATION_CONSTANT */
-    : enumeration_constant '=' constant_expression      { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, $3]; $this->scope->enumdef($1, $$); }
-    | enumeration_constant                              { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, null]; $this->scope->enumdef($1, $$); }
+    : enumeration_constant optional_attribute_specifier '=' constant_expression      { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, $4, null]; $this->scope->enumdef($1, $$); }
+    | enumeration_constant                                                           { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, null, null]; $this->scope->enumdef($1, $$); }
     ;
 
 atomic_type_specifier
@@ -328,6 +332,25 @@ function_specifier
 alignment_specifier
     : ALIGNAS '(' type_name ')'             { throw new Error('alignas type_name not implemented'); }
     | ALIGNAS '(' constant_expression ')'   { throw new Error('alignas constant_expression not implemented'); }
+    ;
+
+optional_attribute_specifier
+    : attribute_specifier    { $$ = $1; }
+    | /* empty */            { $$ = null; }
+
+attribute_specifier
+    : ATTRIBUTE '(' '(' attribute_list ')' ')'    { $$ = Node\Decl\Specifiers\AttributeList[$4]; }
+    | ATTRIBUTE '(' '(' ')' ')'                   { $$ = Node\Decl\Specifiers\AttributeList[]; }
+    ;
+
+attribute_list
+    : attribute                        { $$ = [$1]; }
+    | attribute_list ',' attribute     { $$ = $1; $$[] = $3; }
+    ;
+
+attribute
+    : IDENTIFIER                       { $$ = Node\Decl\Specifiers\Attribute[$1, null]; }
+    | IDENTIFIER '(' expression ')'    { $$ = Node\Decl\Specifiers\Attribute[$1, $3]; }
     ;
 
 declarator
@@ -353,15 +376,17 @@ direct_declarator
     ;
 
 pointer
-    : '*' type_qualifier_list pointer       { $$ = IR\QualifiedPointer[$2, $3]; }
-    | '*' type_qualifier_list               { $$ = IR\QualifiedPointer[$2, null]; }
-    | '*' pointer                           { $$ = IR\QualifiedPointer[0, $2]; }
-    | '*'                                   { $$ = IR\QualifiedPointer[0, null]; }
+    : '*' type_qualifier_list pointer       { $$ = IR\QualifiedPointer[$2[0], $2[1], $3]; }
+    | '*' type_qualifier_list               { $$ = IR\QualifiedPointer[$2[0], $2[1], null]; }
+    | '*' pointer                           { $$ = IR\QualifiedPointer[0, [], $2]; }
+    | '*'                                   { $$ = IR\QualifiedPointer[0, [], null]; }
     ;
 
 type_qualifier_list
-    : type_qualifier                        { $$ = $1; }
-    | type_qualifier_list type_qualifier    { $$ = $1 | $2; }
+    : type_qualifier                            { $$ = [$1, []]; }
+    | type_qualifier_list type_qualifier        { $$ = [$1[0] | $2, $1[1]]; }
+    | attribute_specifier                       { $$ = [0, [$1]]; }
+    | type_qualifier_list attribute_specifier   { $$ = $2; $$[1][] = $1; }
     ;
 
 
@@ -376,9 +401,9 @@ parameter_list
     ;
 
 parameter_declaration
-    : declaration_specifiers declarator             { compileParamVarDeclaration[$1[0], $1[1], $2]; }
-    | declaration_specifiers abstract_declarator    { compileParamAbstractDeclaration[$1[0], $1[1], $2]; }
-    | declaration_specifiers                        { compileParamAbstractDeclaration[$1[0], $1[1], null]; }
+    : declaration_specifiers declarator             { compileParamVarDeclaration[$1[0], $1[1], $1[2], $2]; }
+    | declaration_specifiers abstract_declarator    { compileParamAbstractDeclaration[$1[0], $1[1], $1[2], $2]; }
+    | declaration_specifiers                        { compileParamAbstractDeclaration[$1[0], $1[1], $1[2], null]; }
     ;
 
 identifier_list
@@ -387,8 +412,8 @@ identifier_list
     ;
 
 type_name
-    : specifier_qualifier_list abstract_declarator  { compileTypeReference[$1[0], $1[1], $2]; }
-    | specifier_qualifier_list                      { compileTypeReference[$1[0], $1[1], null]; }
+    : specifier_qualifier_list abstract_declarator  { compileTypeReference[$1[0], $1[1], $1[2], $2]; }
+    | specifier_qualifier_list                      { compileTypeReference[$1[0], $1[1], $1[2], null]; }
     ;
 
 abstract_declarator
@@ -463,9 +488,9 @@ statement
     ;
 
 labeled_statement
-    : IDENTIFIER ':' statement                  { throw new Error('labeled_statement identifier not implemented'); }
-    | CASE constant_expression ':' statement    { throw new Error('labeled_statement case not implemented'); }
-    | DEFAULT ':' statement                     { throw new Error('labeled_statement default not implemented'); }
+    : IDENTIFIER ':' optional_attribute_specifier statement    { throw new Error('labeled_statement identifier not implemented'); }
+    | CASE constant_expression ':' statement                   { throw new Error('labeled_statement case not implemented'); }
+    | DEFAULT ':' statement                                    { throw new Error('labeled_statement default not implemented'); }
     ;
 
 compound_statement
@@ -522,8 +547,8 @@ external_declaration
     ;
 
 function_definition
-    : declaration_specifiers declarator declaration_list compound_statement     { compileFunction[$1[0], $1[1], $2, $3, $4]; }
-    | declaration_specifiers declarator compound_statement                      { compileFunction[$1[0], $1[1], $2, [], $3]; }
+    : declaration_specifiers declarator declaration_list compound_statement     { compileFunction[$1[0], $1[1], $1[2], $2, $3, $4]; }
+    | declaration_specifiers declarator compound_statement                      { compileFunction[$1[0], $1[1], $1[2], $2, [], $3]; }
     ;
 
 declaration_list
