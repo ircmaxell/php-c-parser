@@ -142,7 +142,7 @@ class C implements Printer
             }
             $result .= ')';
             if ($decl->stmts !== null) {
-                $result .= $this->printCompoundStmt($decl->stmts, $level);
+                $result .= " " . $this->printCompoundStmt($decl->stmts, $level);
             }
             $subType = $this->printType($type->return, '__NAME_PLACEHOLDER__', $level);
             return $attribute . str_replace('__NAME_PLACEHOLDER__', $result, $subType);
@@ -151,7 +151,7 @@ class C implements Printer
     }
 
     protected function printCompoundStmt(Stmt\CompoundStmt $stmts, int $level): string {
-        $return = " {\n";
+        $return = "{\n";
         $return .= $this->printNodes($stmts->stmts, $level + 1);
         $return .= str_repeat('  ', $level) . "}\n";
         return $return;
@@ -384,6 +384,18 @@ class C implements Printer
             $asm .= implode(',', array_map($formatOperand, $stmt->inputOperands->operands)) . ': ';
             $asm .= implode(', ', array_map([$this, "formatString"], $stmt->registers->registers));
             return $asm . ');';
+        }
+        if ($stmt instanceof Stmt\IfStmt) {
+            $if = 'if (' . $this->printExpr($stmt->condition, $level) . ") ";
+            $if .= $this->printNode($stmt->trueStmt, $level);
+            if ($stmt->falseStmt) {
+                $if .= ' else ';
+                $if .= $this->printNode($stmt->falseStmt, $level);
+            }
+            return $if;
+        }
+        if ($stmt instanceof Stmt\CompoundStmt) {
+            return $this->printCompoundStmt($stmt, $level);
         }
         var_dump($stmt);
     }

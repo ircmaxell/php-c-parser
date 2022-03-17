@@ -514,8 +514,8 @@ expression_statement
     ;
 
 selection_statement
-    : IF '(' expression ')' statement ELSE statement    { throw new Error('if else not implemented'); }
-    | IF '(' expression ')' statement                   { throw new Error('if not implemented'); }
+    : IF '(' expression ')' statement ELSE statement    { $$ = Node\Stmt\IfStmt[$3, $5, $7]; }
+    | IF '(' expression ')' statement                   { $$ = Node\Stmt\IfStmt[$3, $5, null]; }
     | SWITCH '(' expression ')' statement               { throw new Error('switch not implemented'); }
     ;
 

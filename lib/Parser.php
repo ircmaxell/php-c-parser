@@ -1350,10 +1350,10 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(2-1)]; 
             },
             270 => function ($stackPos) {
-                 throw new Error('if else not implemented'); 
+                 $this->semValue = new Node\Stmt\IfStmt($this->semStack[$stackPos-(7-3)], $this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-7)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             271 => function ($stackPos) {
-                 throw new Error('if not implemented'); 
+                 $this->semValue = new Node\Stmt\IfStmt($this->semStack[$stackPos-(5-3)], $this->semStack[$stackPos-(5-5)], null, $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             272 => function ($stackPos) {
                  throw new Error('switch not implemented'); 
