@@ -5,4 +5,4 @@
 
 #pragma once
 
-#define TEST "bar"
+#define TEST bar
