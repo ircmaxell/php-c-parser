@@ -208,6 +208,7 @@ class Lexer
                 goto emit_single;
             case ';':
             case '(':
+            case '~':
             case ')':
             case '{':
             case '}':
