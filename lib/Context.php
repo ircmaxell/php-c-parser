@@ -369,13 +369,16 @@ result:
             goto result;
         } elseif ($expr->value === '?') {
             // Ternary
-            list ($if, $expr) = $this->evaluateInternal($expr->next, true);
+            list ($if, $expr) = $this->evaluateInternal($expr->next, false);
             if ($expr === null || $expr->value !== ':' || $expr->next === null) {
                 throw new \LogicException('Syntax Error: expecting ": EXPR" in ternary expression');
             }
             list ($else, $expr) = $this->evaluateInternal($expr->next, true);
             $result = $this->normalize($result) === 0 ? $else : $if;
             goto result;
+        } elseif ($expr->value === ':') {
+            // assume part of ternary, these are handled recursively, try returning
+            return [$result, $expr];
         } elseif ($expr->type === Token::LITERAL) {
             // check prior operator
             if ($result->type === Token::IDENTIFIER && $result->value === 'L') {
