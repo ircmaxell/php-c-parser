@@ -354,6 +354,11 @@ attribute
     ;
 
 declarator
+    : unaliased_declarator ASM '(' STRING_LITERAL ')'     { $$ = $1; $$->declarator->declaratorAsm = $4; }
+    | unaliased_declarator                                { $$ = $1; }
+    ;
+
+unaliased_declarator
     : pointer direct_declarator     { $$ = IR\Declarator[$1, $2]; }
     | direct_declarator             { $$ = IR\Declarator[null, $1]; }
     ;

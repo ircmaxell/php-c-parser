@@ -10,12 +10,12 @@ use PHPCParser\Node\Stmt;
 class ExternVarDecl extends VarDecl
 {
 
-    public function __construct(?string $name, Type $type, array $attributes = []) {
-        parent::__construct($name, $type, null, $attributes);
+    public function __construct(?string $name, ?string $declaratorAsm, Type $type, array $attributes = []) {
+        parent::__construct($name, $declaratorAsm, $type, null, $attributes);
     }
 
     public function getSubNodeNames(): array {
-        return ['name', 'type'];
+        return ['name', 'type', 'declaratorAsm'];
     }
 
 }

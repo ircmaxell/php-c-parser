@@ -55,6 +55,9 @@ class C implements Printer
         }
         if ($decl instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl) {
             $result = $this->printType($decl->type, $decl->name, $level);
+            if ($decl->declaratorAsm !== null) {
+                $result .= ' __asm__ (' . $this->formatString($decl->declaratorAsm) . ')';
+            }
             if ($decl->initializer !== null) {
                 $result .= ' = ' . $this->printExpr($decl->initializer, $level);
             }
@@ -141,6 +144,9 @@ class C implements Printer
                 $result .= $next . '...';
             }
             $result .= ')';
+            if ($decl->declaratorAsm !== null) {
+                $result .= ' __asm__ (' . $this->formatString($decl->declaratorAsm) . ')';
+            }
             if ($decl->stmts !== null) {
                 $result .= " " . $this->printCompoundStmt($decl->stmts, $level);
             }

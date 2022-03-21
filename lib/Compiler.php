@@ -22,11 +22,12 @@ class Compiler
         $parts = $this->compileNamedDeclarator($declarator, $type);
         $name = $parts[0];
         $signature = $parts[1];
+        $declaratorAsm = $parts[2];
         if ($qualifiers !== 0 || $attributeLists) {
             $signature = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $signature, $attributes);
         }
         if (empty($declarations)) {
-            return [new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($name, $signature, $stmts)];
+            return [new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($name, $declaratorAsm, $signature, $stmts)];
         }
         throw new \LogicException('Not implemented (yet)');
     }
@@ -85,7 +86,7 @@ restart:
         if ($qualifiers !== 0 || $attributeLists) {
             $parts[1] = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $parts[1], $attributes);
         }
-        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl($parts[0], $parts[1], $attributes);
+        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl($parts[0], $parts[2], $parts[1], $attributes);
     }
 
     public function compileParamAbstractDeclaration(int $qualifiers, array $attributeLists, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
@@ -96,7 +97,7 @@ restart:
         if ($qualifiers !== 0 || $attributeLists) {
             $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
         }
-        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl(null, $type, $attributes);
+        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl(null, null, $type, $attributes);
     }
 
     public function compileTypeReference(int $qualifiers, array $attributeLists, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Expr\TypeRefExpr {
@@ -170,9 +171,9 @@ restart:
         }
         $parts = $this->compileNamedDeclarator($initDeclarator->declarator, $type, $attributes);
         if ($parts[1] instanceof Type\FunctionType) {
-            return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($parts[0], $parts[1], null, $attributes);
+            return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($parts[0], $parts[2], $parts[1], null, $attributes);
         }
-        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl($parts[0], $parts[1], $initDeclarator->initializer, $attributes);
+        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl($parts[0], $parts[2], $parts[1], $initDeclarator->initializer, $attributes);
     }
 
     public function compileTypedefDeclarator(IR\Declarator $declarator, Type $type, array $attributes = []): Decl {
@@ -209,9 +210,10 @@ restart:
             $type = $this->compileQualifiedPointer($declarator->pointer, $type);
         }
         $directdeclarator = $declarator->declarator;
+        $declaratorAsm = $directdeclarator->declaratorAsm;
 restart_direct:
         if ($directdeclarator instanceof IR\DirectDeclarator\Identifier) {
-            return [$directdeclarator->name, $type];
+            return [$directdeclarator->name, $type, $declaratorAsm];
         } elseif ($directdeclarator instanceof IR\DirectDeclarator\IncompleteArray) {
             $type = new Type\ArrayType\IncompleteArrayType($type);
             $directdeclarator = $directdeclarator->declarator;
