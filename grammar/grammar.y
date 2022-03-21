@@ -61,7 +61,7 @@ generic_association
 
 postfix_expression
     : primary_expression                                   { $$ = $1; }
-    | postfix_expression '[' expression ']'                { throw new Error('dim fetch not implemented'); }
+    | postfix_expression '[' expression ']'                { $$ = Expr\DimFetchExpr[$1, $3]; }
     | postfix_expression '(' ')'                           { $$ = Expr\CallExpr[$1, []]; }
     | postfix_expression '(' argument_expression_list ')'  { $$ = Expr\CallExpr[$1, $3]; }
     | postfix_expression '.' IDENTIFIER                    { $$ = Expr\StructRefExpr[$1, $3]; }

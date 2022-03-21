@@ -352,6 +352,9 @@ class C implements Printer
         if ($expr instanceof Expr\StructDerefExpr) {
             return '(' . $this->printExpr($expr->expr, $level) . '->' . $expr->memberName . ')';
         }
+        if ($expr instanceof Expr\DimFetchExpr) {
+            return '(' . $this->printExpr($expr->expr, $level) . ')[' . $this->printExpr($expr->dimension, $level) . ']';
+        }
         if ($expr instanceof Expr\DeclRefExpr) {
             return $expr->name;
         }
