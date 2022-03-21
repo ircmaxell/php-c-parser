@@ -64,8 +64,8 @@ postfix_expression
     | postfix_expression '[' expression ']'                { throw new Error('dim fetch not implemented'); }
     | postfix_expression '(' ')'                           { $$ = Expr\CallExpr[$1, []]; }
     | postfix_expression '(' argument_expression_list ')'  { $$ = Expr\CallExpr[$1, $3]; }
-    | postfix_expression '.' IDENTIFIER                    { throw new Error('.identifier not implemented'); }
-    | postfix_expression PTR_OP IDENTIFIER                 { throw new Error('->identifier not implemented'); }
+    | postfix_expression '.' IDENTIFIER                    { $$ = Expr\StructRefExpr[$1, $3]; }
+    | postfix_expression PTR_OP IDENTIFIER                 { $$ = Expr\StructDerefExpr[$1, $3]; }
     | postfix_expression INC_OP                            { $$ = Expr\UnaryOperator[$2, Expr\UnaryOperator::KIND_POSTINC]; }
     | postfix_expression DEC_OP                            { $$ = Expr\UnaryOperator[$2, Expr\UnaryOperator::KIND_POSTDEC]; }
     | '(' type_name ')' '{' initializer_list '}'           { throw new Error('initializer list no trailing not implemented'); }

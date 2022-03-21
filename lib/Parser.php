@@ -603,10 +603,10 @@ class Parser extends ParserAbstract
                  $this->semValue = new Expr\CallExpr($this->semStack[$stackPos-(4-1)], $this->semStack[$stackPos-(4-3)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             21 => function ($stackPos) {
-                 throw new Error('.identifier not implemented'); 
+                 $this->semValue = new Expr\StructRefExpr($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             22 => function ($stackPos) {
-                 throw new Error('->identifier not implemented'); 
+                 $this->semValue = new Expr\StructDerefExpr($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             23 => function ($stackPos) {
                  $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_POSTINC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 

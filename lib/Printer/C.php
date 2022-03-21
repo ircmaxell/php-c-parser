@@ -346,6 +346,12 @@ class C implements Printer
         if ($expr instanceof Expr\CastExpr) {
             return '(' . $this->printExpr($expr->type, $level) . $this->printExpr($expr->expr, $level) . ')';
         }
+        if ($expr instanceof Expr\StructRefExpr) {
+            return '(' . $this->printExpr($expr->expr, $level) . '.' . $expr->memberName . ')';
+        }
+        if ($expr instanceof Expr\StructDerefExpr) {
+            return '(' . $this->printExpr($expr->expr, $level) . '->' . $expr->memberName . ')';
+        }
         if ($expr instanceof Expr\DeclRefExpr) {
             return $expr->name;
         }
