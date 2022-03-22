@@ -1202,7 +1202,7 @@ class Parser extends ParserAbstract
                  $this->semValue = new IR\AbstractDeclarator(null, $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             221 => function ($stackPos) {
-                 $this->semValue = new IR\DirectAbstractDeclarator\AbstractDeclarator($this->semStack[$stackPos-(3-1)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new IR\DirectAbstractDeclarator\AbstractDeclarator($this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             222 => function ($stackPos) {
                  $this->semValue = new IR\DirectAbstractDeclarator\IncompleteArray($this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
@@ -1259,10 +1259,10 @@ class Parser extends ParserAbstract
                  throw new Error('direct_abstract_declarator parameter list not implemented'); 
             },
             240 => function ($stackPos) {
-                 throw new Error('direct_abstract_declarator with empty parameter list not implemented'); 
+                 $this->semValue = new IR\DirectAbstractDeclarator\Function_($this->semStack[$stackPos-(3-1)], [], false, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             241 => function ($stackPos) {
-                 throw new Error('direct_abstract_declarator with parameter list not implemented'); 
+                 $this->semValue = new IR\DirectAbstractDeclarator\Function_($this->semStack[$stackPos-(4-1)], $this->semStack[$stackPos-(4-3)][0], $this->semStack[$stackPos-(4-3)][1], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             242 => function ($stackPos) {
                  throw new Error('initializer brackend no trailing not implemented'); 

@@ -429,7 +429,7 @@ abstract_declarator
     ;
 
 direct_abstract_declarator
-    : '(' abstract_declarator ')'                                                           { $$ = IR\DirectAbstractDeclarator\AbstractDeclarator[$1]; }
+    : '(' abstract_declarator ')'                                                           { $$ = IR\DirectAbstractDeclarator\AbstractDeclarator[$2]; }
     | '[' ']'                                                                               { $$ = IR\DirectAbstractDeclarator\IncompleteArray[]; }
     | '[' '*' ']'                                                                           { throw new Error('direct_abstract_declarator bracket star not implemented'); }
     | '[' STATIC type_qualifier_list assignment_expression ']'                              { throw new Error('direct_abstract_declarator bracket static type qualifier list assignment not implemented'); }
@@ -448,8 +448,8 @@ direct_abstract_declarator
     | direct_abstract_declarator '[' assignment_expression ']'                              { throw new Error('direct_abstract_declarator with bracket assignment_expr not implemented'); }
     | '(' ')'                                                                               { throw new Error('direct_abstract_declarator empty parameter list not implemented'); }
     | '(' parameter_type_list ')'                                                           { throw new Error('direct_abstract_declarator parameter list not implemented'); }
-    | direct_abstract_declarator '(' ')'                                                    { throw new Error('direct_abstract_declarator with empty parameter list not implemented'); }
-    | direct_abstract_declarator '(' parameter_type_list ')'                                { throw new Error('direct_abstract_declarator with parameter list not implemented'); }
+    | direct_abstract_declarator '(' ')'                                                    { $$ = IR\DirectAbstractDeclarator\Function_[$1, [], false]; }
+    | direct_abstract_declarator '(' parameter_type_list ')'                                { $$ = IR\DirectAbstractDeclarator\Function_[$1, $3[0], $3[1]]; }
     ;
 
 initializer

@@ -199,6 +199,15 @@ restart_direct:
             $type = new Type\ParenType($type);
             $declarator = $directabstractdeclarator->declarator;
             goto restart;
+        } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\Function_) {
+            $params = $paramNames = [];
+            foreach ($directabstractdeclarator->params as $param) {
+                $params[] = $param->type;
+                $paramNames[] = $param->name;
+            }
+            $type = new Type\FunctionType\FunctionProtoType($type, $params, $paramNames, $directabstractdeclarator->isVariadic);
+            $directabstractdeclarator = $directabstractdeclarator->declarator;
+            goto restart_direct;
         } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\IncompleteArray) {
             $type = new Type\ArrayType\IncompleteArrayType($type);
             $directabstractdeclarator = $directabstractdeclarator->declarator;
