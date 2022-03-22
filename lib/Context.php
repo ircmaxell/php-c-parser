@@ -504,14 +504,33 @@ result:
         // Copy token stream
         $first = $newToken = new Token(0, '', 'internal');
         while ($token !== null) {
+            if ($token->type === Token::PUNCTUATOR && $token->value === '#') {
+                $nextToken = Token::skipWhitespace($token->next);
+                if ($nextToken && $nextToken->type === Token::IDENTIFIER && array_key_exists($nextToken->value, $argMap)) {
+                    $arg = $argMap[$nextToken->value];
+                    $toAdd = $toAddNext = new Token(Token::OTHER, '', 'computed');
+                    while ($arg !== null) {
+                        $toAddNext = $toAddNext->next = new Token(Token::LITERAL, $arg->value, $arg->file);
+                        $arg = $arg->next;
+                    }
+                    $newToken->next = $toAdd->next ?? $toAdd;
+                    $newToken = $newToken->tail();
+                    $token = $nextToken;
+                    goto nexttoken;
+                }
+            }
             // handle , ##__VA_ARGS__
             if ($token->type === Token::PUNCTUATOR && $token->value === ',') {
-                $nextToken = Token::skipWhitespace($token);
-                if ($nextToken->type === Token::PUNCTUATOR && $token->value === '##') {
+                $nextToken = Token::skipWhitespace($token->next);
+                if ($nextToken && $nextToken->type === Token::PUNCTUATOR && $nextToken->value === '##') {
                     if (\count($argMap) > $argIdx) {
+                        // preserve the comma
                         $newToken = $newToken->next = new Token($token->type, $token->value, $token->file);
                     }
-                    $token = Token::skipWhitespace($nextToken);
+                    $nextToken = Token::skipWhitespace($nextToken->next);
+                    if ($nextToken && $nextToken->type === Token::IDENTIFIER && array_key_exists($nextToken->value, $argMap)) {
+                        $token = $nextToken;
+                    }
                 }
             }
             if ($token->type === Token::IDENTIFIER && array_key_exists($token->value, $argMap)) {
@@ -521,7 +540,7 @@ result:
                     $toAddNext = $toAddNext->next = new Token($arg->type, $arg->value, $arg->file);
                     $arg = $arg->next;
                 }
-                $newToken->next = $toAdd->next === null ? $toAdd : $toAdd->next;
+                $newToken->next = $toAdd->next ?? $toAdd;
                 $newToken = $newToken->tail();
                 goto nexttoken;
             } else {
