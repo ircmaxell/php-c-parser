@@ -496,6 +496,8 @@ result:
                             while ($variadic->next) {
                                 $variadic = $variadic->next;
                             }
+                            $variadic->next = new Token(Token::PUNCTUATOR, ',', 'computed');
+                            $variadic = $variadic->next;
                             $variadic->next = $args[$argIdx++];
                         }
                     } else {
