@@ -190,6 +190,9 @@ class Context {
         $negate = false;
 restart:
         $expr = Token::skipWhitespace($expr);
+        if ($expr === null) {
+            throw new \LogicException("Unexpected end of line, expecting value after operator");
+        }
         if ($expr->type === Token::PUNCTUATOR && $expr->value === '(') {
             list ($result, $expr) = $this->evaluateInternal($expr->next);
             if ($expr === null) {
@@ -254,26 +257,33 @@ restart:
             }
         } elseif ($expr->type === Token::IDENTIFIER) {
             $next = Token::skipWhitespace($expr->next);
-            if ($next !== null && $next->value === '(') {
-                // This is a call!!!
-                $toCall = $expr->value;
-                $expr = $next->next;
-                $args = [];
-                while ($expr !== null && $expr->value !== ')') {
-                    list ($arg, $expr) = $this->evaluateInternal($expr, false);
-                    $args[] = $arg;
-                    if ($expr !== null && $expr->value === ',') {
-                        $expr = Token::skipWhitespace($expr->next);
+            if ($this->isDefined($expr->value)) {
+                if ($next !== null && $next->value === '(') {
+                    // This is a call!!!
+                    $toCall = $expr->value;
+                    $expr = $next->next;
+                    $args = [];
+                    while ($expr !== null && $expr->value !== ')') {
+                        list ($arg, $expr) = $this->evaluateInternal($expr, false);
+                        $args[] = $arg;
+                        if ($expr !== null && $expr->value === ',') {
+                            $expr = Token::skipWhitespace($expr->next);
+                        }
                     }
+                    if ($expr === null) {
+                        throw new \LogicException('Unexpected end of line, expected ) to close call');
+                    }
+                    $result = Token::skipWhitespace($this->doCall($toCall, ...$args));
+                } else {
+                    $result = Token::skipWhitespace($this->expand($expr->value));
                 }
-                if ($expr === null) {
-                    throw new \LogicException('Unexpected end of line, expected ) to close call');
+                if ($result === null) {
+                    $expr = $next;
+                } else {
+                    $result->tail()->next = $expr->next;
+                    $expr = $result;
                 }
-                $expr = Token::skipWhitespace($expr->next);
-                $result = Token::skipWhitespace($this->doCall($toCall, ...$args));
-            } elseif ($this->isDefined($expr->value)) {
-                $result = Token::skipWhitespace($this->expand($expr->value));
-                $expr = Token::skipWhitespace($expr->next);
+                goto restart;
             } else {
                 $result = new Token(Token::IDENTIFIER, $expr->value, 'computed');
                 $expr = Token::skipWhitespace($expr->next);
@@ -393,6 +403,7 @@ result:
             }
             // fallthrough intentional
         }
+        var_dump($expr);
         throw new \LogicException("Unknown token to evaluate: {$expr->type} with value " . var_export($expr->value, true) . " in {$expr->file}");
     }
 
