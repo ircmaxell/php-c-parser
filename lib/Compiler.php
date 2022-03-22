@@ -23,6 +23,9 @@ class Compiler
         $name = $parts[0];
         $signature = $parts[1];
         $declaratorAsm = $parts[2];
+        if ($parts[3]) {
+            $attributeLists[] = $parts[3];
+        }
         if ($qualifiers !== 0 || $attributeLists) {
             $signature = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $signature, $attributes);
         }
@@ -77,7 +80,10 @@ restart:
             if ($fieldDeclarator->declarator) {
                 $parts = $this->compileNamedDeclarator($fieldDeclarator->declarator, $type);
             } else {
-                $parts = [null, null];
+                $parts = [null, null, null, null];
+            }
+            if ($parts[3]) {
+                $attributeLists[] = $parts[3];
             }
             $result[] = new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FieldDecl($parts[0], $parts[1], $fieldDeclarator->bitfieldSize, $attributes);
         }
@@ -87,6 +93,9 @@ restart:
     public function compileParamVarDeclaration(int $qualifiers, array $attributeLists, array $types, IR\Declarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
         $type = $this->compileType($types);
         $parts = $this->compileNamedDeclarator($declarator, $type);
+        if ($parts[3]) {
+            $attributeLists[] = $parts[3];
+        }
         if ($qualifiers !== 0 || $attributeLists) {
             $parts[1] = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $parts[1], $attributes);
         }
@@ -205,7 +214,7 @@ restart_direct:
                 $params[] = $param->type;
                 $paramNames[] = $param->name;
             }
-            $type = new Type\FunctionType\FunctionProtoType($type, $params, $paramNames, $directabstractdeclarator->isVariadic);
+            $type = new Type\FunctionType\FunctionProtoType($type, $params, $paramNames, $directabstractdeclarator->isVariadic, $directabstractdeclarator->attributeList);
             $directabstractdeclarator = $directabstractdeclarator->declarator;
             goto restart_direct;
         } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\IncompleteArray) {
@@ -224,9 +233,10 @@ restart:
         }
         $directdeclarator = $declarator->declarator;
         $declaratorAsm = $directdeclarator->declaratorAsm;
+        $attributeList = $directdeclarator->attributeList;
 restart_direct:
         if ($directdeclarator instanceof IR\DirectDeclarator\Identifier) {
-            return [$directdeclarator->name, $type, $declaratorAsm];
+            return [$directdeclarator->name, $type, $declaratorAsm, $attributeList];
         } elseif ($directdeclarator instanceof IR\DirectDeclarator\IncompleteArray) {
             $type = new Type\ArrayType\IncompleteArrayType($type);
             $directdeclarator = $directdeclarator->declarator;
@@ -248,7 +258,8 @@ restart_direct:
                 $type,
                 $this->compileDirectParamTypes(...$directdeclarator->params),
                 $this->compileDirectParamTypeNames(...($directdeclarator->params)),
-                $directdeclarator->isVariadic
+                $directdeclarator->isVariadic,
+                $directdeclarator->attributeList
             );
             $directdeclarator = $directdeclarator->name;
             goto restart_direct;

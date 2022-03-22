@@ -217,21 +217,14 @@ class C implements Printer
             $attr = $type->attribute;
             return '__attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . '))' . ' ' . $this->printType($type->parent, $name, $level);
         }
-        if ($type instanceof Type\FunctionType\FunctionProtoType) {
-            $result = $this->printType($type->return, $name, $level) . '(';
-            $next = '';
-            foreach ($type->params as $idx => $param) {
-                $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
-                $next = ', ';
+        if ($type instanceof Type\FunctionType\FunctionProtoType || $this->isFunctionPointer($type)) {
+            if ($type instanceof Type\FunctionType\FunctionProtoType) {
+                $func = $type;
+                $result = $this->printType($type->return, $name, $level) . '(';
+            } else {
+                $func = $type->parent->parent;
+                $result = '(*' . $name . ')(';
             }
-            if ($type->isVariadic) {
-                $result .= $next . '...';
-            }
-            return $result . ')';
-        }
-        if ($this->isFunctionPointer($type)) {
-            $func = $type->parent->parent;
-            $result = '(*' . $name . ')(';
             $next = '';
             foreach ($func->params as $idx => $param) {
                 $result .= $next . $this->printType($param, $func->paramNames[$idx], $level);
@@ -241,6 +234,11 @@ class C implements Printer
                 $result .= $next . '...';
             }
             $result .= ')';
+            if ($func->attributeList) {
+                foreach ($func->attributeList->attributeList as $attr) {
+                    $result .= ' __attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . '))';
+                }
+            }
             $subType = $this->printType($func->return, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', $result, $subType);
         }

@@ -354,8 +354,8 @@ attribute
     ;
 
 declarator
-    : unaliased_declarator ASM '(' STRING_LITERAL ')'     { $$ = $1; $$->declarator->declaratorAsm = $4; }
-    | unaliased_declarator                                { $$ = $1; }
+    : unaliased_declarator optional_attribute_specifier ASM '(' STRING_LITERAL ')'     { $$ = $1; $$->declarator->attributeList = $2; $$->declarator->declaratorAsm = $5; }
+    | unaliased_declarator optional_attribute_specifier                                { $$ = $1; $$->declarator->attributeList = $2; }
     ;
 
 unaliased_declarator
@@ -448,8 +448,8 @@ direct_abstract_declarator
     | direct_abstract_declarator '[' assignment_expression ']'                              { throw new Error('direct_abstract_declarator with bracket assignment_expr not implemented'); }
     | '(' ')'                                                                               { throw new Error('direct_abstract_declarator empty parameter list not implemented'); }
     | '(' parameter_type_list ')'                                                           { throw new Error('direct_abstract_declarator parameter list not implemented'); }
-    | direct_abstract_declarator '(' ')'                                                    { $$ = IR\DirectAbstractDeclarator\Function_[$1, [], false]; }
-    | direct_abstract_declarator '(' parameter_type_list ')'                                { $$ = IR\DirectAbstractDeclarator\Function_[$1, $3[0], $3[1]]; }
+    | direct_abstract_declarator '(' ')' optional_attribute_specifier                       { $$ = IR\DirectAbstractDeclarator\Function_[$1, [], false, $4]; }
+    | direct_abstract_declarator '(' parameter_type_list ')' optional_attribute_specifier   { $$ = IR\DirectAbstractDeclarator\Function_[$1, $3[0], $3[1], $5]; }
     ;
 
 initializer
