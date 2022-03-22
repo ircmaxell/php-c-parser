@@ -4,25 +4,25 @@ namespace PHPCParser\Node\Decl\NamedDecl\ValueDecl\DeclaratorDecl;
 
 use PHPCParser\Node\Decl\NamedDecl\ValueDecl\DeclaratorDecl;
 
+use PHPCParser\Node\Stmt\ValueStmt\Expr;
 use PHPCParser\Node\Type;
-use PHPCParser\Node\Stmt;
 
 class FieldDecl extends DeclaratorDecl
 {
 
-    public string $name;
-    public Type $type;
-    public ?Node\Stmt $initializer;
+    public ?string $name;
+    public ?Type $type;
+    public ?Expr $bitfieldSize;
 
-    public function __construct(string $name, Type $type, ?Node\Stmt $initializer, array $attributes = []) {
+    public function __construct(?string $name, ?Type $type, ?Expr $bitfieldSize, array $attributes = []) {
         parent::__construct($attributes);
         $this->name = $name;
         $this->type = $type;
-        $this->initializer = $initializer;
+        $this->bitfieldSize = $bitfieldSize;
     }
 
     public function getSubNodeNames(): array {
-        return ['name', 'type', 'initializer'];
+        return ['name', 'type', 'bitfieldSize'];
     }
 
     public function getType(): string {

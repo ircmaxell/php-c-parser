@@ -74,8 +74,12 @@ restart:
             throw new \LogicException("Not implemented yet: empty struct/union declarators");
         }
         foreach ($declarators as $fieldDeclarator) {
-            $parts = $this->compileNamedDeclarator($fieldDeclarator->declarator, $type);
-            $result[] = new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FieldDecl($parts[0], $parts[1], $fieldDeclarator->initializer, $attributes);
+            if ($fieldDeclarator->declarator) {
+                $parts = $this->compileNamedDeclarator($fieldDeclarator->declarator, $type);
+            } else {
+                $parts = [null, null];
+            }
+            $result[] = new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FieldDecl($parts[0], $parts[1], $fieldDeclarator->bitfieldSize, $attributes);
         }
         return $result;
     }

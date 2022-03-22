@@ -290,7 +290,7 @@ struct_declarator_list
     ;
 
 struct_declarator
-    : ':' constant_expression               { $$ = IR\FieldDeclaration[null, $1]; }
+    : ':' constant_expression               { $$ = IR\FieldDeclaration[null, $2]; }
     | declarator ':' constant_expression    { $$ = IR\FieldDeclaration[$1, $3]; }
     | declarator                            { $$ = IR\FieldDeclaration[$1, null]; }
     ;
