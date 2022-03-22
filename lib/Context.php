@@ -502,7 +502,7 @@ result:
             return new Token(Token::OTHER, '', 'computed');
         }
         // Copy token stream
-        $first = $newToken = new Token(0, '', 'internal');
+        $lastNonWhitespaceToken = $first = $newToken = new Token(0, '', 'internal');
         while ($token !== null) {
             if ($token->type === Token::PUNCTUATOR && $token->value === '#') {
                 $nextToken = Token::skipWhitespace($token->next);
@@ -515,9 +515,52 @@ result:
                     }
                     $newToken->next = $toAdd->next ?? $toAdd;
                     $newToken = $newToken->tail();
+                    $lastNonWhitespaceToken = $newToken;
                     $token = $nextToken;
                     goto nexttoken;
                 }
+            }
+            if ($token->type === Token::PUNCTUATOR && $token->value === '##') {
+                $newToken = $lastNonWhitespaceToken;
+                $token = Token::skipWhitespace($token->next);
+                if (($lastNonWhitespaceToken->type !== Token::IDENTIFIER && $lastNonWhitespaceToken->type !== Token::PUNCTUATOR && $lastNonWhitespaceToken->type !== Token::LITERAL && $lastNonWhitespaceToken->type !== Token::NUMBER)
+                 || ($token->type !== Token::IDENTIFIER && $token->type !== Token::PUNCTUATOR && $token->type !== Token::LITERAL && $token->type !== Token::NUMBER)) {
+                    continue;
+                }
+                $toAdd = null;
+                $checkToken = $token;
+                if ($token->type === Token::IDENTIFIER && array_key_exists($token->value, $argMap)) {
+                    $arg = $argMap[$token->value];
+                    $toAdd = $toAddNext = new Token(Token::OTHER, '', 'computed');
+                    while ($arg !== null && ($arg->type === Token::WHITESPACE || $arg->value === '')) {
+                        $arg = $arg->next;
+                    }
+                    while ($arg !== null) {
+                        $toAddNext = $toAddNext->next = new Token($arg->type, $arg->value, $arg->file);
+                        $arg = $arg->next;
+                    }
+                    $toAdd = $toAdd->next;
+                    if (!$toAdd) {
+                        goto nexttoken;
+                    }
+                    $checkToken = $toAdd;
+                }
+                if (((1 << $checkToken->type) | (1 << $newToken->type)) === ((1 << Token::NUMBER) | (1 << Token::IDENTIFIER))) {
+                    $newToken->type = Token::IDENTIFIER;
+                } elseif ($checkToken->type !== $newToken->type) {
+                    continue;
+                }
+                $newToken->value .= $checkToken->value;
+                if ($toAdd) {
+                    $newToken->next = $toAdd->next;
+                    while ($newToken->next) {
+                        $newToken = $newToken->next;
+                        if ($newToken->type !== Token::WHITESPACE && ($newToken->type !== Token::OTHER || $newToken->value !== '')) {
+                            $lastNonWhitespaceToken = $newToken;
+                        }
+                    }
+                }
+                goto nexttoken;
             }
             // handle , ##__VA_ARGS__
             if ($token->type === Token::PUNCTUATOR && $token->value === ',') {
@@ -538,6 +581,9 @@ result:
                 $toAdd = $toAddNext = new Token(Token::OTHER, '', 'computed');
                 while ($arg !== null) {
                     $toAddNext = $toAddNext->next = new Token($arg->type, $arg->value, $arg->file);
+                    if ($toAddNext->type !== Token::WHITESPACE && ($toAddNext->type !== Token::OTHER || $toAddNext->value !== '')) {
+                        $lastNonWhitespaceToken = $toAddNext;
+                    }
                     $arg = $arg->next;
                 }
                 $newToken->next = $toAdd->next ?? $toAdd;
@@ -545,6 +591,9 @@ result:
                 goto nexttoken;
             } else {
                 $newToken->next = new Token($token->type, $token->value, $token->file);
+                if ($token->type !== Token::WHITESPACE && ($token->type !== Token::OTHER || $token->value !== '')) {
+                    $lastNonWhitespaceToken = $newToken->next;
+                }
             }
             $newToken = $newToken->next;
 nexttoken:
