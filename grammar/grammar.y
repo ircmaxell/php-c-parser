@@ -365,6 +365,7 @@ unaliased_declarator
 
 direct_declarator
     : IDENTIFIER                                                                    { $$ = IR\DirectDeclarator\Identifier[$1]; }
+    | TYPEDEF_NAME                                                                  { $$ = IR\DirectDeclarator\Identifier[$1]; }
     | '(' declarator ')'                                                            { $$ = IR\DirectDeclarator\Declarator[$2]; }
     | direct_declarator '[' ']'                                                     { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
     | direct_declarator '[' '*' ']'                                                 { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
