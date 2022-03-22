@@ -18,6 +18,30 @@ class Tokenizer {
         return $result;
     }
 
+    protected function convertEscapeSequences(string $str): string {
+        return preg_replace_callback('(\\\\(?:(?<chr>[\\\\\'"?abfnrtve])|x(?<hex>[a-fA-F0-9]+)|(?<oct>[0-7]+)|(?s).+))', function ($m) {
+            if ($m['chr'] !== "") {
+                return [
+                    'a' => "\x7",
+                    'b' => "\x8",
+                    'f' => "\f",
+                    'n' => "\n",
+                    'r' => "\r",
+                    't' => "\t",
+                    'v' => "\v",
+                    'e' => "\e",
+                ][$m['chr']] ?? $m['chr'];
+            }
+            if ($m['hex'] !== "") {
+                return \chr(intval($m['hex'], 16));
+            }
+            if ($m['oct'] !== "") {
+                return \chr(intval($m['oct'], 8));
+            }
+            throw new \LogicException("Unknown character literal escape sequence: " . var_export($m[0], true));
+        }, $str);
+    }
+
     protected function tokenizeLine(string $file, string $line): ?Token {
         $result = $first = new Token(0, '', $file);
         $length = strlen($line);
@@ -72,7 +96,7 @@ class Tokenizer {
                         $buffer .= $char;
                     }
                 }
-                $result = $result->next = new Token(Token::LITERAL, $buffer, $file);
+                $result = $result->next = new Token(Token::LITERAL, $this->convertEscapeSequences($buffer), $file);
             } elseif ($char === "'") {
                 $buffer = '';
                 while ($pos < $length) {
@@ -87,20 +111,8 @@ class Tokenizer {
                         $buffer .= $char;
                     }
                 }
-                $value = chr(0);
-                if (strlen($buffer) > 1 && $buffer[0] === '\\') {
-                    // convert character into integer
-                    switch ($buffer[1]) {
-                        case '0':
-                            $value = chr(0);
-                            break;
-                        case 'x':
-                            $value = chr(intval(substr($buffer, 2), 16));
-                            break;
-                        default: 
-                            throw new \LogicException("Unknown character literal escape sequence: " . var_export($buffer, true));
-                    }
-                } elseif (strlen($buffer) === 1) {
+                $buffer = $this->convertEscapeSequences($buffer);
+                if (strlen($buffer) === 1) {
                     $value = $buffer;
                 } else {
                     throw new \LogicException("Syntax error: unexpected illegal string literal found '$buffer' in $file at position $pos");
