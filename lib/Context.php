@@ -21,13 +21,14 @@ class Context {
 
     public function __construct(array $headerSearchPaths = []) {
         if (PHP_INT_MAX > 1<<32) {
-            $this->define('__x86_64__', null);
-            $this->define('__LP64__', null);
+            $this->define('__x86_64__', new Token(Token::NUMBER, '1', 'built-in'));
+            $this->define('__LP64__', new Token(Token::NUMBER, '1', 'built-in'));
         }
         // The FFI library defines VA_LIST
-        $this->define('__GNUC_VA_LIST', null);
-        $this->define('__GNUC__', null);
-        $this->define('__STDC__', null);
+        $this->define('__GNUC_VA_LIST', new Token(Token::NUMBER, '1', 'built-in'));
+        $this->define('__GNUC__', new Token(Token::NUMBER, '4', 'built-in'));
+        $this->define('__GNUC_MINOR__', new Token(Token::NUMBER, '2', 'built-in'));
+        $this->define('__STDC__', new Token(Token::NUMBER, '1', 'built-in'));
         $this->headerSearchPaths = array_merge($headerSearchPaths, self::DEFAULT_HEADER_SEARCH_PATHS);
         $this->locateGCCHeaderPaths();
         $this->scope = new Scope;
