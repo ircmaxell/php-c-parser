@@ -382,6 +382,14 @@ result:
             list ($right, $expr) = $this->evaluateInternal($expr->next, true);
             $result = new Token(Token::NUMBER, (string) ($this->normalize($result) + $this->normalize($right)), 'computed');
             goto result;
+        } elseif ($expr->value === '*') {
+            list ($right, $expr) = $this->evaluateInternal($expr->next, true);
+            $result = new Token(Token::NUMBER, (string) ($this->normalize($result) * $this->normalize($right)), 'computed');
+            goto result;
+        } elseif ($expr->value === '/') {
+            list ($right, $expr) = $this->evaluateInternal($expr->next, true);
+            $result = new Token(Token::NUMBER, (string) ($this->normalize($result) / $this->normalize($right)), 'computed');
+            goto result;
         } elseif ($expr->value === '?') {
             // Ternary
             list ($if, $expr) = $this->evaluateInternal($expr->next, false);
