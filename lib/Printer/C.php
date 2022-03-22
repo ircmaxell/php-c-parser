@@ -114,6 +114,9 @@ class C implements Printer
             while ($type instanceof Type\AttributedType) {
                 if ($type instanceof Type\ExplicitAttributedType) {
                     switch ($type->kind) {
+                        case Type\ExplicitAttributedType::KIND_EXTERN:
+                            $attribute .= 'extern ';
+                            break;
                         case Type\ExplicitAttributedType::KIND_STATIC:
                             $attribute .= 'static ';
                             break;
