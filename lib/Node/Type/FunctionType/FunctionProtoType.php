@@ -2,7 +2,6 @@
 
 namespace PHPCParser\Node\Type\FunctionType;
 
-use PHPCParser\Node\Decl\Specifiers\AttributeList;
 use PHPCParser\Node\Type\FunctionType;
 
 use PHPCParser\Node\Type;
@@ -13,9 +12,9 @@ class FunctionProtoType extends FunctionType
     public array $params;
     public array $paramNames;
     public bool $isVariadic;
-    public ?AttributeList $attributeList;
+    public array $attributeList;
 
-    public function __construct(Type $return, array $params, array $paramNames, bool $isVariadic, ?AttributeList $attributeList, array $attributes = []) {
+    public function __construct(Type $return, array $params, array $paramNames, bool $isVariadic, array $attributeList, array $attributes = []) {
         parent::__construct($attributes);
         $this->return = $return;
         $this->params = $params;

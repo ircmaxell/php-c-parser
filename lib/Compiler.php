@@ -161,7 +161,7 @@ restart:
 restart:
         $type = new Type\PointerType($type);
         if ($pointer->qualification > 0) {
-            $type = Type\AttributedType::fromDecl($pointer->qualification, $pointer->attributesList, $type);
+            $type = Type\AttributedType::fromDecl($pointer->qualification, $pointer->attributeList, $type);
         }
         if ($pointer->parent !== null) {
             $pointer = $pointer->parent;
@@ -205,7 +205,7 @@ restart_direct:
         if (is_null($directabstractdeclarator)) {
             return $type;
         } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\AbstractDeclarator) {
-            $type = new Type\ParenType($type);
+            $type = new Type\ParenType($type, $directabstractdeclarator->attributes);
             $declarator = $directabstractdeclarator->declarator;
             goto restart;
         } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\Function_) {
@@ -214,11 +214,19 @@ restart_direct:
                 $params[] = $param->type;
                 $paramNames[] = $param->name;
             }
-            $type = new Type\FunctionType\FunctionProtoType($type, $params, $paramNames, $directabstractdeclarator->isVariadic, $directabstractdeclarator->attributeList);
+            $type = new Type\FunctionType\FunctionProtoType($type, $params, $paramNames, $directabstractdeclarator->isVariadic, $directabstractdeclarator->attributeList, $directabstractdeclarator->attributes);
             $directabstractdeclarator = $directabstractdeclarator->declarator;
             goto restart_direct;
-        } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\IncompleteArray) {
-            $type = new Type\ArrayType\IncompleteArrayType($type);
+        } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\Array_) {
+            if ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\IncompleteArray) {
+                $type = new Type\ArrayType\IncompleteArrayType($type, $directabstractdeclarator->modifiers, $directabstractdeclarator->attributeList, $directabstractdeclarator->attributes);
+            } elseif ($directabstractdeclarator instanceof IR\DirectAbstractDeclarator\CompleteArray) {
+                if ($directabstractdeclarator->size->isConstant()) {
+                    $type = new Type\ArrayType\ConstantArrayType($type, $directabstractdeclarator->size, $directabstractdeclarator->modifiers, $directabstractdeclarator->attributeList, $directabstractdeclarator->attributes);
+                } else {
+                    $type = new Type\ArrayType\VariableArrayType($type, $directabstractdeclarator->size, $directabstractdeclarator->modifiers, $directabstractdeclarator->attributeList, $directabstractdeclarator->attributes);
+                }
+            }
             $directabstractdeclarator = $directabstractdeclarator->declarator;
             goto restart_direct;
         }
@@ -237,15 +245,15 @@ restart:
 restart_direct:
         if ($directdeclarator instanceof IR\DirectDeclarator\Identifier) {
             return [$directdeclarator->name, $type, $declaratorAsm, $attributeList];
-        } elseif ($directdeclarator instanceof IR\DirectDeclarator\IncompleteArray) {
-            $type = new Type\ArrayType\IncompleteArrayType($type);
-            $directdeclarator = $directdeclarator->declarator;
-            goto restart_direct;
-        } elseif ($directdeclarator instanceof IR\DirectDeclarator\CompleteArray) {
-            if ($directdeclarator->size->isConstant()) {
-                $type = new Type\ArrayType\ConstantArrayType($type, $directdeclarator->size);
-            } else {
-                $type = new Type\ArrayType\VariableArrayType($type, $directdeclarator->size);
+        } elseif ($directdeclarator instanceof IR\DirectDeclarator\Array_) {
+            if ($directdeclarator instanceof IR\DirectDeclarator\IncompleteArray) {
+                $type = new Type\ArrayType\IncompleteArrayType($type, $directdeclarator->modifiers, $directdeclarator->attributeList, $directdeclarator->attributes);
+            } elseif ($directdeclarator instanceof IR\DirectDeclarator\CompleteArray) {
+                if ($directdeclarator->size->isConstant()) {
+                    $type = new Type\ArrayType\ConstantArrayType($type, $directdeclarator->size, $directdeclarator->modifiers, $directdeclarator->attributeList, $directdeclarator->attributes);
+                } else {
+                    $type = new Type\ArrayType\VariableArrayType($type, $directdeclarator->size, $directdeclarator->modifiers, $directdeclarator->attributeList, $directdeclarator->attributes);
+                }
             }
             $directdeclarator = $directdeclarator->declarator;
             goto restart_direct;

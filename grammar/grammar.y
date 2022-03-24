@@ -252,11 +252,11 @@ type_specifier
     ;
 
 struct_or_union_specifier
-    : struct_or_union optional_attribute_specifier '{' struct_declaration_list '}' optional_attribute_specifier                { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, null, $4, $2 ?? $6]; }
-    | struct_or_union optional_attribute_specifier IDENTIFIER '{' struct_declaration_list '}' optional_attribute_specifier     { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, $5, $2 ?? $7]; }
-    | struct_or_union optional_attribute_specifier IDENTIFIER                                                                  { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, null, $2]; }
-    | struct_or_union optional_attribute_specifier TYPEDEF_NAME '{' struct_declaration_list '}' optional_attribute_specifier   { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, $5, $2 ?? $7]; }
-    | struct_or_union optional_attribute_specifier TYPEDEF_NAME                                                                { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, null, $2]; }
+    : struct_or_union optional_attribute_specifier_list '{' struct_declaration_list '}' optional_attribute_specifier_list                { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, null, $4, $2 ?? $6]; }
+    | struct_or_union optional_attribute_specifier_list IDENTIFIER '{' struct_declaration_list '}' optional_attribute_specifier_list     { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, $5, $2 ?? $7]; }
+    | struct_or_union optional_attribute_specifier_list IDENTIFIER                                                                       { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, null, $2]; }
+    | struct_or_union optional_attribute_specifier_list TYPEDEF_NAME '{' struct_declaration_list '}' optional_attribute_specifier_list   { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, $5, $2 ?? $7]; }
+    | struct_or_union optional_attribute_specifier_list TYPEDEF_NAME                                                                     { $$ = Node\Decl\NamedDecl\TypeDecl\TagDecl\RecordDecl[$1, $3, null, $2]; }
     ;
 
 struct_or_union
@@ -309,8 +309,8 @@ enumerator_list
     ;
 
 enumerator  /* identifiers must be flagged as ENUMERATION_CONSTANT */
-    : enumeration_constant optional_attribute_specifier '=' constant_expression      { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, $4, null]; $this->scope->enumdef($1, $$); }
-    | enumeration_constant                                                           { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, null, null]; $this->scope->enumdef($1, $$); }
+    : enumeration_constant optional_attribute_specifier_list '=' constant_expression      { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, $4, null]; $this->scope->enumdef($1, $$); }
+    | enumeration_constant                                                                { $$ = Node\Decl\NamedDecl\ValueDecl\EnumConstantDecl[$1, null, null]; $this->scope->enumdef($1, $$); }
     ;
 
 atomic_type_specifier
@@ -334,9 +334,10 @@ alignment_specifier
     | ALIGNAS '(' constant_expression ')'   { throw new Error('alignas constant_expression not implemented'); }
     ;
 
-optional_attribute_specifier
-    : attribute_specifier    { $$ = $1; }
-    | /* empty */            { $$ = null; }
+optional_attribute_specifier_list
+    : attribute_specifier optional_attribute_specifier_list    { $$ = $2; $$[] = $1; }
+    | /* empty */                                              { $$ = []; }
+    ;
 
 attribute_specifier
     : ATTRIBUTE '(' '(' attribute_list ')' ')'    { $$ = Node\Decl\Specifiers\AttributeList[$4]; }
@@ -354,8 +355,8 @@ attribute
     ;
 
 declarator
-    : unaliased_declarator optional_attribute_specifier ASM '(' STRING_LITERAL ')'     { $$ = $1; $$->declarator->attributeList = $2; $$->declarator->declaratorAsm = $5; }
-    | unaliased_declarator optional_attribute_specifier                                { $$ = $1; $$->declarator->attributeList = $2; }
+    : unaliased_declarator optional_attribute_specifier_list ASM '(' STRING_LITERAL ')'     { $$ = $1; $$->declarator->attributeList = $2; $$->declarator->declaratorAsm = $5; }
+    | unaliased_declarator optional_attribute_specifier_list                                { $$ = $1; $$->declarator->attributeList = $2; }
     ;
 
 unaliased_declarator
@@ -367,15 +368,15 @@ direct_declarator
     : IDENTIFIER                                                                    { $$ = IR\DirectDeclarator\Identifier[$1]; }
     | TYPEDEF_NAME                                                                  { $$ = IR\DirectDeclarator\Identifier[$1]; }
     | '(' declarator ')'                                                            { $$ = IR\DirectDeclarator\Declarator[$2]; }
-    | direct_declarator '[' ']'                                                     { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
-    | direct_declarator '[' '*' ']'                                                 { $$ = IR\DirectDeclarator\IncompleteArray[$1]; }
-    | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'    { throw new Error('direct_declarator bracket static type_qualifier_list assignment_expression not implemented'); }
-    | direct_declarator '[' STATIC assignment_expression ']'                        { throw new Error('direct_declarator bracket static assignment_expression not implemented'); }
-    | direct_declarator '[' type_qualifier_list '*' ']'                             { throw new Error('direct_declarator bracket type_qualifier_list star not implemented'); }
-    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'    { throw new Error('direct_declarator bracket type_qualifier_list static assignment_expression not implemented'); }
-    | direct_declarator '[' type_qualifier_list assignment_expression ']'           { throw new Error('direct_declarator bracket type_qualifier_list assignment_expression not implemented'); }
-    | direct_declarator '[' type_qualifier_list ']'                                 { throw new Error('direct_declarator bracket type_qualifier_list not implemented'); }
-    | direct_declarator '[' assignment_expression ']'                               { $$ = IR\DirectDeclarator\CompleteArray[$1, $3]; }
+    | direct_declarator '[' ']'                                                     { $$ = IR\DirectDeclarator\IncompleteArray[$1, 0, []]; }
+    | direct_declarator '[' '*' ']'                                                 { $$ = IR\DirectDeclarator\CompleteArray[$1, null, 0, []]; }
+    | direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'    { $$ = IR\DirectDeclarator\CompleteArray[$1, $5, $4[0] | Node\Decl::KIND_STATIC, $4[1]]; }
+    | direct_declarator '[' STATIC assignment_expression ']'                        { $$ = IR\DirectDeclarator\CompleteArray[$1, $4, Node\Decl::KIND_STATIC, []]; }
+    | direct_declarator '[' type_qualifier_list '*' ']'                             { $$ = IR\DirectDeclarator\CompleteArray[$1, null, $3[0], $3[1]]; }
+    | direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'    { $$ = IR\DirectDeclarator\CompleteArray[$1, $5, $3[0] | Node\Decl::KIND_STATIC, $3[1]]; }
+    | direct_declarator '[' type_qualifier_list assignment_expression ']'           { $$ = IR\DirectDeclarator\CompleteArray[$1, $4, $3[0], $3[1]]; }
+    | direct_declarator '[' type_qualifier_list ']'                                 { $$ = IR\DirectDeclarator\IncompleteArray[$1, $3[0], $3[1]]; }
+    | direct_declarator '[' assignment_expression ']'                               { $$ = IR\DirectDeclarator\CompleteArray[$1, $3, 0, []]; }
     | direct_declarator '(' parameter_type_list ')'                                 { $$ = IR\DirectDeclarator\Function_[$1, $3[0], $3[1]]; }
     | direct_declarator '(' ')'                                                     { $$ = IR\DirectDeclarator\Function_[$1, [], false]; }
     | direct_declarator '(' identifier_list ')'                                     { throw new Error('direct_declarator params identifier list not implemented'); }
@@ -429,27 +430,27 @@ abstract_declarator
     ;
 
 direct_abstract_declarator
-    : '(' abstract_declarator ')'                                                           { $$ = IR\DirectAbstractDeclarator\AbstractDeclarator[$2]; }
-    | '[' ']'                                                                               { $$ = IR\DirectAbstractDeclarator\IncompleteArray[]; }
-    | '[' '*' ']'                                                                           { throw new Error('direct_abstract_declarator bracket star not implemented'); }
-    | '[' STATIC type_qualifier_list assignment_expression ']'                              { throw new Error('direct_abstract_declarator bracket static type qualifier list assignment not implemented'); }
-    | '[' STATIC assignment_expression ']'                                                  { throw new Error('direct_abstract_declarator bracket static assignment not implemented'); }
-    | '[' type_qualifier_list STATIC assignment_expression ']'                              { throw new Error('direct_abstract_declarator bracket type qualifier list static assignment not implemented'); }
-    | '[' type_qualifier_list assignment_expression ']'                                     { throw new Error('direct_abstract_declarator bracket type qualifier list assignment not implemented'); }
-    | '[' type_qualifier_list ']'                                                           { throw new Error('direct_abstract_declarator bracket type qualifier list not implemented'); }
-    | '[' assignment_expression ']'                                                         { throw new Error('direct_abstract_declarator bracket assignment_expr not implemented'); }
-    | direct_abstract_declarator '[' ']'                                                    { throw new Error('direct_abstract_declarator with bracket not implemented'); }
-    | direct_abstract_declarator '[' '*' ']'                                                { throw new Error('direct_abstract_declarator with bracket star not implemented'); }
-    | direct_abstract_declarator '[' STATIC type_qualifier_list assignment_expression ']'   { throw new Error('direct_abstract_declarator with bracket static type qualifier list assignment not implemented'); }
-    | direct_abstract_declarator '[' STATIC assignment_expression ']'                       { throw new Error('direct_abstract_declarator with bracket static assignment not implemented'); }
-    | direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'          { throw new Error('direct_abstract_declarator with bracket type qualifier list assignment not implemented'); }
-    | direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'   { throw new Error('direct_abstract_declarator with bracket type qualifier list static asssignment not implemented'); }
-    | direct_abstract_declarator '[' type_qualifier_list ']'                                { throw new Error('direct_abstract_declarator with bracket type qualifier list not implemented'); }
-    | direct_abstract_declarator '[' assignment_expression ']'                              { throw new Error('direct_abstract_declarator with bracket assignment_expr not implemented'); }
-    | '(' ')'                                                                               { throw new Error('direct_abstract_declarator empty parameter list not implemented'); }
-    | '(' parameter_type_list ')'                                                           { throw new Error('direct_abstract_declarator parameter list not implemented'); }
-    | direct_abstract_declarator '(' ')' optional_attribute_specifier                       { $$ = IR\DirectAbstractDeclarator\Function_[$1, [], false, $4]; }
-    | direct_abstract_declarator '(' parameter_type_list ')' optional_attribute_specifier   { $$ = IR\DirectAbstractDeclarator\Function_[$1, $3[0], $3[1], $5]; }
+    : '(' abstract_declarator ')'                                                                { $$ = IR\DirectAbstractDeclarator\AbstractDeclarator[$2]; }
+    | '[' ']'                                                                                    { $$ = IR\DirectAbstractDeclarator\IncompleteArray[null, 0, []]; }
+    | '[' '*' ']'                                                                                { $$ = IR\DirectAbstractDeclarator\CompleteArray[null, null, 0, []]; }
+    | '[' STATIC type_qualifier_list assignment_expression ']'                                   { $$ = IR\DirectAbstractDeclarator\CompleteArray[null, $4, $3[0] | Node\Decl::KIND_STATIC, $3[1]]; }
+    | '[' STATIC assignment_expression ']'                                                       { $$ = IR\DirectAbstractDeclarator\CompleteArray[null, $3, Node\Decl::KIND_STATIC, []]; }
+    | '[' type_qualifier_list STATIC assignment_expression ']'                                   { $$ = IR\DirectAbstractDeclarator\CompleteArray[null, $4, $2[0] | Node\Decl::KIND_STATIC, $2[1]]; }
+    | '[' type_qualifier_list assignment_expression ']'                                          { $$ = IR\DirectAbstractDeclarator\CompleteArray[null, $3, $2[0], $2[1]]; }
+    | '[' type_qualifier_list ']'                                                                { $$ = IR\DirectAbstractDeclarator\IncompleteArray[null, $2[0], $2[1]]; }
+    | '[' assignment_expression ']'                                                              { $$ = IR\DirectAbstractDeclarator\CompleteArray[null, $2, 0, []]; }
+    | direct_abstract_declarator '[' ']'                                                         { $$ = IR\DirectAbstractDeclarator\IncompleteArray[$1, 0, []]; }
+    | direct_abstract_declarator '[' '*' ']'                                                     { $$ = IR\DirectAbstractDeclarator\CompleteArray[$1, null, 0, []]; }
+    | direct_abstract_declarator '[' STATIC type_qualifier_list assignment_expression ']'        { $$ = IR\DirectAbstractDeclarator\CompleteArray[$1, $5, $4[0] | Node\Decl::KIND_STATIC, $4[1]]; }
+    | direct_abstract_declarator '[' STATIC assignment_expression ']'                            { $$ = IR\DirectAbstractDeclarator\CompleteArray[$1, $4, Node\Decl::KIND_STATIC, []]; }
+    | direct_abstract_declarator '[' type_qualifier_list assignment_expression ']'               { $$ = IR\DirectAbstractDeclarator\CompleteArray[$1, $5, $3[0] | Node\Decl::KIND_STATIC, $3[1]]; }
+    | direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expression ']'        { $$ = IR\DirectAbstractDeclarator\CompleteArray[$1, $4, $3[0], $3[1]]; }
+    | direct_abstract_declarator '[' type_qualifier_list ']'                                     { $$ = IR\DirectAbstractDeclarator\IncompleteArray[$1, $3[0], $3[1]]; }
+    | direct_abstract_declarator '[' assignment_expression ']'                                   { $$ = IR\DirectAbstractDeclarator\CompleteArray[$1, $3, 0, []]; }
+    | '(' ')' optional_attribute_specifier_list                                                  { $$ = IR\DirectAbstractDeclarator\Function_[null, [], false, $3]; }
+    | '(' parameter_type_list ')' optional_attribute_specifier_list                              { $$ = IR\DirectAbstractDeclarator\Function_[null, $2[0], $2[1], $4]; }
+    | direct_abstract_declarator '(' ')' optional_attribute_specifier_list                       { $$ = IR\DirectAbstractDeclarator\Function_[$1, [], false, $4]; }
+    | direct_abstract_declarator '(' parameter_type_list ')' optional_attribute_specifier_list   { $$ = IR\DirectAbstractDeclarator\Function_[$1, $3[0], $3[1], $5]; }
     ;
 
 initializer
@@ -494,9 +495,9 @@ statement
     ;
 
 labeled_statement
-    : IDENTIFIER ':' optional_attribute_specifier statement    { throw new Error('labeled_statement identifier not implemented'); }
-    | CASE constant_expression ':' statement                   { throw new Error('labeled_statement case not implemented'); }
-    | DEFAULT ':' statement                                    { throw new Error('labeled_statement default not implemented'); }
+    : IDENTIFIER ':' optional_attribute_specifier_list statement     { throw new Error('labeled_statement identifier not implemented'); }
+    | CASE constant_expression ':' statement                         { throw new Error('labeled_statement case not implemented'); }
+    | DEFAULT ':' statement                                          { throw new Error('labeled_statement default not implemented'); }
     ;
 
 compound_statement

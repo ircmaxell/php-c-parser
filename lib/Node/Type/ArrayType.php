@@ -6,4 +6,18 @@ use PHPCParser\Node\Type;
 
 abstract class ArrayType extends Type
 {
+    public Type $parent;
+    public int $modifiers;
+    public array $attributeList;
+
+    public function __construct(Type $parent, int $modifiers, array $attributeList, array $attributes = []) {
+        parent::__construct($attributes);
+        $this->parent = $parent;
+        $this->modifiers = $modifiers;
+        $this->attributeList = $attributeList;
+    }
+
+    public function getSubNodeNames(): array {
+        return ['parent', 'modifiers', 'attributeList'];
+    }
 }

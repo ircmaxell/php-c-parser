@@ -2,11 +2,6 @@
 
 namespace PHPCParser\IR\DirectAbstractDeclarator;
 
-use PHPCParser\IR\DirectAbstractDeclarator;
-
-class IncompleteArray extends DirectAbstractDeclarator
+class IncompleteArray extends Array_
 {
-    public function __construct(array $attributes = []) {
-        parent::__construct($attributes);
-    }
 }

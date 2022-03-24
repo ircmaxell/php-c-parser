@@ -4,6 +4,6 @@ namespace PHPCParser\Node\Type\ArrayType;
 
 use PHPCParser\Node\Type\ArrayType;
 
-class IncompleteArrayType extends ArrayType
+class CompleteArrayType extends ArrayType
 {
 }

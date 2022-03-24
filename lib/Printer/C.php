@@ -234,8 +234,8 @@ class C implements Printer
                 $result .= $next . '...';
             }
             $result .= ')';
-            if ($func->attributeList) {
-                foreach ($func->attributeList->attributeList as $attr) {
+            foreach ($func->attributeList as $attrs) {
+                foreach ($attrs->attributeList as $attr) {
                     $result .= ' __attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . '))';
                 }
             }
@@ -253,9 +253,13 @@ class C implements Printer
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', $name . '[]', $subType);
         }
-        if ($type instanceof Type\ArrayType\ConstantArrayType) {
+        if ($type instanceof Type\ArrayType\CompleteArrayType) {
             $subType = $this->printType($type->parent, '__NAME_PLACEHOLDER__', $level);
-            return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']', $subType);
+            if ($type instanceof Type\ArrayType\ConstantArrayType || $type instanceof Type\ArrayType\VariableArrayType) {
+                return str_replace('__NAME_PLACEHOLDER__', $name . '[' . $this->printExpr($type->size, $level) . ']', $subType);
+            } else {
+                return str_replace('__NAME_PLACEHOLDER__', $name . '[*]', $subType);
+            }
         }
         var_dump($type);
     }
