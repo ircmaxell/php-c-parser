@@ -619,10 +619,10 @@ class Parser extends ParserAbstract
                  $this->semValue = new Expr\StructDerefExpr($this->semStack[$stackPos-(3-1)], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             23 => function ($stackPos) {
-                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_POSTINC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-1)], Expr\UnaryOperator::KIND_POSTINC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             24 => function ($stackPos) {
-                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-2)], Expr\UnaryOperator::KIND_POSTDEC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-1)], Expr\UnaryOperator::KIND_POSTDEC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             25 => function ($stackPos) {
                  throw new Error('initializer list no trailing not implemented'); 
