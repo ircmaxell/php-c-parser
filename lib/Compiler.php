@@ -62,6 +62,7 @@ restart:
         } elseif ($qualifiers > 0 || !empty($attributeLists)) {
             $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
             $qualifiers = 0;
+            $attributeLists = [];
             goto restart;
         } else {
             var_dump($declaration);
