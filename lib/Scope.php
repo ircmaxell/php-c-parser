@@ -7,7 +7,7 @@ class Scope {
     private array $entries = [
         'void' => Tokens::T_TYPEDEF_NAME,
         'char' => Tokens::T_TYPEDEF_NAME,
-        'bool' => Tokens::T_TYPEDEF_NAME,
+        '_Bool' => Tokens::T_TYPEDEF_NAME,
 //        'int8_t' => Tokens::T_TYPEDEF_NAME,
 //        'uint8_t' => Tokens::T_TYPEDEF_NAME,
 //        'int16_t' => Tokens::T_TYPEDEF_NAME,
