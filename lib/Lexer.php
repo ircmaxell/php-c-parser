@@ -89,12 +89,33 @@ class Lexer
         return [Tokens::T_I_CONSTANT, $number];
     }
 
-    private function extractLiteral(): array {
+    private array $literalsBuffer = [];
+    private function extractLiteral(): ?array {
         $string = $this->currentToken->value;
         $this->currentToken = $this->currentToken->next;
-        while ($this->currentToken !== null && $this->currentToken->type === Token::LITERAL) {
-            $string .= $this->currentToken->value;
-            $this->currentToken = $this->currentToken->next;
+        $tokenLine = $this->tokenPos;
+        $token = $this->currentToken;
+        for (;;) {
+            if ($token === null) {
+                if (\count($this->tokens) > ++$tokenLine) {
+                    $token = $this->tokens[$tokenLine];
+                } else {
+                    break;
+                }
+            } elseif ($token->type === Token::WHITESPACE || $token->value === '') {
+                $token = $token->next;
+            } else {
+                break;
+            }
+        }
+        if ($token !== null && $token->type === Token::LITERAL) {
+            $this->literalsBuffer[] = $string;
+            return null;
+        }
+        if ($this->literalsBuffer) {
+            $this->literalsBuffer[] = $string;
+            $string = implode($this->literalsBuffer);
+            $this->literalsBuffer = [];
         }
         return [Tokens::T_STRING_LITERAL, $string];
     }
@@ -276,6 +297,7 @@ emit_single:
         '_noreturn' => Tokens::T_NORETURN,
         '_static_assert' => Tokens::T_STATIC_ASSERT,
         '_thread_local' => Tokens::T_THREAD_LOCAL,
+        '__thread' => Tokens::T_THREAD_LOCAL,
         '__func__' => Tokens::T_FUNC_NAME,
     ];
 
