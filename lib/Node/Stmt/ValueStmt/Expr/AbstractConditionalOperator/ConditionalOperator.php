@@ -21,7 +21,7 @@ class ConditionalOperator extends AbstractConditionalOperator
     }
 
     public function getSubNodeNames(): array {
-        return ['cond', 'ifTrue', 'ifFalse'];
+        return array_merge(parent::getSubNodeNames(), ['cond', 'ifTrue', 'ifFalse']);
     }
 
     public function isConstant(): bool {

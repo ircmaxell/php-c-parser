@@ -17,7 +17,7 @@ class DeclRefExpr extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['name', 'decl'];
+        return array_merge(parent::getSubNodeNames(), ['name', 'decl']);
     }
 
     public function isConstant(): bool {

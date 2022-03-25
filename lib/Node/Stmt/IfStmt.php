@@ -20,6 +20,6 @@ class IfStmt extends Stmt
     }
 
     public function getSubNodeNames(): array {
-        return ['condition', 'trueStmt', 'falseStmt'];
+        return array_merge(parent::getSubNodeNames(), ['condition', 'trueStmt', 'falseStmt']);
     }
 }

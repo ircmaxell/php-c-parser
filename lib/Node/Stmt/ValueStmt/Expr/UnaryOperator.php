@@ -30,7 +30,7 @@ class UnaryOperator extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['expr', 'kind'];
+        return array_merge(parent::getSubNodeNames(), ['expr', 'kind']);
     }
 
     public function isConstant(): bool {

@@ -15,7 +15,7 @@ class TypeRefExpr extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['type'];
+        return array_merge(parent::getSubNodeNames(), ['type']);
     }
 
     public function isConstant(): bool {

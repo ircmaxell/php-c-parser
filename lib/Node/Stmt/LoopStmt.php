@@ -22,6 +22,6 @@ class LoopStmt extends Stmt
     }
 
     public function getSubNodeNames(): array {
-        return ['condition', 'initExpr', 'loopExpr', 'loopStmt'];
+        return array_merge(parent::getSubNodeNames(), ['condition', 'initExpr', 'loopExpr', 'loopStmt']);
     }
 }

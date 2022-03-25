@@ -495,9 +495,9 @@ statement
     ;
 
 labeled_statement
-    : IDENTIFIER ':' optional_attribute_specifier_list statement     { throw new Error('labeled_statement identifier not implemented'); }
-    | CASE constant_expression ':' statement                         { throw new Error('labeled_statement case not implemented'); }
-    | DEFAULT ':' statement                                          { throw new Error('labeled_statement default not implemented'); }
+    : IDENTIFIER ':' optional_attribute_specifier_list statement     { $$ = $4; $$->labels[] = Node\Stmt\Label\IdentifiedLabel[$1, $3]; }
+    | CASE constant_expression ':' statement                         { $$ = $4; $$->labels[] = Node\Stmt\Label\CaseLabel[$2]; }
+    | DEFAULT ':' statement                                          { $$ = $3; $$->labels[] = Node\Stmt\Label\DefaultLabel[]; }
     ;
 
 compound_statement
@@ -536,9 +536,9 @@ iteration_statement
     ;
 
 jump_statement
-    : GOTO IDENTIFIER ';'       { throw new Error('goto identifier not implemented'); }
-    | CONTINUE ';'              { throw new Error('continue not implemented'); }
-    | BREAK ';'                 { throw new Error('break not implemented'); }
+    : GOTO IDENTIFIER ';'       { $$ = Node\Stmt\GotoStmt[$2]; }
+    | CONTINUE ';'              { $$ = Node\Stmt\ContinueStmt[]; }
+    | BREAK ';'                 { $$ = Node\Stmt\BreakStmt[]; }
     | RETURN ';'                { $$ = Node\Stmt\ReturnStmt[null]; }
     | RETURN expression ';'     { $$ = Node\Stmt\ReturnStmt[$2]; }
     ;

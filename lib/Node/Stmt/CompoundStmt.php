@@ -14,7 +14,7 @@ class CompoundStmt extends Stmt
     }
 
     public function getSubNodeNames(): array {
-        return ['stmts'];
+        return array_merge(parent::getSubNodeNames(), ['stmts']);
     }
 
     public function getType(): string {

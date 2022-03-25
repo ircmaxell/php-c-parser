@@ -17,7 +17,7 @@ class DimFetchExpr extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['expr', 'dimension'];
+        return array_merge(parent::getSubNodeNames(), ['expr', 'dimension']);
     }
 
     public function isConstant(): bool {

@@ -14,7 +14,7 @@ class IntegerLiteral extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['value'];
+        return array_merge(parent::getSubNodeNames(), ['value']);
     }
 
     public function isConstant(): bool {

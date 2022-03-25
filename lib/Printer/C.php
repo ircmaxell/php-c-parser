@@ -401,6 +401,20 @@ class C implements Printer
     }
 
     protected function printStmt(Stmt $stmt, int $level): string {
+        $labels = '';
+        foreach ($stmt->labels as $label) {
+            if ($label instanceof Stmt\Label\IdentifiedLabel) {
+                $labels .= $label->label . ': ';
+            } elseif ($label instanceof Stmt\Label\CaseLabel) {
+                $labels .= 'case ' . $this->printExpr($label->expr, $level) . ': ';
+            } elseif ($label instanceof Stmt\Label\DefaultLabel) {
+                $labels .= 'default: ';
+            }
+        }
+        return $labels . $this->printStmtContents($stmt, $level);
+    }
+
+    private function printStmtContents(Stmt $stmt, int $level): string {
         if ($stmt instanceof Stmt\ReturnStmt) {
             $return = 'return';
             if ($stmt->result !== null) {
@@ -449,6 +463,15 @@ class C implements Printer
         }
         if ($stmt instanceof Stmt\DoLoopStmt) {
             return 'do ' . $this->printNode($stmt->loopStmt, $level) . ' while (' . $this->printExpr($stmt->condition, $level) . ');';
+        }
+        if ($stmt instanceof Stmt\GotoStmt) {
+            return 'goto ' . $stmt->label . ';';
+        }
+        if ($stmt instanceof Stmt\BreakStmt) {
+            return 'break;';
+        }
+        if ($stmt instanceof Stmt\ContinueStmt) {
+            return 'continue;';
         }
         if ($stmt instanceof Stmt\CompoundStmt) {
             return $this->printCompoundStmt($stmt, $level);

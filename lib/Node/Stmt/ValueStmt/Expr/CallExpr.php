@@ -16,7 +16,7 @@ class CallExpr extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['fn', 'args'];
+        return array_merge(parent::getSubNodeNames(), ['fn', 'args']);
     }
 
     public function isConstant(): bool {

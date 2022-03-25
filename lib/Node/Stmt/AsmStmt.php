@@ -27,6 +27,6 @@ class AsmStmt extends Stmt
     }
 
     public function getSubNodeNames(): array {
-        return ['asm', 'outputOperands', 'inputOperands', 'registers', 'modifiers'];
+        return array_merge(parent::getSubNodeNames(), ['asm', 'outputOperands', 'inputOperands', 'registers', 'modifiers']);
     }
 }

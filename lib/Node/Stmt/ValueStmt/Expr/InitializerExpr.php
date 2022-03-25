@@ -17,7 +17,7 @@ class InitializerExpr extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['initializers', 'explicitType'];
+        return array_merge(parent::getSubNodeNames(), ['initializers', 'explicitType']);
     }
 
     public function isConstant(): bool {

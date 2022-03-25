@@ -17,7 +17,7 @@ class StructDerefExpr extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['expr', 'memberName'];
+        return array_merge(parent::getSubNodeNames(), ['expr', 'memberName']);
     }
 
     public function isConstant(): bool {

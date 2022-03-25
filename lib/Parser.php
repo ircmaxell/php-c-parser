@@ -583,7 +583,7 @@ class Parser extends ParserAbstract
                  $this->semValue = new Expr\StringLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             11 => function ($stackPos) {
-                 $this->semValue = new Expr\DeclRefExpr('__func__', null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\FuncName($this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             12 => function ($stackPos) {
                  throw new Error('generic not implemented'); 
@@ -1336,13 +1336,13 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             262 => function ($stackPos) {
-                 throw new Error('labeled_statement identifier not implemented'); 
+                 $this->semValue = $this->semStack[$stackPos-(4-4)]; $this->semValue->labels[] = new Node\Stmt\Label\IdentifiedLabel($this->semStack[$stackPos-(4-1)], $this->semStack[$stackPos-(4-3)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             263 => function ($stackPos) {
-                 throw new Error('labeled_statement case not implemented'); 
+                 $this->semValue = $this->semStack[$stackPos-(4-4)]; $this->semValue->labels[] = new Node\Stmt\Label\CaseLabel($this->semStack[$stackPos-(4-2)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             264 => function ($stackPos) {
-                 throw new Error('labeled_statement default not implemented'); 
+                 $this->semValue = $this->semStack[$stackPos-(3-3)]; $this->semValue->labels[] = new Node\Stmt\Label\DefaultLabel($this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             265 => function ($stackPos) {
                  $this->semValue = new Node\Stmt\CompoundStmt([], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
@@ -1396,13 +1396,13 @@ class Parser extends ParserAbstract
                  $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(7-4)], $this->compiler->compileDeclarationStmt($this->semStack[$stackPos-(7-3)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes), $this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-7)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             282 => function ($stackPos) {
-                 throw new Error('goto identifier not implemented'); 
+                 $this->semValue = new Node\Stmt\GotoStmt($this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             283 => function ($stackPos) {
-                 throw new Error('continue not implemented'); 
+                 $this->semValue = new Node\Stmt\ContinueStmt($this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             284 => function ($stackPos) {
-                 throw new Error('break not implemented'); 
+                 $this->semValue = new Node\Stmt\BreakStmt($this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             285 => function ($stackPos) {
                  $this->semValue = new Node\Stmt\ReturnStmt(null, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 

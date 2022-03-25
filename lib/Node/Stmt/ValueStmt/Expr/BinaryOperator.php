@@ -52,7 +52,7 @@ class BinaryOperator extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['left', 'right', 'kind'];
+        return array_merge(parent::getSubNodeNames(), ['left', 'right', 'kind']);
     }
 
     public function isConstant(): bool {

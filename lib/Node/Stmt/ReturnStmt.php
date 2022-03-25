@@ -16,6 +16,6 @@ class ReturnStmt extends Stmt
     }
 
     public function getSubNodeNames(): array {
-        return ['result'];
+        return array_merge(parent::getSubNodeNames(), ['result']);
     }
 }

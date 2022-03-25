@@ -16,7 +16,7 @@ class CastExpr extends Expr
     }
 
     public function getSubNodeNames(): array {
-        return ['expr', 'type'];
+        return array_merge(parent::getSubNodeNames(), ['expr', 'type']);
     }
 
     public function isConstant(): bool {

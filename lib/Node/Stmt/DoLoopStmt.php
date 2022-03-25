@@ -18,6 +18,6 @@ class DoLoopStmt extends Stmt
     }
 
     public function getSubNodeNames(): array {
-        return ['condition', 'loopStmt'];
+        return array_merge(parent::getSubNodeNames(), ['condition', 'loopStmt']);
     }
 }
