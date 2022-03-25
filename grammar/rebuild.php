@@ -85,7 +85,7 @@ function resolveCompiles($code) {
             foreach ($params as $param) {
                 $paramCode .= $param . ', ';
             }
-            return '$$ = $this->compiler->' . $matches['name'] . '(' . $paramCode . 'attributes())';
+            return '$this->compiler->' . $matches['name'] . '(' . $paramCode . 'attributes())';
         },
         $code
     );

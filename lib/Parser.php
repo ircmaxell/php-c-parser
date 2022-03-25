@@ -1378,22 +1378,22 @@ class Parser extends ParserAbstract
                  throw new Error('switch not implemented'); 
             },
             276 => function ($stackPos) {
-                 throw new Error('iteration 0 not implemented'); 
+                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(5-3)], null, null, $this->semStack[$stackPos-(5-5)], $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             277 => function ($stackPos) {
-                 throw new Error('iteration 1 not implemented'); 
+                 $this->semValue = new Node\Stmt\DoLoopStmt($this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-2)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             278 => function ($stackPos) {
-                 throw new Error('iteration 2 not implemented'); 
+                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(6-4)], $this->semStack[$stackPos-(6-3)], null, $this->semStack[$stackPos-(6-6)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes); 
             },
             279 => function ($stackPos) {
-                 throw new Error('iteration 3 not implemented'); 
+                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(7-4)], $this->semStack[$stackPos-(7-3)], $this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-7)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             280 => function ($stackPos) {
-                 throw new Error('iteration 4 not implemented'); 
+                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(6-4)], $this->compiler->compileDeclarationStatement($this->semStack[$stackPos-(6-3)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes), null, $this->semStack[$stackPos-(6-6)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes); 
             },
             281 => function ($stackPos) {
-                 throw new Error('iteration 5 not implemented'); 
+                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(7-4)], $this->compiler->compileDeclarationStatement($this->semStack[$stackPos-(7-3)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes), $this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-7)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             282 => function ($stackPos) {
                  throw new Error('goto identifier not implemented'); 

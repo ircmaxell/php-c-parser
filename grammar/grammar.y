@@ -270,8 +270,8 @@ struct_declaration_list
     ;
 
 struct_declaration
-    : specifier_qualifier_list ';'                          { compileStructField[$1[0], $1[1], $1[2], null]; } /* for anonymous struct/union */
-    | specifier_qualifier_list struct_declarator_list ';'   { compileStructField[$1[0], $1[1], $1[2], $2]; }
+    : specifier_qualifier_list ';'                          { $$ = compileStructField[$1[0], $1[1], $1[2], null]; } /* for anonymous struct/union */
+    | specifier_qualifier_list struct_declarator_list ';'   { $$ = compileStructField[$1[0], $1[1], $1[2], $2]; }
     | static_assert_declaration                             
     ;
 
@@ -408,9 +408,9 @@ parameter_list
     ;
 
 parameter_declaration
-    : declaration_specifiers declarator             { compileParamVarDeclaration[$1[0], $1[1], $1[2], $2]; }
-    | declaration_specifiers abstract_declarator    { compileParamAbstractDeclaration[$1[0], $1[1], $1[2], $2]; }
-    | declaration_specifiers                        { compileParamAbstractDeclaration[$1[0], $1[1], $1[2], null]; }
+    : declaration_specifiers declarator             { $$ = compileParamVarDeclaration[$1[0], $1[1], $1[2], $2]; }
+    | declaration_specifiers abstract_declarator    { $$ = compileParamAbstractDeclaration[$1[0], $1[1], $1[2], $2]; }
+    | declaration_specifiers                        { $$ = compileParamAbstractDeclaration[$1[0], $1[1], $1[2], null]; }
     ;
 
 identifier_list
@@ -419,8 +419,8 @@ identifier_list
     ;
 
 type_name
-    : specifier_qualifier_list abstract_declarator  { compileTypeReference[$1[0], $1[1], $1[2], $2]; }
-    | specifier_qualifier_list                      { compileTypeReference[$1[0], $1[1], $1[2], null]; }
+    : specifier_qualifier_list abstract_declarator  { $$ = compileTypeReference[$1[0], $1[1], $1[2], $2]; }
+    | specifier_qualifier_list                      { $$ = compileTypeReference[$1[0], $1[1], $1[2], null]; }
     ;
 
 abstract_declarator
@@ -511,7 +511,7 @@ block_item_list
     ;
 
 block_item
-    : declaration           { compileDeclarationStmt[$1]; }
+    : declaration           { $$ = compileDeclarationStmt[$1]; }
     | statement             { $$ = $1; }
     ;
 
@@ -527,12 +527,12 @@ selection_statement
     ;
 
 iteration_statement
-    : WHILE '(' expression ')' statement                                            { throw new Error('iteration 0 not implemented'); }
-    | DO statement WHILE '(' expression ')' ';'                                     { throw new Error('iteration 1 not implemented'); }
-    | FOR '(' expression_statement expression_statement ')' statement               { throw new Error('iteration 2 not implemented'); }
-    | FOR '(' expression_statement expression_statement expression ')' statement    { throw new Error('iteration 3 not implemented'); }
-    | FOR '(' declaration expression_statement ')' statement                        { throw new Error('iteration 4 not implemented'); }
-    | FOR '(' declaration expression_statement expression ')' statement             { throw new Error('iteration 5 not implemented'); }
+    : WHILE '(' expression ')' statement                                            { $$ = Node\Stmt\LoopStmt[$3, null, null, $5]; }
+    | DO statement WHILE '(' expression ')' ';'                                     { $$ = Node\Stmt\DoLoopStmt[$5, $2]; }
+    | FOR '(' expression_statement expression_statement ')' statement               { $$ = Node\Stmt\LoopStmt[$4, $3, null, $6]; }
+    | FOR '(' expression_statement expression_statement expression ')' statement    { $$ = Node\Stmt\LoopStmt[$4, $3, $5, $7]; }
+    | FOR '(' declaration expression_statement ')' statement                        { $$ = Node\Stmt\LoopStmt[$4, compileDeclarationStmt[$3], null, $6]; }
+    | FOR '(' declaration expression_statement expression ')' statement             { $$ = Node\Stmt\LoopStmt[$4, compileDeclarationStmt[$3], $5, $7]; }
     ;
 
 jump_statement
@@ -550,12 +550,12 @@ translation_unit
 
 external_declaration
     : function_definition   { $$ = $1; }
-    | declaration           { compileExternalDeclaration[$1]; }
+    | declaration           { $$ = compileExternalDeclaration[$1]; }
     ;
 
 function_definition
-    : declaration_specifiers declarator declaration_list compound_statement     { compileFunction[$1[0], $1[1], $1[2], $2, $3, $4]; }
-    | declaration_specifiers declarator compound_statement                      { compileFunction[$1[0], $1[1], $1[2], $2, [], $3]; }
+    : declaration_specifiers declarator declaration_list compound_statement     { $$ = compileFunction[$1[0], $1[1], $1[2], $2, $3, $4]; }
+    | declaration_specifiers declarator compound_statement                      { $$ = compileFunction[$1[0], $1[1], $1[2], $2, [], $3]; }
     ;
 
 declaration_list
