@@ -1375,7 +1375,7 @@ class Parser extends ParserAbstract
                  $this->semValue = new Node\Stmt\IfStmt($this->semStack[$stackPos-(5-3)], $this->semStack[$stackPos-(5-5)], null, $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             275 => function ($stackPos) {
-                 throw new Error('switch not implemented'); 
+                 $this->semValue = new Node\Stmt\SwitchStmt($this->semStack[$stackPos-(5-3)], $this->semStack[$stackPos-(5-5)], $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             276 => function ($stackPos) {
                  $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(5-3)], null, null, $this->semStack[$stackPos-(5-5)], $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 

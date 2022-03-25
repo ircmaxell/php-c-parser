@@ -453,6 +453,11 @@ class C implements Printer
             }
             return $if;
         }
+        if ($stmt instanceof Stmt\SwitchStmt) {
+            $switch = 'switch (' . $this->printExpr($stmt->condition, $level) . ') ';
+            $switch .= $this->printNode($stmt->stmt, $level);
+            return $switch;
+        }
         if ($stmt instanceof Stmt\LoopStmt) {
             if ($stmt->condition && !$stmt->initStmt && !$stmt->loopExpr) {
                 $loop = 'while (' . $this->printExpr($stmt->condition, $level) . ')';
