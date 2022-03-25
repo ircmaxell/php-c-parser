@@ -511,7 +511,7 @@ block_item_list
     ;
 
 block_item
-    : declaration           { throw new Error('block_item declaration not implemented'); }
+    : declaration           { compileDeclarationStmt[$1]; }
     | statement             { $$ = $1; }
     ;
 

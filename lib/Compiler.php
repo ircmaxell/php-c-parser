@@ -4,6 +4,7 @@ namespace PHPCParser;
 
 use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl;
 use PHPCParser\Node\Decl;
+use PHPCParser\Node\DeclGroup;
 use PHPCParser\Node\Type;
 use PHPCParser\Node\Stmt\ValueStmt\Expr;
 use PHPCParser\Node\Stmt;
@@ -66,9 +67,35 @@ restart:
             goto restart;
         } else {
             var_dump($declaration);
-            throw new \LogicException("Not implmented yet");
+            throw new \LogicException("Not implemented yet");
         }
         return $result;
+    }
+
+    public function compileDeclarationStmt(IR\Declaration $declaration, array $attributes = []): Stmt\DeclStmt {
+        $qualifiers = $declaration->qualifiers;
+        $attributeLists = $declaration->attributeLists;
+        $type = $this->compileType($declaration->types);
+restart:
+        if ($declaration->qualifiers & Decl::KIND_TYPEDEF) {
+            throw new \LogicException("No typedefs inside statement blocks");
+        } elseif ($qualifiers === 0 && empty($attributeLists) && empty($declaration->declarators)) {
+            throw new \LogicException('Also struct/enum defs inside statement blocks');
+        } elseif ($qualifiers === 0 && empty($attributeLists)) {
+            $declGroup = new DeclGroup([], $attributes);
+            foreach ($declaration->declarators as $initDeclarator) {
+                $declGroup->addDecl($this->compileInitDeclarator($initDeclarator, $type, $attributes));
+            }
+            return new Stmt\DeclStmt($declGroup, $attributes);
+        } elseif ($qualifiers > 0 || !empty($attributeLists)) {
+            $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
+            $qualifiers = 0;
+            $attributeLists = [];
+            goto restart;
+        } else {
+            var_dump($declaration);
+            throw new \LogicException("Not implemented yet");
+        }
     }
 
     public function compileStructField(int $qualifiers, array $attributeLists, array $types, ?array $declarators, array $attributes = []): array {

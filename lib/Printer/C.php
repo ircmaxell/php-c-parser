@@ -390,6 +390,13 @@ class C implements Printer
             }
             return $return . ';';
         }
+        if ($stmt instanceof Stmt\DeclStmt) {
+            $decls = [];
+            foreach ($stmt->declarations->declarations as $decl) {
+                $decls[] = $this->printDecl($decl, $level);
+            }
+            return implode(';\n' . str_repeat(' ', $level), $decls) . ';';
+        }
         if ($stmt instanceof Stmt\AsmStmt) {
             $asm = '__asm__ ';
             if ($stmt->modifiers & Stmt\AsmStmt::VOLATILE) {
@@ -406,7 +413,7 @@ class C implements Printer
             return $asm . ');';
         }
         if ($stmt instanceof Stmt\IfStmt) {
-            $if = 'if (' . $this->printExpr($stmt->condition, $level) . ") ";
+            $if = 'if (' . $this->printExpr($stmt->condition, $level) . ') ';
             $if .= $this->printNode($stmt->trueStmt, $level);
             if ($stmt->falseStmt) {
                 $if .= ' else ';

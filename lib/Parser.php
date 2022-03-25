@@ -1357,7 +1357,7 @@ class Parser extends ParserAbstract
                  $this->semStack[$stackPos-(2-1)][] = $this->semStack[$stackPos-(2-2)]; $this->semValue = $this->semStack[$stackPos-(2-1)]; 
             },
             269 => function ($stackPos) {
-                 throw new Error('block_item declaration not implemented'); 
+                 $this->semValue = $this->compiler->compileDeclarationStmt($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             270 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
