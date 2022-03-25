@@ -6,4 +6,5 @@ use PHPCParser\Node\Stmt\ValueStmt;
 
 abstract class Expr extends ValueStmt
 {
+    public abstract function isConstant(): bool;
 }

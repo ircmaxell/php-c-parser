@@ -19,4 +19,8 @@ class DimFetchExpr extends Expr
     public function getSubNodeNames(): array {
         return ['expr', 'dimension'];
     }
+
+    public function isConstant(): bool {
+        return $this->expr->isConstant() && $this->dimension->isConstant();
+    }
 }

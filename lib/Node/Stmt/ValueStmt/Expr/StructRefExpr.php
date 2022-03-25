@@ -3,7 +3,6 @@
 namespace PHPCParser\Node\Stmt\ValueStmt\Expr;
 
 use PHPCParser\Node\Stmt\ValueStmt\Expr;
-use PHPCParser\Node\Type;
 
 class StructRefExpr extends Expr
 {
@@ -18,5 +17,9 @@ class StructRefExpr extends Expr
 
     public function getSubNodeNames(): array {
         return ['expr', 'memberName'];
+    }
+
+    public function isConstant(): bool {
+        return $this->expr->isConstant();
     }
 }

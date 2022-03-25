@@ -216,6 +216,7 @@ class Lexer
             case '[':
             case ']':
             case '?':
+            case '.':
             case ':':
 emit_single:
                 return [ord($value), $value];

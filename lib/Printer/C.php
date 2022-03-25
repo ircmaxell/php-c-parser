@@ -98,9 +98,9 @@ class C implements Printer
                 $return .= " {\n";
                 foreach ($decl->fields as $field) {
                     $return .= str_repeat('  ', $level + 1);
-                    $return .= $this->printType($field->type, $field->name, $level + 1);
-                    if ($field->initializer !== null) {
-                        $return .= ': ' . $this->printExpr($field->initializer, $level + 1);
+                    $return .= $field->type ? $this->printType($field->type, $field->name, $level + 1) : $field->name;
+                    if ($field->bitfieldSize !== null) {
+                        $return .= ': ' . $this->printExpr($field->bitfieldSize, $level + 1);
                     }
                     $return .= ";\n";
                 }
@@ -264,6 +264,21 @@ class C implements Printer
         var_dump($type);
     }
 
+    protected function printInitializer(Expr\Initializer\InitializerElement $initializer, int $level): string {
+        $designators = '';
+        if ($initializer->designators) {
+            foreach ($initializer->designators as $designator) {
+                if ($designator instanceof Expr\Initializer\InitializerDimension) {
+                    $designators .= '[' . $this->printExpr($designator->dimension, $level) . ']';
+                } elseif ($designator instanceof Expr\Initializer\InitializerStructRef) {
+                    $designators .= '.' . $designator->memberName;
+                }
+            }
+            $designators .= ' = ';
+        }
+        return $designators . $this->printExpr($initializer->expr, $level);
+    }
+
     const BINARYOPERATOR_MAP = [
         Expr\BinaryOperator::KIND_ADD         => '+',
         Expr\BinaryOperator::KIND_SUB         => '-',
@@ -371,6 +386,9 @@ class C implements Printer
         }
         if ($expr instanceof Expr\AbstractConditionalOperator\ConditionalOperator) {
             return '(' . $this->printExpr($expr->cond, $level) . ' ? ' . $this->printExpr($expr->ifTrue, $level) . ' : ' . $this->printExpr($expr->ifFalse, $level) . ')';
+        }
+        if ($expr instanceof Expr\InitializerExpr) {
+            return ($expr->explicitType ? '(' . ')' : '') . '{' . implode(', ', array_map(function ($el) use ($level) { return $this->printInitializer($el, $level); }, $expr->initializers)) . '}';
         }
         if ($expr instanceof Expr\CallExpr) {
             $args = [];

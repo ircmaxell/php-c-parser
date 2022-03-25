@@ -3,7 +3,6 @@
 namespace PHPCParser\Node\Stmt\ValueStmt\Expr;
 
 use PHPCParser\Node\Stmt\ValueStmt\Expr;
-use PHPCParser\Node\Type;
 
 class CastExpr extends Expr
 {

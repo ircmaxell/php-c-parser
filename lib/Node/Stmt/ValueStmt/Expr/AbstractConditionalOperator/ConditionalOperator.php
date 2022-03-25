@@ -25,6 +25,6 @@ class ConditionalOperator extends AbstractConditionalOperator
     }
 
     public function isConstant(): bool {
-        return $this->cond->isConstant() ? $this->ifTrue->isConstant() && $this->ifFalse->isConstant : false;
+        return $this->cond->isConstant() ? $this->ifTrue->isConstant() && $this->ifFalse->isConstant() : false;
     }
 }

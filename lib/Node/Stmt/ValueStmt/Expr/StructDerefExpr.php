@@ -19,4 +19,8 @@ class StructDerefExpr extends Expr
     public function getSubNodeNames(): array {
         return ['expr', 'memberName'];
     }
+
+    public function isConstant(): bool {
+        return false;
+    }
 }

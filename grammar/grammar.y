@@ -68,8 +68,8 @@ postfix_expression
     | postfix_expression PTR_OP IDENTIFIER                 { $$ = Expr\StructDerefExpr[$1, $3]; }
     | postfix_expression INC_OP                            { $$ = Expr\UnaryOperator[$1, Expr\UnaryOperator::KIND_POSTINC]; }
     | postfix_expression DEC_OP                            { $$ = Expr\UnaryOperator[$1, Expr\UnaryOperator::KIND_POSTDEC]; }
-    | '(' type_name ')' '{' initializer_list '}'           { throw new Error('initializer list no trailing not implemented'); }
-    | '(' type_name ')' '{' initializer_list ',' '}'       { throw new Error('initializer list trailing not implemented'); }
+    | '(' type_name ')' '{' initializer_list '}'           { $$ = Expr\InitializerExpr[$5, $2]; }
+    | '(' type_name ')' '{' initializer_list ',' '}'       { $$ = Expr\InitializerExpr[$5, $2]; }
     ;
 
 argument_expression_list
@@ -454,20 +454,20 @@ direct_abstract_declarator
     ;
 
 initializer
-    : '{' initializer_list '}'      { throw new Error('initializer brackend no trailing not implemented'); }
-    | '{' initializer_list ',' '}'  { throw new Error('initializer brackeded trailing not implemented'); }
-    | assignment_expression         { throw new Error('initializer assignment_expression not implemented'); }
+    : '{' initializer_list '}'      { $$ = Expr\InitializerExpr[$2, null]; }
+    | '{' initializer_list ',' '}'  { $$ = Expr\InitializerExpr[$2, null]; }
+    | assignment_expression         { $$ = $1; }
     ;
 
 initializer_list
-    : designation initializer                           { throw new Error('initializer_list designator initializer not implemented'); }
-    | initializer                                       { throw new Error('initializer_list initializer not implemented'); }
-    | initializer_list ',' designation initializer      { throw new Error('initializer_list initializer_list designator initializer not implemented'); }
-    | initializer_list ',' initializer                  { throw new Error('initializer_list initializer_list initializer not implemented'); }
+    : designation initializer                           { init(Expr\Initializer\InitializerElement[$1, $2]); }
+    | initializer                                       { init(Expr\Initializer\InitializerElement[[], $1]); }
+    | initializer_list ',' designation initializer      { push($1, Expr\Initializer\InitializerElement[$3, $4]); }
+    | initializer_list ',' initializer                  { push($1, Expr\Initializer\InitializerElement[[], $3]); }
     ;
 
 designation
-    : designator_list '='       
+    : designator_list '='       { $$ = $1; }
     ;
 
 designator_list
@@ -476,8 +476,8 @@ designator_list
     ;
 
 designator
-    : '[' constant_expression ']'   { throw new Error('[] designator not implemented'); }
-    | '.' IDENTIFIER                { throw new Error('. designator not implemented'); }
+    : '[' constant_expression ']'   { $$ = Expr\Initializer\InitializerDimension[$1]; }
+    | '.' IDENTIFIER                { $$ = Expr\Initializer\InitializerStructRef[$1]; }
     ;
 
 static_assert_declaration
@@ -491,7 +491,7 @@ statement
     | selection_statement   { $$ = $1; }
     | iteration_statement   { $$ = $1; }
     | jump_statement        { $$ = $1; } 
-    | asm_statement        { $$ = $1; }
+    | asm_statement         { $$ = $1; }
     ;
 
 labeled_statement

@@ -625,10 +625,10 @@ class Parser extends ParserAbstract
                  $this->semValue = new Expr\UnaryOperator($this->semStack[$stackPos-(2-1)], Expr\UnaryOperator::KIND_POSTDEC, $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             25 => function ($stackPos) {
-                 throw new Error('initializer list no trailing not implemented'); 
+                 $this->semValue = new Expr\InitializerExpr($this->semStack[$stackPos-(6-5)], $this->semStack[$stackPos-(6-2)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes); 
             },
             26 => function ($stackPos) {
-                 throw new Error('initializer list trailing not implemented'); 
+                 $this->semValue = new Expr\InitializerExpr($this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-2)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             27 => function ($stackPos) {
                  $this->semValue = array($this->semStack[$stackPos-(1-1)]); 
@@ -1276,28 +1276,28 @@ class Parser extends ParserAbstract
                  $this->semValue = new IR\DirectAbstractDeclarator\Function_($this->semStack[$stackPos-(5-1)], $this->semStack[$stackPos-(5-3)][0], $this->semStack[$stackPos-(5-3)][1], $this->semStack[$stackPos-(5-5)], $this->startAttributeStack[$stackPos-(5-1)] + $this->endAttributes); 
             },
             242 => function ($stackPos) {
-                 throw new Error('initializer brackend no trailing not implemented'); 
+                 $this->semValue = new Expr\InitializerExpr($this->semStack[$stackPos-(3-2)], null, $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             243 => function ($stackPos) {
-                 throw new Error('initializer brackeded trailing not implemented'); 
+                 $this->semValue = new Expr\InitializerExpr($this->semStack[$stackPos-(4-2)], null, $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); 
             },
             244 => function ($stackPos) {
-                 throw new Error('initializer assignment_expression not implemented'); 
+                 $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             245 => function ($stackPos) {
-                 throw new Error('initializer_list designator initializer not implemented'); 
+                 $this->semValue = array(new Expr\Initializer\InitializerElement($this->semStack[$stackPos-(2-1)], $this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes)); 
             },
             246 => function ($stackPos) {
-                 throw new Error('initializer_list initializer not implemented'); 
+                 $this->semValue = array(new Expr\Initializer\InitializerElement([], $this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes)); 
             },
             247 => function ($stackPos) {
-                 throw new Error('initializer_list initializer_list designator initializer not implemented'); 
+                 $this->semStack[$stackPos-(4-1)][] = new Expr\Initializer\InitializerElement($this->semStack[$stackPos-(4-3)], $this->semStack[$stackPos-(4-4)], $this->startAttributeStack[$stackPos-(4-1)] + $this->endAttributes); $this->semValue = $this->semStack[$stackPos-(4-1)]; 
             },
             248 => function ($stackPos) {
-                 throw new Error('initializer_list initializer_list initializer not implemented'); 
+                 $this->semStack[$stackPos-(3-1)][] = new Expr\Initializer\InitializerElement([], $this->semStack[$stackPos-(3-3)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); $this->semValue = $this->semStack[$stackPos-(3-1)]; 
             },
             249 => function ($stackPos) {
-                $this->semValue = $this->semStack[$stackPos];
+                 $this->semValue = $this->semStack[$stackPos-(2-1)]; 
             },
             250 => function ($stackPos) {
                  $this->semValue = array($this->semStack[$stackPos-(1-1)]); 
@@ -1306,10 +1306,10 @@ class Parser extends ParserAbstract
                  $this->semStack[$stackPos-(2-1)][] = $this->semStack[$stackPos-(2-2)]; $this->semValue = $this->semStack[$stackPos-(2-1)]; 
             },
             252 => function ($stackPos) {
-                 throw new Error('[] designator not implemented'); 
+                 $this->semValue = new Expr\Initializer\InitializerDimension($this->semStack[$stackPos-(3-1)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             253 => function ($stackPos) {
-                 throw new Error('. designator not implemented'); 
+                 $this->semValue = new Expr\Initializer\InitializerStructRef($this->semStack[$stackPos-(2-1)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             254 => function ($stackPos) {
                  throw new Error('static assert declaration not implemented'); 

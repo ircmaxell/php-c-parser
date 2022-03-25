@@ -207,9 +207,6 @@ restart:
     }
 
     public function compileInitDeclarator(IR\InitDeclarator $initDeclarator, Type $type, array $attributes = []): Decl {
-        if ($initDeclarator->initializer !== null) {
-            throw new \LogicException("Can't deal with non-null initializers yet");
-        }
         $parts = $this->compileNamedDeclarator($initDeclarator->declarator, $type, $attributes);
         if ($parts[1] instanceof Type\FunctionType) {
             return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($parts[0], $parts[2], $parts[1], null, $attributes);
