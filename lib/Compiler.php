@@ -102,7 +102,7 @@ restart:
         $result = [];
         $type = $this->compileType($types);
         if (is_null($declarators)) {
-            throw new \LogicException("Not implemented yet: empty struct/union declarators");
+            return [new Node\Decl\NamedDecl\ValueDecl\DeclaratorDecl\FieldDecl(null, $type, null, $attributes)];
         }
         foreach ($declarators as $fieldDeclarator) {
             if ($fieldDeclarator->declarator) {
