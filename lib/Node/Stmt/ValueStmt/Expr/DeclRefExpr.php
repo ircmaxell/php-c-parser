@@ -24,6 +24,9 @@ class DeclRefExpr extends Expr
         if ($this->decl instanceof Decl\NamedDecl\ValueDecl\EnumConstantDecl) {
             return true;
         }
+        if ($this->decl === null) {
+            return false; // TODO accessing non-extern const values in the current translation unit is also constant
+        }
         throw new \LogicException('Unknown decl reference type');
     }
 

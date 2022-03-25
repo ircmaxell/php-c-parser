@@ -568,22 +568,22 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             6 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\ValueStmt\Expr\IntegerLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\IntegerLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             7 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\ValueStmt\Expr\FloatLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\FloatLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             8 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\ValueStmt\Expr\DeclRefExpr($this->semStack[$stackPos-(1-1)], $this->scope->enum($this->semStack[$stackPos-(1-1)]), $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\DeclRefExpr($this->semStack[$stackPos-(1-1)], $this->scope->enum($this->semStack[$stackPos-(1-1)]), $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             9 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             10 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\ValueStmt\Expr\StringLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\StringLiteral($this->semStack[$stackPos-(1-1)], $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             11 => function ($stackPos) {
-                 throw new Error('func name not implemented'); 
+                 $this->semValue = new Expr\DeclRefExpr('__func__', null, $this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             12 => function ($stackPos) {
                  throw new Error('generic not implemented'); 
@@ -1390,10 +1390,10 @@ class Parser extends ParserAbstract
                  $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(7-4)], $this->semStack[$stackPos-(7-3)], $this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-7)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             280 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(6-4)], $this->compiler->compileDeclarationStatement($this->semStack[$stackPos-(6-3)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes), null, $this->semStack[$stackPos-(6-6)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes); 
+                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(6-4)], $this->compiler->compileDeclarationStmt($this->semStack[$stackPos-(6-3)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes), null, $this->semStack[$stackPos-(6-6)], $this->startAttributeStack[$stackPos-(6-1)] + $this->endAttributes); 
             },
             281 => function ($stackPos) {
-                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(7-4)], $this->compiler->compileDeclarationStatement($this->semStack[$stackPos-(7-3)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes), $this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-7)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
+                 $this->semValue = new Node\Stmt\LoopStmt($this->semStack[$stackPos-(7-4)], $this->compiler->compileDeclarationStmt($this->semStack[$stackPos-(7-3)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes), $this->semStack[$stackPos-(7-5)], $this->semStack[$stackPos-(7-7)], $this->startAttributeStack[$stackPos-(7-1)] + $this->endAttributes); 
             },
             282 => function ($stackPos) {
                  throw new Error('goto identifier not implemented'); 

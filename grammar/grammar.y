@@ -31,9 +31,9 @@ primary_expression
     ;
 
 constant
-    : I_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\IntegerLiteral[$1]; } /* includes character_constant */
-    | F_CONSTANT            { $$ = Node\Stmt\ValueStmt\Expr\FloatLiteral[$1]; }
-    | ENUMERATION_CONSTANT  { $$ = Node\Stmt\ValueStmt\Expr\DeclRefExpr[$1, $this->scope->enum($1)]; }  /* after it has been defined as such */
+    : I_CONSTANT            { $$ = Expr\IntegerLiteral[$1]; } /* includes character_constant */
+    | F_CONSTANT            { $$ = Expr\FloatLiteral[$1]; }
+    | ENUMERATION_CONSTANT  { $$ = Expr\DeclRefExpr[$1, $this->scope->enum($1)]; }  /* after it has been defined as such */
     ;
 
 enumeration_constant        /* before it has been defined as such */
@@ -41,8 +41,8 @@ enumeration_constant        /* before it has been defined as such */
     ;
 
 string
-    : STRING_LITERAL        { $$ = Node\Stmt\ValueStmt\Expr\StringLiteral[$1]; }
-    | FUNC_NAME             { throw new Error('func name not implemented'); }
+    : STRING_LITERAL        { $$ = Expr\StringLiteral[$1]; }
+    | FUNC_NAME             { $$ = Expr\FuncName[]; }
     ;
 
 generic_selection
