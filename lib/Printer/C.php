@@ -324,7 +324,7 @@ class C implements Printer
                 $replacements[\chr($i)] = sprintf('\x%02x', $i);
             }
         }
-        return strtr($string, $replacements);
+        return '"' . strtr($string, $replacements) . '"';
     }
 
     protected function printExpr(Expr $expr, int $level): string {
@@ -339,7 +339,7 @@ class C implements Printer
             return $float;
         }
         if ($expr instanceof Expr\StringLiteral) {
-            return '"' . $this->formatString($expr->value) . '"';
+            return $this->formatString($expr->value);
         }
         if ($expr instanceof Expr\BinaryOperator) {
             if (isset(self::BINARYOPERATOR_MAP[$expr->kind])) {
