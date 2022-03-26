@@ -49,6 +49,23 @@ class C implements Printer
         return $result;
     }
 
+    protected function printAttributedTypeAttributes(Node\Type\AttributedType $type, int $level): string {
+        if ($type instanceof Type\ExplicitAttributedType) {
+            if ($type->kind === Type\ExplicitAttributedType::KIND_CONST && $this->omitConst) {
+                return '';
+            }
+            if (isset(self::ATTRIBUTED_MAP[$type->kind])) {
+                return self::ATTRIBUTED_MAP[$type->kind] . ' ';
+            }
+            throw new \LogicException('Unknown attributed type kind: ' . $type->kind);
+        }
+        if ($type instanceof Type\ArbitraryAttributedType) {
+            $attr = $type->attribute;
+            return '__attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . ')) ';
+        }
+        throw new \LogicException('Unknown AttributedType: ' . get_class($type));
+    }
+
     protected function printDecl(Decl $decl, int $level): string {
         if ($decl instanceof Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl) {
             return 'typedef ' . $this->printType($decl->type, $decl->name, $level);
@@ -112,29 +129,7 @@ class C implements Printer
             $type = $decl->type;
             $attribute = '';
             while ($type instanceof Type\AttributedType) {
-                if ($type instanceof Type\ExplicitAttributedType) {
-                    switch ($type->kind) {
-                        case Type\ExplicitAttributedType::KIND_EXTERN:
-                            $attribute .= 'extern ';
-                            break;
-                        case Type\ExplicitAttributedType::KIND_STATIC:
-                            $attribute .= 'static ';
-                            break;
-                        case Type\ExplicitAttributedType::KIND_INLINE:
-                            $attribute .= 'inline ';
-                            break;
-                        case Type\ExplicitAttributedType::KIND_ALWAYS_INLINE:
-                            $attribute .= '__attribute__((always_inline)) ';
-                            break;
-                        default:
-                            throw new \LogicException('Unknown function attributed type qualifier: ' . $type->kind);
-                    }
-                } elseif ($type instanceof Type\ArbitraryAttributedType) {
-                    $attr = $type->attribute;
-                    $attribute .= '__attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . ')) ';
-                } else {
-                    throw new \LogicException('Unknown AttributedType: ' . get_class($type));
-                }
+                $attribute .= $this->printAttributedTypeAttributes($type, $level);
                 $type = $type->parent;
             }
             $result = $decl->name . '(';
@@ -204,18 +199,8 @@ class C implements Printer
         if ($type instanceof Type\TagType\EnumType) {
             return $this->printDecl($type->decl, $level) . ($name !== null ? ' ' . $name : '');
         }
-        if ($type instanceof Type\ExplicitAttributedType) {
-            if ($type->kind === Type\ExplicitAttributedType::KIND_CONST && $this->omitConst) {
-                return $this->printType($type->parent, $name, $level);
-            }
-            if (isset(self::ATTRIBUTED_MAP[$type->kind])) {
-                return self::ATTRIBUTED_MAP[$type->kind] . ' ' . $this->printType($type->parent, $name, $level);
-            }
-            throw new \LogicException('Unknown attributed type kind: ' . $type->kind);
-        }
-        if ($type instanceof Type\ArbitraryAttributedType) {
-            $attr = $type->attribute;
-            return '__attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . '))' . ' ' . $this->printType($type->parent, $name, $level);
+        if ($type instanceof Type\AttributedType) {
+            return $this->printAttributedTypeAttributes($type, $level) . $this->printType($type->parent, $name, $level);
         }
         if ($type instanceof Type\FunctionType\FunctionProtoType || $this->isFunctionPointer($type)) {
             if ($type instanceof Type\FunctionType\FunctionProtoType) {
