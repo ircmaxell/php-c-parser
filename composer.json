@@ -6,6 +6,10 @@
         {
             "name": "Anthony Ferrara",
             "email": "ircmaxell@gmail.com"
+        },
+        {
+            "name": "Bob Weinand",
+            "email": "bobwei9@hotmail.com"
         }
     ],
     "require": {
