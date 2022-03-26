@@ -32,21 +32,19 @@ class C implements Printer
     }
 
     public function printNode(Node $node, int $level): string {
-        $result = '';
         if ($node instanceof TranslationUnitDecl) {
             return $this->printNodes($node->declarations, $level);
         } elseif ($node instanceof Decl) {
-            return $this->printDecl($node, $level) . ($level === 0 ? ';' : '');
+            return $this->printDecl($node, $level) . ($level === 0 && (!($node instanceof Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl) || $node->stmts === null) ? ';' : '');
         } elseif ($level === 0) {
             throw new \LogicException('Unexpected node type found for level 0: ' . get_class($node));
         } elseif ($node instanceof Expr) {
-            return $this->printExpr($node, $level);
+            return $this->printExpr($node, $level) . ';';
         } elseif ($node instanceof Stmt) {
             return $this->printStmt($node, $level);
         } else {
             throw new \LogicException('Top level node ' . get_class($node) . ' not implemented yet');
         }
-        return $result;
     }
 
     protected function printAttributedTypeAttributes(Node\Type\AttributedType $type, int $level): string {
@@ -455,7 +453,7 @@ class C implements Printer
             if ($stmt->condition && !$stmt->initStmt && !$stmt->loopExpr) {
                 $loop = 'while (' . $this->printExpr($stmt->condition, $level) . ')';
             } else {
-                $loop = 'for (' . ($stmt->initStmt ? $this->printNode($stmt->initStmt, $level) : '') . ';' . ($stmt->condition ? ' ' . $this->printExpr($stmt->condition, $level) : '') . ';' . ($stmt->loopExpr ? ' ' . $this->printExpr($stmt->loopExpr, $level) : '');
+                $loop = 'for (' . ($stmt->initStmt ? $this->printNode($stmt->initStmt, $level) : ';') . ($stmt->condition ? ' ' . $this->printExpr($stmt->condition, $level) : '') . ';' . ($stmt->loopExpr ? ' ' . $this->printExpr($stmt->loopExpr, $level) : '');
             }
             return $loop . ' ' . $this->printNode($stmt->loopStmt, $level);
         }
