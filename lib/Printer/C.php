@@ -482,6 +482,9 @@ class C implements Printer
         if ($stmt instanceof Stmt\CompoundStmt) {
             return $this->printCompoundStmt($stmt, $level);
         }
+        if ($stmt instanceof Stmt\EmptyStmt) {
+            return ';';
+        }
         var_dump($stmt);
     }
 

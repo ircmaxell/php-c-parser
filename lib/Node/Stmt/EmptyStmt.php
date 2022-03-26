@@ -4,6 +4,6 @@ namespace PHPCParser\Node\Stmt;
 
 use PHPCParser\Node\Stmt;
 
-class BreakStmt extends Stmt
+class EmptyStmt extends Stmt
 {
 }

@@ -1362,7 +1362,7 @@ class Parser extends ParserAbstract
                  $this->semValue = $this->semStack[$stackPos-(1-1)]; 
             },
             271 => function ($stackPos) {
-                 $this->semValue = null; 
+                 $this->semValue = new Node\Stmt\EmptyStmt($this->startAttributeStack[$stackPos-(1-1)] + $this->endAttributes); 
             },
             272 => function ($stackPos) {
                  $this->semValue = $this->semStack[$stackPos-(2-1)]; 

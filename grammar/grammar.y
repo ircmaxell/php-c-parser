@@ -516,7 +516,7 @@ block_item
     ;
 
 expression_statement
-    : ';'                   { $$ = null; }
+    : ';'                   { $$ = Node\Stmt\EmptyStmt[]; }
     | expression ';'        { $$ = $1; }
     ;
 
