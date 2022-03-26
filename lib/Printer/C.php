@@ -438,10 +438,11 @@ class C implements Printer
                 $asm .= 'goto ';
             }
             $asm .= '(' . $this->formatString($stmt->asm) . ' : ';
-            $formatOperand = function ($op) { return $this->formatString($op->clobberMode) . ' (' . $op->variable . ') '; };
+            $formatOperand = function ($op) use ($level) { return $this->formatString($op->clobberMode) . ' (' . $this->printExpr($op->variable, $level) . ') '; };
             $asm .= implode(',', array_map($formatOperand, $stmt->outputOperands->operands)) . ': ';
             $asm .= implode(',', array_map($formatOperand, $stmt->inputOperands->operands)) . ': ';
             $asm .= implode(', ', array_map([$this, "formatString"], $stmt->registers->registers));
+            $asm .= $stmt->gotoLabels->labels ? ': ' . implode(', ', $stmt->gotoLabels->labels) : '';
             return $asm . ');';
         }
         if ($stmt instanceof Stmt\IfStmt) {

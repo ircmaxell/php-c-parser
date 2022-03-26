@@ -564,8 +564,8 @@ declaration_list
     ;
 
 asm_operand_list_non_empty
-    : asm_operand_list_non_empty ',' STRING_LITERAL '(' IDENTIFIER ')'    { $$ = $1; $$->operands[] = Node\Asm\Operand[$3, $5]; }
-    | STRING_LITERAL '(' IDENTIFIER ')'                                   { $$ = Node\Asm\Operands[]; $$->operands[] = Node\Asm\Operand[$1, $3]; }
+    : asm_operand_list_non_empty ',' STRING_LITERAL '(' expression ')'    { $$ = $1; $$->operands[] = Node\Asm\Operand[$3, $5]; }
+    | STRING_LITERAL '(' expression ')'                                   { $$ = Node\Asm\Operands[]; $$->operands[] = Node\Asm\Operand[$1, $3]; }
     ;
 
 asm_operand_list
@@ -583,11 +583,22 @@ asm_register_list
     | /* empty */                   { $$ = new Node\Asm\Registers; }
     ;
 
+asm_goto_list_non_empty
+    : asm_goto_list_non_empty ',' IDENTIFIER    { $$ = $1; $$->labels[] = $3; }
+    | IDENTIFIER                                { $$ = Node\Asm\GotoLabels[]; $$->labels[] = $1; }
+    ;
+
+asm_goto_list
+    : asm_goto_list_non_empty   { $$ = $1; }
+    | /* empty */               { $$ = new Node\Asm\GotoLabels; }
+    ;
+
 asm_extended
-    : STRING_LITERAL                                                                     { $$ = Node\Stmt\AsmStmt[$1, new Node\Asm\Operands, new Node\Asm\Operands, new Node\Asm\Registers]; }
-    | STRING_LITERAL ':' asm_operand_list                                                { $$ = Node\Stmt\AsmStmt[$1, $3, new Node\Asm\Operands, new Node\Asm\Registers]; }
-    | STRING_LITERAL ':' asm_operand_list ':' asm_operand_list                           { $$ = Node\Stmt\AsmStmt[$1, $3, $5, new Node\Asm\Registers]; }
-    | STRING_LITERAL ':' asm_operand_list ':' asm_operand_list ':' asm_register_list     { $$ = Node\Stmt\AsmStmt[$1, $3, $5, $7]; }
+    : STRING_LITERAL                                                                                      { $$ = Node\Stmt\AsmStmt[$1, new Node\Asm\Operands, new Node\Asm\Operands, new Node\Asm\Registers, new Node\Asm\GotoLabels]; }
+    | STRING_LITERAL ':' asm_operand_list                                                                 { $$ = Node\Stmt\AsmStmt[$1, $3, new Node\Asm\Operands, new Node\Asm\Registers, new Node\Asm\GotoLabels]; }
+    | STRING_LITERAL ':' asm_operand_list ':' asm_operand_list                                            { $$ = Node\Stmt\AsmStmt[$1, $3, $5, new Node\Asm\Registers, new Node\Asm\GotoLabels]; }
+    | STRING_LITERAL ':' asm_operand_list ':' asm_operand_list ':' asm_register_list                      { $$ = Node\Stmt\AsmStmt[$1, $3, $5, $7, new Node\Asm\GotoLabels]; }
+    | STRING_LITERAL ':' asm_operand_list ':' asm_operand_list ':' asm_register_list ':' asm_goto_list    { $$ = Node\Stmt\AsmStmt[$1, $3, $5, $7, $9]; }
 
 asm_modifiers
     : asm_modifiers VOLATILE        { $$ = $1 | Node\Stmt\AsmStmt::VOLATILE; }
