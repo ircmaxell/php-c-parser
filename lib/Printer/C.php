@@ -333,6 +333,13 @@ class C implements Printer
         if ($expr instanceof Expr\IntegerLiteral) {
             return (string) $expr->value;
         }
+        if ($expr instanceof Expr\FloatLiteral) {
+            $float = (string) $expr->value;
+            if (strcspn($float, "e.") === \strlen($float)) {
+                $float .= ".";
+            }
+            return $float;
+        }
         if ($expr instanceof Expr\StringLiteral) {
             return '"' . $this->formatString($expr->value) . '"';
         }
