@@ -222,6 +222,9 @@ class C implements Printer
                     $result .= ' __attribute__((' . $attr->attribute . ($attr->expr ? '(' . $this->printExpr($attr->expr, $level) . ')' : '') . '))';
                 }
             }
+            if ($type instanceof Type\FunctionType\FunctionProtoType) {
+                return $result;
+            }
             $subType = $this->printType($func->return, '__NAME_PLACEHOLDER__', $level);
             return str_replace('__NAME_PLACEHOLDER__', $result, $subType);
         }

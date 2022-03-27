@@ -21,19 +21,20 @@ class structTest extends TestCase {
           name: "x"
           type: Type_BuiltinType
               name: "int"
-          initializer: null
+          bitfieldSize: null
         Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
           name: "y"
           type: Type_BuiltinType
               name: "int"
-          initializer: null
+          bitfieldSize: null
         Decl_NamedDecl_ValueDecl_DeclaratorDecl_FieldDecl
           name: "z"
           type: Type_BuiltinType
               name: "float"
-          initializer: null
+          bitfieldSize: null
       ]
-      attributeList: null
+      attributeList: [
+      ]
     Decl_NamedDecl_TypeDecl_TypedefNameDecl_TypedefDecl
       name: "foo"
       type: Type_BuiltinType
@@ -45,7 +46,8 @@ class structTest extends TestCase {
               kind: 1
               name: "foo"
               fields: null
-              attributeList: null
+              attributeList: [
+              ]
   ]';
 
     protected CParser $parser;
