@@ -117,7 +117,7 @@ class Tokenizer {
                 } else {
                     throw new \LogicException("Syntax error: unexpected illegal string literal found '$buffer' in $file at position $pos");
                 }
-                $result = $result->next = new Token(Token::LITERAL, $value, $file);
+                $result = $result->next = new Token(Token::NUMBER, (string) \ord($value), $file);
             } elseif (ctype_punct($char)) {
                 if ($char === '.' && $pos + 1 < $length && $line[$pos] === '.' && $line[$pos + 1] === '.') {
                     // special case for ... token
