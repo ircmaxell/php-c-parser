@@ -456,7 +456,7 @@ class C implements Printer
             if ($stmt->condition && !$stmt->initStmt && !$stmt->loopExpr) {
                 $loop = 'while (' . $this->printExpr($stmt->condition, $level) . ')';
             } else {
-                $loop = 'for (' . ($stmt->initStmt ? $this->printNode($stmt->initStmt, $level) : ';') . ($stmt->condition ? ' ' . $this->printExpr($stmt->condition, $level) : '') . ';' . ($stmt->loopExpr ? ' ' . $this->printExpr($stmt->loopExpr, $level) : '');
+                $loop = 'for (' . ($stmt->initStmt ? $this->printNode($stmt->initStmt, $level) : ';') . ($stmt->condition ? ' ' . $this->printExpr($stmt->condition, $level) : '') . ';' . ($stmt->loopExpr ? ' ' . $this->printExpr($stmt->loopExpr, $level) : '') . ')';
             }
             return $loop . ' ' . $this->printNode($stmt->loopStmt, $level);
         }
