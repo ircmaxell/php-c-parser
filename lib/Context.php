@@ -17,6 +17,8 @@ class Context {
         '/usr/local/include',
         '/usr/include',
         '/usr/include/x86_64-linux-gnu',
+        '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/',
+        '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/',
     ];
 
     public function __construct(array $headerSearchPaths = []) {
