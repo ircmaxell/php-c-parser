@@ -1,5 +1,5 @@
 struct foo {
-    int x, y;
+    int x, y:2, :6;
     float z;
 };
 

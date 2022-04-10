@@ -108,7 +108,7 @@ restart:
             if ($fieldDeclarator->declarator) {
                 $parts = $this->compileNamedDeclarator($fieldDeclarator->declarator, $type);
             } else {
-                $parts = [null, null, null, null];
+                $parts = [null, $type, null, null];
             }
             if ($parts[3]) {
                 $attributeLists[] = $parts[3];

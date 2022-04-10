@@ -115,7 +115,7 @@ class C implements Printer
                     $return .= str_repeat('  ', $level + 1);
                     $return .= $field->type ? $this->printType($field->type, $field->name, $level + 1) : $field->name;
                     if ($field->bitfieldSize !== null) {
-                        $return .= ': ' . $this->printExpr($field->bitfieldSize, $level + 1);
+                        $return .= ' :' . $this->printExpr($field->bitfieldSize, $level + 1);
                     }
                     $return .= ";\n";
                 }

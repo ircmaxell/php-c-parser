@@ -13,7 +13,8 @@ class structTest extends TestCase {
 
     const EXPECTED = 'struct foo {
   int x;
-  int y;
+  int y :2;
+  int :6;
   float z;
 };
 typedef int foo;
