@@ -39,9 +39,10 @@ class Context {
     private function locateGCCHeaderPaths() {
         if (is_dir('/usr/lib/gcc/x86_64-linux-gnu/')) {
             for ($i = 8; $i > 4; $i--) {
-                if (is_dir('/usr/lib/gcc/x86_64-linux-gnu/' . $i)) {
+                if (is_dir('/usr/lib/gcc/x86_64-linux-gnu/' . $i . '/include')) {
                     $this->headerSearchPaths[] = '/usr/lib/gcc/x86_64-linux-gnu/' . $i . '/include';
-                    return;
+		    // Note, linux sometimes adds empty directories, so let's add all in order. This may be wrong long term though...
+		    //return;
                 }
             }
         }
