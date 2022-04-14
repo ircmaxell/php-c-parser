@@ -355,6 +355,12 @@ result:
                 $result = new Token(Token::NUMBER, $this->normalize($result) >= $this->normalize($right) ? '1' : '0', 'computed');
                 goto result;
             }
+            if ($expr->next !== null && $expr->next->value === '>') {
+                // >>
+                list ($right, $expr) = $this->evaluateInternal($expr->next->next, true);
+                $result = new Token(Token::NUMBER, (string) ($this->normalize($result) >> $this->normalize($right)), 'computed');
+                goto result;
+            }
             list ($right, $expr) = $this->evaluateInternal($expr->next, true);
             $result = new Token(Token::NUMBER, $this->normalize($result) > $this->normalize($right) ? '1' : '0', 'computed');
             goto result;
@@ -363,6 +369,12 @@ result:
                 // >=
                 list ($right, $expr) = $this->evaluateInternal($expr->next->next, true);
                 $result = new Token(Token::NUMBER, $this->normalize($result) <= $this->normalize($right) ? '1' : '0', 'computed');
+                goto result;
+            }
+            if ($expr->next !== null && $expr->next->value === '<') {
+                // <<
+                list ($right, $expr) = $this->evaluateInternal($expr->next->next, true);
+                $result = new Token(Token::NUMBER, (string) ($this->normalize($result) << $this->normalize($right)), 'computed');
                 goto result;
             }
             list ($right, $expr) = $this->evaluateInternal($expr->next, true);
