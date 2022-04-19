@@ -476,8 +476,8 @@ designator_list
     ;
 
 designator
-    : '[' constant_expression ']'   { $$ = Expr\Initializer\InitializerDimension[$1]; }
-    | '.' IDENTIFIER                { $$ = Expr\Initializer\InitializerStructRef[$1]; }
+    : '[' constant_expression ']'   { $$ = Expr\Initializer\InitializerDimension[$2]; }
+    | '.' IDENTIFIER                { $$ = Expr\Initializer\InitializerStructRef[$2]; }
     ;
 
 static_assert_declaration

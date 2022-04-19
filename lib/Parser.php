@@ -1305,10 +1305,10 @@ class Parser extends ParserAbstract
                  $this->semStack[$stackPos-(2-1)][] = $this->semStack[$stackPos-(2-2)]; $this->semValue = $this->semStack[$stackPos-(2-1)]; 
             },
             252 => function ($stackPos) {
-                 $this->semValue = new Expr\Initializer\InitializerDimension($this->semStack[$stackPos-(3-1)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\Initializer\InitializerDimension($this->semStack[$stackPos-(3-2)], $this->startAttributeStack[$stackPos-(3-1)] + $this->endAttributes); 
             },
             253 => function ($stackPos) {
-                 $this->semValue = new Expr\Initializer\InitializerStructRef($this->semStack[$stackPos-(2-1)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
+                 $this->semValue = new Expr\Initializer\InitializerStructRef($this->semStack[$stackPos-(2-2)], $this->startAttributeStack[$stackPos-(2-1)] + $this->endAttributes); 
             },
             254 => function ($stackPos) {
                  throw new Error('static assert declaration not implemented'); 
