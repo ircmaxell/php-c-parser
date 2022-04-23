@@ -5,7 +5,7 @@ namespace PHPCParser\Node\Asm;
 use PHPCParser\NodeAbstract;
 
 class Registers extends NodeAbstract {
-
+    /** @var string[] */
     public array $registers = [];
 
     public function getSubNodeNames(): array {

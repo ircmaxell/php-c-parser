@@ -9,6 +9,7 @@ class Array_ extends DirectDeclarator
     public DirectDeclarator $declarator;
     public int $modifiers;
 
+    /** @param \PHPCParser\Node\Decl\Specifiers\AttributeList[] $attributeList */
     public function __construct(DirectDeclarator $declarator, int $modifiers, array $attributeList, array $attributes = []) {
         parent::__construct($attributes);
         $this->declarator = $declarator;

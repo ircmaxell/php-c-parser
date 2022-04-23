@@ -7,9 +7,7 @@ namespace PHPCParser\PreProcessor;
 class Tokenizer {
 
 
-    /**
-     * @return Token[][]
-     */
+    /** @return Token[] */
     public function tokenize(string $file, string ...$lines): array {
         $result = [];
         foreach ($lines as $line) {

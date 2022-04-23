@@ -7,7 +7,7 @@ use PHPCParser\Node\Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl;
 use PHPCParser\Node\Type;
 use PHPCParser\Node\Stmt;
 
-class ParmVarDecl extends VarDecl
+class ParamVarDecl extends VarDecl
 {
 
     public function __construct(?string $name, ?string $declaratorAsm, Type $type, array $attributes = []) {

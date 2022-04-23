@@ -12,6 +12,7 @@ class Parser {
         $this->tokenizer = $tokenizer ?? new Tokenizer;
     }
 
+    /** @return Token[] */
     public function parse(string $file, string $code): array {
         $lines = preg_split("(\n|\r|\r\n)", $code);
         $lines = $this->mergeContinuedLines($lines);
@@ -21,6 +22,9 @@ class Parser {
         return $tokens;
     }
 
+    /** @param string[] $lines
+     *  @return string[]
+     */
     private function stripEmptyLines(array $lines): array {
         $new = [];
         foreach ($lines as $line) {
@@ -31,6 +35,9 @@ class Parser {
         return $new;
     }
 
+    /** @param string[] $lines
+     *  @return string[]
+     */
     private function mergeContinuedLines(array $lines): array {
         $result = [];
         $pos = 0;
@@ -51,6 +58,9 @@ class Parser {
         return $result;
     }
 
+    /** @param string[] $lines
+     *  @return string[]
+     */
     private function stripComments(array $lines): array {
         $result = [];
         $pos = 0;

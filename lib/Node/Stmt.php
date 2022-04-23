@@ -6,6 +6,7 @@ use PHPCParser\NodeAbstract;
 
 abstract class Stmt extends NodeAbstract
 {
+    /** @var \PHPCParser\Node\Stmt\Label[] */
     public array $labels = [];
 
     public function getSubNodeNames(): array {

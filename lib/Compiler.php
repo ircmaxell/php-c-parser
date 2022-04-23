@@ -2,6 +2,8 @@
 
 namespace PHPCParser;
 
+use PHPCParser\IR\Declaration;
+use PHPCParser\IR\FieldDeclaration;
 use PHPCParser\Node\Decl\NamedDecl\TypeDecl\TypedefNameDecl\TypedefDecl;
 use PHPCParser\Node\Decl;
 use PHPCParser\Node\DeclGroup;
@@ -18,6 +20,11 @@ class Compiler
         $this->scope = $scope;
     }
 
+    /** @param Decl\Specifiers\AttributeList[] $attributeLists
+     *  @param Type[] $types
+     *  @param Declaration[] $declarations
+     *  @return Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl[]
+     */
     public function compileFunction(int $qualifiers, array $attributeLists, array $types, IR\Declarator $declarator, array $declarations, Stmt\CompoundStmt $stmts, array $attributes = []): array {
         $type = $this->compileType($types);
         $parts = $this->compileNamedDeclarator($declarator, $type);
@@ -36,10 +43,10 @@ class Compiler
         throw new \LogicException('Not implemented (yet)');
     }
 
+    /** @return Node\Decl[] */
     public function compileExternalDeclaration(IR\Declaration $declaration, array $attributes = []): array {
         $qualifiers = $declaration->qualifiers;
         $attributeLists = $declaration->attributeLists;
-        $isTypedef = false;
         $type = $this->compileType($declaration->types);
 restart:
         $result = [];
@@ -98,6 +105,11 @@ restart:
         }
     }
 
+    /** @param Decl\Specifiers\AttributeList[] $attributeLists
+     *  @param Type[] $types
+     *  @param FieldDeclaration[] $declarators
+     *  @return Decl\NamedDecl\ValueDecl\DeclaratorDecl\FieldDecl[]
+     */
     public function compileStructField(int $qualifiers, array $attributeLists, array $types, ?array $declarators, array $attributes = []): array {
         $result = [];
         $type = $this->compileType($types);
@@ -118,7 +130,10 @@ restart:
         return $result;
     }
 
-    public function compileParamVarDeclaration(int $qualifiers, array $attributeLists, array $types, IR\Declarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
+    /** @param Decl\Specifiers\AttributeList[] $attributeLists
+     *  @param Type[] $types
+     */
+    public function compileParamVarDeclaration(int $qualifiers, array $attributeLists, array $types, IR\Declarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParamVarDecl {
         $type = $this->compileType($types);
         $parts = $this->compileNamedDeclarator($declarator, $type);
         if ($parts[3]) {
@@ -127,10 +142,13 @@ restart:
         if ($qualifiers !== 0 || $attributeLists) {
             $parts[1] = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $parts[1], $attributes);
         }
-        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl($parts[0], $parts[2], $parts[1], $attributes);
+        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParamVarDecl($parts[0], $parts[2], $parts[1], $attributes);
     }
 
-    public function compileParamAbstractDeclaration(int $qualifiers, array $attributeLists, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl {
+    /** @param Decl\Specifiers\AttributeList[] $attributeLists
+     *  @param Type[] $types
+     */
+    public function compileParamAbstractDeclaration(int $qualifiers, array $attributeLists, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParamVarDecl {
         $type = $this->compileType($types);
         if ($declarator !== null) {
             $type = $this->compileAbstractDeclarator($declarator, $type);
@@ -138,9 +156,12 @@ restart:
         if ($qualifiers !== 0 || $attributeLists) {
             $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
         }
-        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl(null, null, $type, $attributes);
+        return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParamVarDecl(null, null, $type, $attributes);
     }
 
+    /** @param Decl\Specifiers\AttributeList[] $attributeLists
+     *  @param Type[] $types
+     */
     public function compileTypeReference(int $qualifiers, array $attributeLists, array $types, ?IR\AbstractDeclarator $declarator, array $attributes = []): Expr\TypeRefExpr {
         $type = $this->compileType($types);
         if ($declarator !== null) {
@@ -152,6 +173,7 @@ restart:
         return new Expr\TypeRefExpr($type);
     }
 
+    /** @param Type[] $types */
     public function compileType(array $types): Type {
 restart:
         if (empty($types)) {
@@ -259,6 +281,7 @@ restart_direct:
         throw new \LogicException('AbstractDeclarator not fully implemented yet');
     }
 
+    /** @return array{string, Type, null|string, Decl\Specifiers\AttributeList[]} */
     public function compileNamedDeclarator(IR\Declarator $declarator, Type $type): array {
 restart:
         if ($declarator->pointer !== null) {
@@ -301,7 +324,8 @@ restart_direct:
         throw new \LogicException("Unknown declarator found for typedef");
     }
 
-    public function compileDirectParamTypes(Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl ... $params): array {
+    /** @return Type[] */
+    public function compileDirectParamTypes(Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParamVarDecl ... $params): array {
         $result = [];
         foreach ($params as $param) {
             $result[] = $param->type;
@@ -309,7 +333,8 @@ restart_direct:
         return $result;
     }
 
-    public function compileDirectParamTypeNames(Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParmVarDecl ... $params): array {
+    /** @return string[] */
+    public function compileDirectParamTypeNames(Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl\ParamVarDecl ... $params): array {
         $result = [];
         foreach ($params as $param) {
             $result[] = $param->name;

@@ -97,6 +97,7 @@ abstract class ParserAbstract
         $this->initReduceCallbacks();
     }
 
+    /** @param \PHPCParser\PreProcessor\Token[] */
     public function parse(array $tokens, Context $context) {
         $this->scope = $context->scope;
         $this->compiler->begin($this->scope);

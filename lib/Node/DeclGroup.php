@@ -6,8 +6,10 @@ use PHPCParser\NodeAbstract;
 
 class DeclGroup extends NodeAbstract
 {
+    /** @var Decl[] */
     public array $declarations;
 
+    /** @param Decl[] $declarations */
     public function __construct(array $declarations, array $attributes = []) {
         parent::__construct($attributes);
         $this->addDecl(...$declarations);

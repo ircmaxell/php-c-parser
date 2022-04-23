@@ -9,6 +9,7 @@ class CParser
 
     private Context $context;
     private Parser $parser;
+    /** @var string[] */
     private array $headerSearchPaths = [];
 
     public function __construct() {

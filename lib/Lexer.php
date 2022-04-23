@@ -6,18 +6,17 @@ use PHPCParser\PreProcessor\Token;
 
 class Lexer
 {
-
+    /** @var Token[] */
     private array $tokens;
     private int $tokenPos = -1;
     private ?Token $currentToken = null;
-    private array $toEmit = [];
     private Scope $scope;
 
+    /** @param Token[] $tokens */
     public function begin(Scope $scope, array $tokens): void {
         $this->tokens = $tokens;
         $this->tokenPos = -1;
         $this->currentToken = null;
-        $this->toEmit = [];
         $this->scope = $scope;
     }
 
@@ -54,6 +53,7 @@ class Lexer
         throw new \LogicException("Reached the end of lexer loop, should never happen");
     }
 
+    /** @return array{int, string}|null */
     private function extractToken(): ?array {
         if ($this->currentToken->type === Token::IDENTIFIER) {
             return $this->extractIdentifier();
@@ -76,6 +76,7 @@ class Lexer
         throw new \LogicException("Unknown token type encountered: {$this->currentToken->type}");
     }
 
+    /** @return array{int, string} */
     private function extractNumber(): array {
         $number = $this->currentToken->value;
         $this->currentToken = $this->currentToken->next;
@@ -89,7 +90,9 @@ class Lexer
         return [Tokens::T_I_CONSTANT, $number];
     }
 
+    /** @var string[] */
     private array $literalsBuffer = [];
+    /** @return array{int, string}|null */
     private function extractLiteral(): ?array {
         $string = $this->currentToken->value;
         $this->currentToken = $this->currentToken->next;
@@ -120,6 +123,7 @@ class Lexer
         return [Tokens::T_STRING_LITERAL, $string];
     }
 
+    /** @return array{int, string} */
     private function extractPunctuation(): array {
         $value = $this->currentToken->value;
         $this->currentToken = $this->currentToken->next;
@@ -301,6 +305,7 @@ emit_single:
         '__func__' => Tokens::T_FUNC_NAME,
     ];
 
+    /** @return array{int, string} */
     private function extractIdentifier(): array {
         $tok = $this->currentToken;
         $this->currentToken = $this->currentToken->next;

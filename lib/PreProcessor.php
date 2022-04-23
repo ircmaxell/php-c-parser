@@ -20,6 +20,7 @@ class PreProcessor {
         $this->context = $context;
     }
 
+    /** @return Token[] */
     public function process(string $header): array {
         if (empty($header)) {
             throw new \LogicException("Header cannot be empty");
@@ -157,6 +158,9 @@ class PreProcessor {
         return true;
     }
 
+    /** @param Token[] $lines
+     *  @return Token[]
+     */
     private function skipIf(array $lines, bool $skipAll = false): array {
         while (!empty($lines)) {
             $line = array_shift($lines);
@@ -206,6 +210,7 @@ class PreProcessor {
         return [];
     }
 
+    /** @return Token[] */
     private function findAndParse(string $header, string $contextDir, string $contextFile, bool $next = false): array {
         $contextDir = rtrim($contextDir, '/');
         $file = $this->findHeaderFile($header, $contextDir, $contextFile, $next);
@@ -218,6 +223,7 @@ class PreProcessor {
         return $lines;
     }
 
+    /** @return Token[] */
     private function resolveInclude(?Token $arg, string $contextFile, bool $next = false): array {
         $contextDir = dirname($contextFile);
         if (empty($arg)) {
@@ -226,7 +232,7 @@ class PreProcessor {
         $type = $arg;
         if ($type->type === Token::LITERAL) {
             $file = $type->value;
-            if (!empty($args)) {
+            if ($arg->next) {
                 throw new \LogicException("extra tokens in #include" . ($next ? "_next" : "") . " directive");
             }
             return $this->findAndParse($file, $contextDir, $contextFile, $next);
@@ -240,7 +246,7 @@ class PreProcessor {
                 }
                 $file .= $arg->value;
             }
-            if (!empty($args)) {
+            if ($arg->next) {
                 throw new \LogicException("extra tokens in #include" . ($next ? "_next" : "") . " directive");
             }
             // always a system import
@@ -394,6 +400,7 @@ next:
 class CallStack {
     public string $toCall;
     public int $openCount = 0;
+    /** @var Token[] */
     public array $args = [];
     public Token $currentArg;
     public ?CallStack $prior;

@@ -7,8 +7,9 @@ namespace PHPCParser;
 use PHPCParser\PreProcessor\Token;
 
 class Context {
+    /** @var Token[] */
     private array $definitions = [];
-    
+    /** @var string[] */
     public array $headerSearchPaths = [];
 
     public Scope $scope;
@@ -80,6 +81,7 @@ class Context {
         return null;
     }
 
+    /** @return Token[] */
     public function getDefines(): array {
         return $this->definitions;
     }
@@ -98,6 +100,7 @@ class Context {
         return $first->next;
     }
 
+    /** @return string[] */
     public function getNumericDefines(): array {
         $result = [];
         foreach ($this->definitions as $identifier => $token) {
@@ -186,6 +189,7 @@ class Context {
         return $result;
     }
 
+    /** @return array{Token, Token|null} */
     public function evaluateInternal(?Token $expr, bool $single = false): array {
         if ($expr === null) {
             return [new Token(Token::NUMBER, '0', 'computed'), null];

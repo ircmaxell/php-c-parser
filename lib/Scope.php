@@ -30,8 +30,11 @@ class Scope {
 //        'wchar_t' => Tokens::T_TYPEDEF_NAME,
     ];
 
+    /** @var Node\Type[] */
     private array $types = [];
+    /** @var Node\Decl[] */
     private array $enums = [];
+    /** @var Node\Decl[] */
     private array $structs = [];
 
     private ?Scope $parent;

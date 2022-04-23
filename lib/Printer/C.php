@@ -21,6 +21,7 @@ class C implements Printer
         return $this->printNode($node, 0);
     }
 
+    /** @param Node[] $nodes */
     public function printNodes(array $nodes, int $level): string {
         $result = '';
         foreach ($nodes as $node) {
