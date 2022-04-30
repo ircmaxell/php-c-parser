@@ -232,7 +232,7 @@ class PreProcessor {
         $type = $arg;
         if ($type->type === Token::LITERAL) {
             $file = $type->value;
-            if ($arg->next) {
+            if (Token::skipWhitespace($arg->next)) {
                 throw new \LogicException("extra tokens in #include" . ($next ? "_next" : "") . " directive");
             }
             return $this->findAndParse($file, $contextDir, $contextFile, $next);
@@ -246,7 +246,7 @@ class PreProcessor {
                 }
                 $file .= $arg->value;
             }
-            if ($arg->next) {
+            if (Token::skipWhitespace($arg->next)) {
                 throw new \LogicException("extra tokens in #include" . ($next ? "_next" : "") . " directive");
             }
             // always a system import
