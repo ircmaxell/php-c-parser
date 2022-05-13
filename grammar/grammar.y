@@ -11,7 +11,7 @@
 
 %token  TYPEDEF EXTERN STATIC AUTO REGISTER INLINE ATTRIBUTE
 %token  CONST RESTRICT VOLATILE
-%token  BOOL CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE VOID
+%token  BOOL CHAR SHORT INT LONG SIGNED UNSIGNED INT128 FLOAT DOUBLE FLOAT128 VOID
 %token  COMPLEX IMAGINARY 
 %token  STRUCT UNION ENUM ELLIPSIS
 
@@ -238,8 +238,10 @@ type_specifier
     | SHORT                         { $$ = Node\Type\BuiltinType[$1]; }
     | INT                           { $$ = Node\Type\BuiltinType[$1]; }
     | LONG                          { $$ = Node\Type\BuiltinType[$1]; }
+    | INT128                        { $$ = Node\Type\BuiltinType[$1]; }
     | FLOAT                         { $$ = Node\Type\BuiltinType[$1]; }
     | DOUBLE                        { $$ = Node\Type\BuiltinType[$1]; }
+    | FLOAT128                      { $$ = Node\Type\BuiltinType[$1]; }
     | SIGNED                        { $$ = Node\Type\BuiltinType[$1]; }
     | UNSIGNED                      { $$ = Node\Type\BuiltinType[$1]; }
     | BOOL                          { $$ = Node\Type\BuiltinType[$1]; }
@@ -356,6 +358,7 @@ attribute
 
 declarator
     : unaliased_declarator optional_attribute_specifier_list ASM '(' STRING_LITERAL ')'     { $$ = $1; $$->declarator->attributeList = $2; $$->declarator->declaratorAsm = $5; }
+    | unaliased_declarator ASM '(' STRING_LITERAL ')' optional_attribute_specifier_list     { $$ = $1; $$->declarator->attributeList = $6; $$->declarator->declaratorAsm = $4; }
     | unaliased_declarator optional_attribute_specifier_list                                { $$ = $1; $$->declarator->attributeList = $2; }
     ;
 

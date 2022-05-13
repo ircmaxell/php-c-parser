@@ -53,7 +53,7 @@ restart:
         if ($declaration->qualifiers & Decl::KIND_TYPEDEF) {
             // this is wrong
             foreach ($declaration->declarators as $declarator) {
-                $result[] = $this->compileTypedef($declarator, $type, $attributes);;
+                $result[] = $this->compileTypedef($declarator, $type, $attributes);
             }
         } elseif ($qualifiers === 0 && empty($attributeLists) && empty($declaration->declarators)) {
             if ($type instanceof Type\TagType) {

@@ -275,8 +275,11 @@ emit_single:
         '__inline__' => Tokens::T_INLINE,
         'int' => Tokens::T_INT,
         'long' => Tokens::T_LONG,
+        '__int128' => Tokens::T_INT128,
+        '__float128' => Tokens::T_FLOAT128,
         'register' => Tokens::T_REGISTER,
         'restrict' => Tokens::T_RESTRICT,
+        '__restrict' => Tokens::T_RESTRICT,
         'return' => Tokens::T_RETURN,
         'short' => Tokens::T_SHORT,
         'signed' => Tokens::T_SIGNED,
@@ -291,27 +294,31 @@ emit_single:
         'volatile' => Tokens::T_VOLATILE,
         '__volatile__' => Tokens::T_VOLATILE,
         'while' => Tokens::T_WHILE,
-        '_alignas' => Tokens::T_ALIGNAS,
-        '_alignof' => Tokens::T_ALIGNOF,
-        '_atomic' => Tokens::T_ATOMIC,
-        '_bool' => Tokens::T_BOOL,
-        '_complex' => Tokens::T_COMPLEX,
-        '_generic' => Tokens::T_GENERIC,
-        '_imaginary' => Tokens::T_IMAGINARY,
-        '_noreturn' => Tokens::T_NORETURN,
-        '_static_assert' => Tokens::T_STATIC_ASSERT,
-        '_thread_local' => Tokens::T_THREAD_LOCAL,
+        '_Alignas' => Tokens::T_ALIGNAS,
+        '_Alignof' => Tokens::T_ALIGNOF,
+        '_Atomic' => Tokens::T_ATOMIC,
+        '_Bool' => Tokens::T_BOOL,
+        '_Complex' => Tokens::T_COMPLEX,
+        '_Generic' => Tokens::T_GENERIC,
+        '_Imaginary' => Tokens::T_IMAGINARY,
+        '_Noreturn' => Tokens::T_NORETURN,
+        '_Static_assert' => Tokens::T_STATIC_ASSERT,
+        '_Thread_local' => Tokens::T_THREAD_LOCAL,
         '__thread' => Tokens::T_THREAD_LOCAL,
         '__func__' => Tokens::T_FUNC_NAME,
     ];
 
-    /** @return array{int, string} */
-    private function extractIdentifier(): array {
+    /** @return array{int, string}|null */
+    private function extractIdentifier(): ?array {
         $tok = $this->currentToken;
         $this->currentToken = $this->currentToken->next;
 
         if (isset(self::IDENTIFIER_MAP[$tok->value])) {
             return [self::IDENTIFIER_MAP[$tok->value], $tok->value];
+        }
+        // This is a no-op keyword in gcc, just skip it, is has no value for us
+        if ($tok->value === '__extension__') {
+            return null;
         }
         return [$this->scope->lookup($tok->value), $tok->value];
     }
