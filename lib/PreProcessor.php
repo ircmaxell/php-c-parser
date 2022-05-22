@@ -25,118 +25,123 @@ class PreProcessor {
         if (empty($header)) {
             throw new \LogicException("Header cannot be empty");
         }
-        $lines = $this->findAndParse($header, '', '');
 
         $result = [];
-        while (!empty($lines)) {
-            $line = array_shift($lines);
-            $line = Token::skipWhitespace($line);
-            if (empty($line)) {
-                continue;
-            }
-            if ($line->type === Token::PUNCTUATOR && $line->value === '#') {
-                $line = Token::skipWhitespace($line->next);
+        $includeStack = [$this->findAndParse($header, '', '')];
+        while (!empty($includeStack)) {
+            [$file, $lines] = array_pop($includeStack);
+            while (!empty($lines)) {
+                $line = \reset($lines);
+                $lineno = \key($lines);
+                unset($lines[$lineno]);
+                $line = Token::skipWhitespace($line);
                 if (empty($line)) {
-                    continue; // ignore blank preprocessor directives
+                    continue;
                 }
-                $directive = $line;
-                $line = Token::skipWhitespace($directive->next); 
+                if ($line->type === Token::PUNCTUATOR && $line->value === '#') {
+                    $line = Token::skipWhitespace($line->next);
+                    if (empty($line)) {
+                        continue; // ignore blank preprocessor directives
+                    }
+                    $directive = $line;
+                    $line = Token::skipWhitespace($directive->next);
 
-                if ($directive->type !== Token::IDENTIFIER) {
-                    var_dump($directive, $line);
-                    throw new \LogicException("Unknown directive found {$directive->value}");
-                }
-                switch ($directive->value) {
-                    case 'include':
-                        $tokens = $this->resolveInclude($line, $directive->file);
-                        $lines = array_merge($tokens, $lines);
-                        break;
-                    case 'include_next':
-                        $tokens = $this->resolveInclude($line, $directive->file, true);
-                        $lines = array_merge($tokens, $lines);
-                        break;
-                    case 'define':
-                        if (empty($line)) {
-                            throw new \LogicException("#define must have a name");
-                        }
-                        $identifier = $line;
-                        if ($identifier->type !== Token::IDENTIFIER) {
-                            throw new \LogicException("Only #define identifiers");
-                        }
-                        $this->context->define($identifier->value, $line->next);
-                        break;
-                    case 'undef':
-                        if (empty($line)) {
-                            throw new \LogicException("#undef must only have a single argument");
-                        }
-                        $identifier = $line;
-                        if ($identifier->type !== Token::IDENTIFIER) {
-                            throw new \LogicException("Undef only works on identifiers");
-                        }
-                        if (!empty(Token::skipWhitespace($line->next))) {
-                            var_dump($directive, $identifier, $line);
-                            die("failed parsing undef");
-                        }
-                        $this->context->undefine($identifier->value);
-                        break;
-                    case 'if':
-                        if (empty($line)) {
-                            throw new \LogicException("At least one declaration is required for if");
-                        }
-                        if (!$this->evaluateIf($line)) {
-                            $lines = $this->skipIf($lines);
-                        }
-                        break;
-                    case 'ifdef':
-                    case 'ifndef':
-                        if (empty($line)) {
-                            throw new \LogicException("Only a single arg is allowed for #{$directive->value}");
-                        }
-                        if ($line->type !== Token::IDENTIFIER) {
-                            throw new \LogicException("Only an identifier arg is allowed for #{$directive->value}");
-                        }
-                        $tmp = $this->context->isDefined($line->value);
-                        if ($tmp xor $directive->value === 'ifdef') {
-                            // skip if they aren't the same boolean value
-                            // if value is ifdef, skip if result is false
-                            // if value is ifndef, skip if result is true
-                            $lines = $this->skipIf($lines);
-                        }
-                        break;
-                    case 'else':
-                    case 'elif':
-                        $lines = $this->skipIf($lines, true);
-                        break;
-                    case 'endif':
-                        // ignore
-                        break;
-                    case 'pragma':
-                        if (empty($line)) {
-                            throw new \LogicException("At least one declaration is required for pragma");
-                        }
-                        $pragmaMode = $line;
-                        if ($pragmaMode->value === "once") {
-                            if (Token::skipWhitespace($pragmaMode->next)) {
-                                throw new \LogicException("pragma once has no further arguments");
-                            }
-                            $this->headers[$pragmaMode->file] = true;
-                        }
-                        break;
-                    case 'warning':
-                        // ignore
-                        break;
-                    case 'error':
-                        //var_dump($this->context);
-                        //var_dump(array_keys($this->context->getDefines()));
-                        $this->debug($directive);
-                        throw new \LogicException('We reached an error preprocessor token:');
-                    default:
-                        var_dump($line);
-                        var_dump($directive->value);
+                    if ($directive->type !== Token::IDENTIFIER) {
+                        var_dump($directive, $line);
                         throw new \LogicException("Unknown directive found {$directive->value}");
+                    }
+                    switch ($directive->value) {
+                        case 'include':
+                            $includeStack[] = [$file, $lines];
+                            [$file, $lines] = $this->resolveInclude($line, $directive->file);
+                            break;
+                        case 'include_next':
+                            $includeStack[] = [$file, $lines];
+                            [$file, $lines] = $this->resolveInclude($line, $directive->file, true);
+                            break;
+                        case 'define':
+                            if (empty($line)) {
+                                throw new \LogicException("#define must have a name");
+                            }
+                            $identifier = $line;
+                            if ($identifier->type !== Token::IDENTIFIER) {
+                                throw new \LogicException("Only #define identifiers");
+                            }
+                            $this->context->define($identifier->value, $line->next);
+                            break;
+                        case 'undef':
+                            if (empty($line)) {
+                                throw new \LogicException("#undef must only have a single argument");
+                            }
+                            $identifier = $line;
+                            if ($identifier->type !== Token::IDENTIFIER) {
+                                throw new \LogicException("Undef only works on identifiers");
+                            }
+                            if (!empty(Token::skipWhitespace($line->next))) {
+                                var_dump($directive, $identifier, $line);
+                                die("failed parsing undef");
+                            }
+                            $this->context->undefine($identifier->value);
+                            break;
+                        case 'if':
+                            if (empty($line)) {
+                                throw new \LogicException("At least one declaration is required for if");
+                            }
+                            if (!$this->evaluateIf($line)) {
+                                $this->skipIf($lines);
+                            }
+                            break;
+                        case 'ifdef':
+                        case 'ifndef':
+                            if (empty($line)) {
+                                throw new \LogicException("Only a single arg is allowed for #{$directive->value}");
+                            }
+                            if ($line->type !== Token::IDENTIFIER) {
+                                throw new \LogicException("Only an identifier arg is allowed for #{$directive->value}");
+                            }
+                            $tmp = $this->context->isDefined($line->value);
+                            if ($tmp xor $directive->value === 'ifdef') {
+                                // skip if they aren't the same boolean value
+                                // if value is ifdef, skip if result is false
+                                // if value is ifndef, skip if result is true
+                                $this->skipIf($lines);
+                            }
+                            break;
+                        case 'else':
+                        case 'elif':
+                            $this->skipIf($lines, true);
+                            break;
+                        case 'endif':
+                            // ignore
+                            break;
+                        case 'pragma':
+                            if (empty($line)) {
+                                throw new \LogicException("At least one declaration is required for pragma");
+                            }
+                            $pragmaMode = $line;
+                            if ($pragmaMode->value === "once") {
+                                if (Token::skipWhitespace($pragmaMode->next)) {
+                                    throw new \LogicException("pragma once has no further arguments");
+                                }
+                                $this->headers[$pragmaMode->file] = true;
+                            }
+                            break;
+                        case 'warning':
+                            // ignore
+                            break;
+                        case 'error':
+                            //var_dump($this->context);
+                            //var_dump(array_keys($this->context->getDefines()));
+                            $this->debug($directive);
+                            throw new \LogicException('We reached an error preprocessor token:');
+                        default:
+                            var_dump($line);
+                            var_dump($directive->value);
+                            throw new \LogicException("Unknown directive found {$directive->value}");
+                    }
+                } else {
+                    $result[] = $this->expandMacros($file, $lineno, $line);
                 }
-            } else {
-                $result[] = $this->expandMacros($line);
             }
         }
         if ($this->callStack !== null) {
@@ -158,12 +163,11 @@ class PreProcessor {
         return true;
     }
 
-    /** @param Token[] $lines
-     *  @return Token[]
-     */
-    private function skipIf(array $lines, bool $skipAll = false): array {
+    /** @param Token[] $lines */
+    private function skipIf(array &$lines, bool $skipAll = false): void {
         while (!empty($lines)) {
-            $line = array_shift($lines);
+            $line = \reset($lines);
+            unset($lines[\key($lines)]);
             $line = Token::skipWhitespace($line);
             if (empty($line) || empty($line->next)) {
                 continue;
@@ -175,24 +179,24 @@ class PreProcessor {
                         case 'if':
                         case 'ifdef':
                         case 'ifndef':
-                            $lines = $this->skipIf($lines, true);
+                            $this->skipIf($lines, true);
                             break;
                         case 'endif':
-                            return $lines;
+                            return;
                         case 'elif':
                             if ($skipAll) {
                                 break;
                             }
                             $line = Token::skipWhitespace($next->next);
                             if ($this->evaluateIf($line)) {
-                               return $lines;
+                                return;
                             }
                             break;
                         case 'else':
                             if ($skipAll) {
                                 break;
                             }
-                            return $lines;
+                            return;
                         case 'define':
                         case 'include':
                         case 'pragma': // there are no special pragmas supposed to be in #if's
@@ -207,23 +211,22 @@ class PreProcessor {
                 }
             }
         }
-        return [];
     }
 
-    /** @return Token[] */
+    /** @return array{string, Token[]} */
     private function findAndParse(string $header, string $contextDir, string $contextFile, bool $next = false): array {
         $contextDir = rtrim($contextDir, '/');
         $file = $this->findHeaderFile($header, $contextDir, $contextFile, $next);
         if (($this->headers[$file] ?? false) === true) { // has pragma once
-            return [];
+            return [$file, []];
         }
         $this->headers[$file] = false;
         $code = file_get_contents($file);
         $lines = $this->parser->parse($file, $code);
-        return $lines;
+        return [$file, $lines];
     }
 
-    /** @return Token[] */
+    /** @return array{string, Token[]} */
     private function resolveInclude(?Token $arg, string $contextFile, bool $next = false): array {
         $contextDir = dirname($contextFile);
         if (empty($arg)) {
@@ -259,7 +262,7 @@ class PreProcessor {
     private function findHeaderFile(string $header, string $contextDir, string $contextFile, bool $next): string {
         if ($headerFile = $this->context->findHeaderFile($header, $contextDir, $contextFile, $next)) {
             return $headerFile;
-        } 
+        }
         var_dump($this->context->headerSearchPaths);
         throw new \LogicException("Could not find header file: $header given context $contextDir (called from $contextFile)");
     }
@@ -276,7 +279,6 @@ class PreProcessor {
         echo "\n";
     }
 
-    
     private function prepareAndDoCall(string $identifier, array $rawargs): ?Token {
         $args = [];
         $first = null;
@@ -293,9 +295,9 @@ restart:
                 $first = null;
                 $firstTail = null;
             } elseif (is_null($firstTail)) {
-                $first = $firstTail = new Token($next->type, $next->value, $next->file);
+                $first = $firstTail = new Token($next->type, $next->value, $next->file, $next->line);
             } else {
-                $firstTail = $firstTail->next = new Token($next->type, $next->value, $next->file);
+                $firstTail = $firstTail->next = new Token($next->type, $next->value, $next->file, $next->line);
             }
             if ($next->next !== null) {
                 $next = $next->next;
@@ -308,7 +310,7 @@ restart:
         return $this->context->doCall($identifier, ...$args);
     }
 
-    private function expandMacros(?Token $expr, int $recurseLevel = 0): ?Token {
+    private function expandMacros(string $file, int $lineno, ?Token $expr, int $recurseLevel = 0): ?Token {
         $result = $head = new Token(0, '', 'internal');
         if ($this->callStack !== null) {
             $result = $this->callStack->currentArg->tail();
@@ -326,15 +328,24 @@ restart:
                         $this->callStack = new CallStack($expr->value, $this->callStack);
                         $result = $this->callStack->currentArg;
                         goto next;
-                    } 
+                    }
                     // It's not a call, so treat it literally
-                    $result = $result->next = new Token($expr->type, $expr->value, $expr->file);
+                    $result = $result->next = new Token($expr->type, $expr->value, $expr->file, $expr->line);
                     goto next;
                 }
                 $result->next = $this->context->expand($expr->value);
                 $rerun = true;
                 $result = $result->tail();
                 goto next;
+            } elseif ($expr->type === Token::IDENTIFIER && ($expr->value === '__FILE__' || $expr->value === '__LINE__')) {
+                if ($expr->value === '__LINE__') {
+                    $expr->type = Token::NUMBER;
+                    $expr->value = (string)$lineno;
+                }
+                if ($expr->value === '__FILE__') {
+                    $expr->type = Token::LITERAL;
+                    $expr->value = $file;
+                }
             } elseif ($this->callStack !== null && $this->callStack->openCount === 1 && $expr->value === ',') {
                 $this->callStack->nextArg();
                 $result = $this->callStack->currentArg;
@@ -375,7 +386,7 @@ restart:
                 continue;
             }
             if ($expr->type !== Token::WHITESPACE) {
-                $result = $result->next = new Token($expr->type, $expr->value, $expr->file);
+                $result = $result->next = new Token($expr->type, $expr->value, $expr->file, $expr->line);
             }
 next:
             $expr = $expr->next;
@@ -389,7 +400,7 @@ next:
                 throw new \LogicException("Too much recurseLevel!!!");
                 return $head->next;
             }
-            return $this->expandMacros($head->next, $recurseLevel + 1);
+            return $this->expandMacros($file, $lineno, $head->next, $recurseLevel + 1);
         }
         return $head->next;
     }

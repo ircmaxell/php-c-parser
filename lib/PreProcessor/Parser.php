@@ -14,11 +14,11 @@ class Parser {
 
     /** @return Token[] */
     public function parse(string $file, string $code): array {
-        $lines = preg_split("(\n|\r|\r\n)", $code);
+        $lines = preg_split("(\r\n|\n|\r)", $code);
         $lines = $this->mergeContinuedLines($lines);
         $lines = $this->stripComments($lines);
         $lines = $this->stripEmptyLines($lines);
-        $tokens = $this->tokenizer->tokenize($file, ...$lines);
+        $tokens = $this->tokenizer->tokenize($file, $lines);
         return $tokens;
     }
 
@@ -26,36 +26,34 @@ class Parser {
      *  @return string[]
      */
     private function stripEmptyLines(array $lines): array {
-        $new = [];
-        foreach ($lines as $line) {
-            if (!empty($line)) {
-                $new[] = $line;
+        foreach ($lines as $lineno => $line) {
+            if ($line == "") {
+                unset($lines[$lineno]);
             }
         }
-        return $new;
+        return $lines;
     }
 
     /** @param string[] $lines
      *  @return string[]
      */
     private function mergeContinuedLines(array $lines): array {
-        $result = [];
-        $pos = 0;
+        $lineno = 0;
         $length = count($lines);
 
-        while ($pos < $length) {
-            $buffer = $lines[$pos++];
+        while ($lineno < $length) {
+            $buffer = &$lines[$lineno++];
             while (substr($buffer, -1) === '\\') {
                 $buffer = substr($buffer, 0, -1);
-                if ($pos < $length) {
-                    $buffer .= $lines[$pos++];
+                if ($lineno < $length) {
+                    $buffer .= $lines[$lineno];
+                    unset($lines[$lineno++]);
                 } else {
                     break;
                 }
             }
-            $result[] = $buffer;
         }
-        return $result;
+        return $lines;
     }
 
     /** @param string[] $lines
@@ -64,14 +62,18 @@ class Parser {
     private function stripComments(array $lines): array {
         $result = [];
         $pos = 0;
-        $length = count($lines);
+        $length = array_key_last($lines);
 
-        while ($pos < $length) {
-            $buffer = $lines[$pos++];
+        while ($pos <= $length) {
+            while (!isset($lines[$pos])) {
+                ++$pos;
+            }
+            $buffer = $lines[$pos];
             if (strpos($buffer, '//') === false && strpos($buffer, "/*") === false) {
-                $result[] = $buffer;
+                $result[$pos++] = $buffer;
                 continue;
             }
+            $subbuffer = &$result[$pos++];
             $subbuffer = '';
             $i = 0;
             $lineLength = strlen($buffer);
@@ -86,7 +88,10 @@ class Parser {
                         $i++;
                         while (true) {
                             if ($i >= $lineLength) {
-                                if ($pos < $length) {
+                                if ($pos <= $length) {
+                                    while (!isset($lines[$pos])) {
+                                        ++$pos;
+                                    }
                                     $buffer = $lines[$pos++];
                                     $i = 0;
                                     $lineLength = strlen($buffer);
@@ -113,7 +118,10 @@ class Parser {
                     // Consume until we find an unescaped "
                     while (true) {
                         if ($i >= $lineLength) {
-                            if ($pos < $length) {
+                            if ($pos <= $length) {
+                                while (!isset($lines[$pos])) {
+                                    ++$pos;
+                                }
                                 $buffer = $lines[$pos++];
                                 $i = 0;
                                 $lineLength = strlen($buffer);
@@ -141,7 +149,6 @@ class Parser {
                     $subbuffer .= $char;
                 }
             }
-            $result[] = $subbuffer;
         }
         return $result;
     }

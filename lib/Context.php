@@ -638,10 +638,12 @@ result:
                     }
                     $checkToken = $toAdd;
                 }
-                if (((1 << $checkToken->type) | (1 << $newToken->type)) === ((1 << Token::NUMBER) | (1 << Token::IDENTIFIER))) {
-                    $newToken->type = Token::IDENTIFIER;
-                } elseif ($checkToken->type !== $newToken->type) {
-                    continue;
+                if ($checkToken->type !== $newToken->type) {
+                    if ($checkToken->type === Token::NUMBER && $newToken->type === Token::IDENTIFIER) {
+                        $newToken->type = Token::IDENTIFIER;
+                    } elseif ($checkToken->type !== Token::IDENTIFIER || $newToken->type !== Token::NUMBER) {
+                        continue;
+                    }
                 }
                 $newToken->value .= $checkToken->value;
                 if ($toAdd) {

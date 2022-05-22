@@ -15,12 +15,14 @@ class Token {
     public int $type;
     public string $value;
     public string $file;
+    public int $line;
     public ?Token $next;
 
-    public function __construct(int $type, string $value, string $file, ?Token $next = null) {
+    public function __construct(int $type, string $value, string $file, int $line = 0, ?Token $next = null) {
         $this->type = $type;
         $this->value = $value;
         $this->file = $file;
+        $this->line = $line;
         $this->next = $next;
     }
 

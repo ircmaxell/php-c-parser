@@ -7,11 +7,13 @@ namespace PHPCParser\PreProcessor;
 class Tokenizer {
 
 
-    /** @return Token[] */
-    public function tokenize(string $file, string ...$lines): array {
+    /** @param string[] $lines
+     *  @return Token[]
+     */
+    public function tokenize(string $file, array $lines): array {
         $result = [];
-        foreach ($lines as $line) {
-            $result[] = $this->tokenizeLine($file, $line);
+        foreach ($lines as $lineno => $line) {
+            $result[$lineno + 1] = $this->tokenizeLine($file, $lineno + 1, $line);
         }
         return $result;
     }
@@ -40,7 +42,7 @@ class Tokenizer {
         }, $str);
     }
 
-    protected function tokenizeLine(string $file, string $line): ?Token {
+    protected function tokenizeLine(string $file, int $lineno, string $line): ?Token {
         $result = $first = new Token(0, '', $file);
         $length = strlen($line);
         $pos = 0;
@@ -52,14 +54,14 @@ class Tokenizer {
                 while ($pos < $length && (ctype_alnum($line[$pos]) || $line[$pos] === '_')) {
                     $buffer .= $line[$pos++];
                 }
-                $result = $result->next = new Token(Token::IDENTIFIER, $buffer, $file);
+                $result = $result->next = new Token(Token::IDENTIFIER, $buffer, $file, $lineno);
             } elseif ($char === ' ' || $char === "\t" || $char === "\0") {
                 // white space, ignore
                 $buffer = $char;
                 while ($pos < $length && ($line[$pos] === ' ' || $line[$pos] === "\t" || $line[$pos] === "\0")) {
                     $buffer .= $line[$pos++];
                 }
-                $result = $result->next = new Token(Token::WHITESPACE, $buffer, $file);
+                $result = $result->next = new Token(Token::WHITESPACE, $buffer, $file, $lineno);
             } elseif (ctype_digit($char) || ($char === '.' && $pos < $length && ctype_digit($line[$pos]))) {
                 // Numeric literal
                 $buffer = $char;
@@ -79,7 +81,7 @@ class Tokenizer {
                         break;
                     }
                 }
-                $result = $result->next = new Token(Token::NUMBER, $buffer, $file);
+                $result = $result->next = new Token(Token::NUMBER, $buffer, $file, $lineno);
             } elseif ($char === '"') {
                 $buffer = '';
                 while ($pos < $length) {
@@ -94,7 +96,7 @@ class Tokenizer {
                         $buffer .= $char;
                     }
                 }
-                $result = $result->next = new Token(Token::LITERAL, $this->convertEscapeSequences($buffer), $file);
+                $result = $result->next = new Token(Token::LITERAL, $this->convertEscapeSequences($buffer), $file, $lineno);
             } elseif ($char === "'") {
                 $buffer = '';
                 while ($pos < $length) {
@@ -115,47 +117,47 @@ class Tokenizer {
                 } else {
                     throw new \LogicException("Syntax error: unexpected illegal string literal found '$buffer' in $file at position $pos");
                 }
-                $result = $result->next = new Token(Token::NUMBER, (string) \ord($value), $file);
+                $result = $result->next = new Token(Token::NUMBER, (string) \ord($value), $file, $lineno);
             } elseif (ctype_punct($char)) {
                 if ($char === '.' && $pos + 1 < $length && $line[$pos] === '.' && $line[$pos + 1] === '.') {
                     // special case for ... token
-                    $result = $result->next = new Token(Token::PUNCTUATOR, '...', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, '...', $file, $lineno);
                     $pos = $pos + 2;
                 } elseif ($char === '@' || $char === '$' || $char === '`') {
-                    $result = $result->next = new Token(Token::OTHER, $char, $file);
+                    $result = $result->next = new Token(Token::OTHER, $char, $file, $lineno);
                 } elseif ($char === '#' && $pos < $length && $line[$pos] === '#') {
-                    $result = $result->next = new Token(Token::PUNCTUATOR, '##', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, '##', $file, $lineno);
                     $pos++;
                 } elseif ($char === '<' && $pos < $length && $line[$pos] === '%') {
                     // Digraph
-                    $result = $result->next = new Token(Token::PUNCTUATOR, '{', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, '{', $file, $lineno);
                     $pos++;
                 } elseif ($char === '%' && $pos < $length && $line[$pos] === '>') {
                     // Digraph
-                    $result = $result->next = new Token(Token::PUNCTUATOR, '}', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, '}', $file, $lineno);
                     $pos++;
                 } elseif ($char === '<' && $pos < $length && $line[$pos] === ':') {
                     // Digraph
-                    $result = $result->next = new Token(Token::PUNCTUATOR, '[', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, '[', $file, $lineno);
                     $pos++;
                 } elseif ($char === ':' && $pos < $length && $line[$pos] === '>') {
                     // Digraph
-                    $result = $result->next = new Token(Token::PUNCTUATOR, ']', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, ']', $file, $lineno);
                     $pos++;
                 } elseif ($char === '%' && $pos + 2 < $length && $line[$pos] === ':' && $line[$pos + 1] === '%' && $line[$pos + 2] === ':') {
                     // Digraph
-                    $result = $result->next = new Token(Token::PUNCTUATOR, '##', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, '##', $file, $lineno);
                     $pos = $pos + 3;
                 } elseif ($char === '%' && $pos < $length && $line[$pos] === ':') {
                     // Digraph
-                    $result = $result->next = new Token(Token::PUNCTUATOR, '#', $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, '#', $file, $lineno);
                     $pos++;
                 } else {
-                    $result = $result->next = new Token(Token::PUNCTUATOR, $char, $file);
+                    $result = $result->next = new Token(Token::PUNCTUATOR, $char, $file, $lineno);
                 }
             } else {
                 var_dump($char, ord($char), ord("\n"));
-                die("Unknown Character");
+                die("Unknown Character in $file:$lineno");
             }
         }
         return $first->next;
