@@ -48,33 +48,28 @@ class Compiler
         $qualifiers = $declaration->qualifiers;
         $attributeLists = $declaration->attributeLists;
         $type = $this->compileType($declaration->types);
-restart:
+
         $result = [];
         if ($declaration->qualifiers & Decl::KIND_TYPEDEF) {
             // this is wrong
             foreach ($declaration->declarators as $declarator) {
                 $result[] = $this->compileTypedef($declarator, $type, $attributes);
             }
-        } elseif ($qualifiers === 0 && empty($attributeLists) && empty($declaration->declarators)) {
+        } elseif (empty($declaration->declarators)) {
             if ($type instanceof Type\TagType) {
                 if ($type->decl->name !== null) {
                     $this->scope->structdef($type->decl->name, $type->decl);
                 }
                 return [$type->decl];
             }
+            // Handle attributed types here too
             throw new \LogicException('Also not implemented yet');
-        } elseif ($qualifiers === 0 && empty($attributeLists)) {
-            foreach ($declaration->declarators as $initDeclarator) {
-                $result[] = $this->compileInitDeclarator($initDeclarator, $type, $attributes);
-            }     
-        } elseif ($qualifiers > 0 || !empty($attributeLists)) {
-            $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
-            $qualifiers = 0;
-            $attributeLists = [];
-            goto restart;
         } else {
-            var_dump($declaration);
-            throw new \LogicException("Not implemented yet");
+            foreach ($declaration->declarators as $initDeclarator) {
+                $declarator = $this->compileInitDeclarator($initDeclarator, $type, $attributes);
+                $declarator->type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $declarator->type, $attributes);
+                $result[] = $declarator;
+            }
         }
         return $result;
     }
@@ -83,25 +78,19 @@ restart:
         $qualifiers = $declaration->qualifiers;
         $attributeLists = $declaration->attributeLists;
         $type = $this->compileType($declaration->types);
-restart:
+
         if ($declaration->qualifiers & Decl::KIND_TYPEDEF) {
             throw new \LogicException("No typedefs inside statement blocks");
-        } elseif ($qualifiers === 0 && empty($attributeLists) && empty($declaration->declarators)) {
-            throw new \LogicException('Also struct/enum defs inside statement blocks');
-        } elseif ($qualifiers === 0 && empty($attributeLists)) {
+        } elseif (empty($declaration->declarators)) {
+            throw new \LogicException('No struct/enum defs inside statement blocks');
+        } else {
             $declGroup = new DeclGroup([], $attributes);
             foreach ($declaration->declarators as $initDeclarator) {
-                $declGroup->addDecl($this->compileInitDeclarator($initDeclarator, $type, $attributes));
+                $declarator = $this->compileInitDeclarator($initDeclarator, $type, $attributes);
+                $declarator->type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $declarator->type, $attributes);
+                $declGroup->addDecl($declarator);
             }
             return new Stmt\DeclStmt($declGroup, $attributes);
-        } elseif ($qualifiers > 0 || !empty($attributeLists)) {
-            $type = Type\AttributedType::fromDecl($qualifiers, $attributeLists, $type, $attributes);
-            $qualifiers = 0;
-            $attributeLists = [];
-            goto restart;
-        } else {
-            var_dump($declaration);
-            throw new \LogicException("Not implemented yet");
         }
     }
 
@@ -228,7 +217,7 @@ restart:
         return $this->compileTypedefDeclarator($declarator, $type, $attributes);
     }
 
-    public function compileInitDeclarator(IR\InitDeclarator $initDeclarator, Type $type, array $attributes = []): Decl {
+    public function compileInitDeclarator(IR\InitDeclarator $initDeclarator, Type $type, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl {
         $parts = $this->compileNamedDeclarator($initDeclarator->declarator, $type, $attributes);
         if ($parts[1] instanceof Type\FunctionType) {
             return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($parts[0], $parts[2], $parts[1], null, $attributes);
