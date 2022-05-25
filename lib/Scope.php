@@ -71,14 +71,21 @@ class Scope {
         return Tokens::T_IDENTIFIER;
     }
 
-    public function type(string $identifier): Node\Type {
+    public function tryType(string $identifier): ?Node\Type {
         if (!isset($this->types[$identifier])) {
             if ($this->parent !== null) {
                 return $this->parent->type($identifier);
             }
-            throw new \LogicException("Attempt to lookup unknown type '$identifier'");
+            return null;
         }
         return $this->types[$identifier];
+    }
+
+    public function type(string $identifier): Node\Type {
+        if ($type = $this->tryType($identifier)) {
+            return $type;
+        }
+        throw new \LogicException("Attempt to lookup unknown type '$identifier'");
     }
 
     public function enum(string $identifier): Node\Decl {

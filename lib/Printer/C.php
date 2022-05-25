@@ -131,24 +131,28 @@ class C implements Printer
                 $attribute .= $this->printAttributedTypeAttributes($type, $level);
                 $type = $type->parent;
             }
-            $result = $decl->name . '(';
-            $next = '';
-            foreach ($type->params as $idx => $param) {
-                $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
-                $next = ', ';
+            $result = $decl->name;
+            if ($type instanceof Type\FunctionType\FunctionProtoType) {
+                $result .= '(';
+                $next = '';
+                foreach ($type->params as $idx => $param) {
+                    $result .= $next . $this->printType($param, $type->paramNames[$idx], $level);
+                    $next = ', ';
+                }
+                if ($type->isVariadic) {
+                    $result .= $next . '...';
+                }
+                $result .= ')';
+                if ($decl->declaratorAsm !== null) {
+                    $result .= ' __asm__ (' . $this->formatString($decl->declaratorAsm) . ')';
+                }
+                if ($decl->stmts !== null) {
+                    $result .= " " . $this->printCompoundStmt($decl->stmts, $level);
+                }
+                $subType = $this->printType($type->return, '__NAME_PLACEHOLDER__', $level);
+                return $attribute . str_replace('__NAME_PLACEHOLDER__', $result, $subType);
             }
-            if ($type->isVariadic) {
-                $result .= $next . '...';
-            }
-            $result .= ')';
-            if ($decl->declaratorAsm !== null) {
-                $result .= ' __asm__ (' . $this->formatString($decl->declaratorAsm) . ')';
-            }
-            if ($decl->stmts !== null) {
-                $result .= " " . $this->printCompoundStmt($decl->stmts, $level);
-            }
-            $subType = $this->printType($type->return, '__NAME_PLACEHOLDER__', $level);
-            return $attribute . str_replace('__NAME_PLACEHOLDER__', $result, $subType);
+            return $result;
         }
         var_dump($decl);
     }

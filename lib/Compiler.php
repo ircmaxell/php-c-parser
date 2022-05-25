@@ -217,9 +217,22 @@ restart:
         return $this->compileTypedefDeclarator($declarator, $type, $attributes);
     }
 
+    public function verifyTypeIsFunctionType(Type $type): bool {
+        while ($type instanceof Type\ParenType) {
+            $type = $type->parent;
+        }
+        while ($type instanceof Type\TypedefType) {
+            $type = $this->scope->tryType($type->name);
+            while ($type instanceof Type\ParenType) {
+                $type = $type->parent;
+            }
+        }
+        return $type instanceof Type\FunctionType\FunctionProtoType;
+    }
+
     public function compileInitDeclarator(IR\InitDeclarator $initDeclarator, Type $type, array $attributes = []): Decl\NamedDecl\ValueDecl\DeclaratorDecl {
         $parts = $this->compileNamedDeclarator($initDeclarator->declarator, $type, $attributes);
-        if ($parts[1] instanceof Type\FunctionType) {
+        if ($this->verifyTypeIsFunctionType($parts[1])) {
             return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\FunctionDecl($parts[0], $parts[2], $parts[1], null, $attributes);
         }
         return new Decl\NamedDecl\ValueDecl\DeclaratorDecl\VarDecl($parts[0], $parts[2], $parts[1], $initDeclarator->initializer, $attributes);
