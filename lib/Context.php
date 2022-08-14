@@ -16,8 +16,8 @@ class Context {
 
     const DEFAULT_HEADER_SEARCH_PATHS = [
         '/usr/local/include',
-        '/usr/include',
         '/usr/include/x86_64-linux-gnu',
+        '/usr/include',
         '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/',
         '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/',
     ];
@@ -78,23 +78,24 @@ class Context {
         foreach (self::NUMERICAL_DEFINES as $name => $value) {
             $this->define($name, new Token(Token::NUMBER, $value, 'built-in'));
         }
-        $this->headerSearchPaths = array_merge($headerSearchPaths, self::DEFAULT_HEADER_SEARCH_PATHS);
-        $this->locateGCCHeaderPaths();
+        $this->headerSearchPaths = array_merge($headerSearchPaths, $this->locateGCCHeaderPaths(), self::DEFAULT_HEADER_SEARCH_PATHS);
         $this->scope = new Scope;
     }
 
     private function locateGCCHeaderPaths() {
+        $gccHeaders = [];
         if (is_dir('/usr/lib/gcc/x86_64-linux-gnu/')) {
             $dirs = scandir('/usr/lib/gcc/x86_64-linux-gnu/');
             sort($dirs, SORT_NUMERIC);
             foreach ($dirs as $dir) {
                 if (is_numeric($dir) && is_dir('/usr/lib/gcc/x86_64-linux-gnu/' . $dir . '/include')) {
-                    $this->headerSearchPaths[] = '/usr/lib/gcc/x86_64-linux-gnu/' . $dir . '/include';
+                    $gccHeaders[] = '/usr/lib/gcc/x86_64-linux-gnu/' . $dir . '/include';
 		    // Note, linux sometimes adds empty directories, so let's add all in order. This may be wrong long term though...
 		    //return;
                 }
             }
         }
+        return $gccHeaders;
     }
 
     public function findHeaderFile(string $header, string $contextDir, string $contextFile, bool $next): ?string {
