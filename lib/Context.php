@@ -113,12 +113,16 @@ class Context {
                     $dir = dirname($dir);
                 }
             }
+            if ($next)
+            {
+                $next = in_array($contextDir, $this->headerSearchPaths);
+            }
             foreach ($this->headerSearchPaths as $path) {
                 if ($next) {
                     if ($contextDir === $path) {
                         $next = false;
                     }
-                    break;
+                    continue;
                 }
                 $test = $path . '/' . $header;
                 if (file_exists($test)) {

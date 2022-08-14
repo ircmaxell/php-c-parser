@@ -199,6 +199,7 @@ class PreProcessor {
                             return;
                         case 'define':
                         case 'include':
+                        case 'include_next':
                         case 'pragma': // there are no special pragmas supposed to be in #if's
                         case 'undef':
                         case 'error':
