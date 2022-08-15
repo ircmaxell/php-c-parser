@@ -84,14 +84,25 @@ class Context {
 
     private function locateGCCHeaderPaths() {
         $gccHeaders = [];
-        if (is_dir('/usr/lib/gcc/x86_64-linux-gnu/')) {
-            $dirs = scandir('/usr/lib/gcc/x86_64-linux-gnu/');
-            sort($dirs, SORT_NUMERIC);
-            foreach ($dirs as $dir) {
-                if (is_numeric($dir) && is_dir('/usr/lib/gcc/x86_64-linux-gnu/' . $dir . '/include')) {
-                    $gccHeaders[] = '/usr/lib/gcc/x86_64-linux-gnu/' . $dir . '/include';
-		    // Note, linux sometimes adds empty directories, so let's add all in order. This may be wrong long term though...
-		    //return;
+        if (is_dir('/usr/lib/gcc')) {
+            $gccDirs = scandir('/usr/lib/gcc');
+            foreach ($gccDirs as $gccDir) {
+                if ($gccDir[0] !== ".") {
+                    $gccDir = "/usr/lib/gcc/$gccDir";
+                    $dirs = scandir($gccDir);
+                    rsort($dirs, SORT_NUMERIC);
+                    foreach ($dirs as $dir) {
+                        if (is_numeric($dir)) {
+                            if (is_dir("$gccDir/$dir/include")) {
+                                $gccHeaders[] = "$gccDir/$dir/include";
+                            }
+                            if (is_dir("$gccDir/$dir/include-fixed")) {
+                                $gccHeaders[] = "$gccDir/$dir/include-fixed";
+                            }
+                            // Note, linux sometimes adds empty directories, so let's add all in order. This may be wrong long term though...
+                            //return;
+                        }
+                    }
                 }
             }
         }
