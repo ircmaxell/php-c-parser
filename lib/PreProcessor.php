@@ -254,7 +254,7 @@ class PreProcessor {
                 throw new \LogicException("extra tokens in #include" . ($next ? "_next" : "") . " directive");
             }
             // always a system import
-            return $this->findAndParse($file, $contextDir, $contextFile, $next);
+            return $this->findAndParse($file, $next ? $contextDir : "", $contextFile, $next);
         }
         var_dump($type, $arg);
         throw new \LogicException("Illegal include directive");
