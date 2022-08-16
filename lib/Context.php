@@ -359,6 +359,14 @@ restart:
                 $result = new Token(Token::IDENTIFIER, $expr->value, 'computed');
                 $expr = Token::skipWhitespace($expr->next);
             }
+        } elseif ($expr->value === '-') {
+            list ($right, $expr) = $this->evaluateInternal($expr->next, true);
+            $result = new Token(Token::NUMBER, (string) -$this->normalize($right), 'computed');
+            goto result;
+        } elseif ($expr->value === '+') {
+            list ($right, $expr) = $this->evaluateInternal($expr->next, true);
+            $result = new Token(Token::NUMBER, (string) +$this->normalize($right), 'computed');
+            goto result;
         } elseif ($expr->type === Token::PUNCTUATOR && $expr->value === '!' && ($expr->next === null || $expr->next->value !== '=')) {
             $negate = true;
             $expr = Token::skipWhitespace($expr->next);
