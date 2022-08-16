@@ -50,6 +50,10 @@ class Tokenizer {
             $char = $line[$pos++];
             if (ctype_alpha($char) || $char === '_') {
                 // identifier
+                if ($char === 'L' && $pos < $length && $line[$pos] === "'") {
+                    ++$pos;
+                    goto single_quoted_string;
+                }
                 $buffer = $char;
                 while ($pos < $length && (ctype_alnum($line[$pos]) || $line[$pos] === '_')) {
                     $buffer .= $line[$pos++];
@@ -98,6 +102,7 @@ class Tokenizer {
                 }
                 $result = $result->next = new Token(Token::LITERAL, $this->convertEscapeSequences($buffer), $file, $lineno);
             } elseif ($char === "'") {
+single_quoted_string:
                 $buffer = '';
                 while ($pos < $length) {
                     $char = $line[$pos++];
