@@ -22,6 +22,8 @@ class Context {
         '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/',
     ];
 
+    // TODO: Try to figure out built-in sizes at run-time
+
     // defines needed for <float.h>
     const NUMERICAL_DEFINES = [
         "__DBL_DECIMAL_DIG__" => "17",
@@ -63,6 +65,65 @@ class Context {
         "__LDBL_MIN_10_EXP__" => "(-4931)",
         "__LDBL_MIN_EXP__" => "(-16381)",
         "__LDBL_MIN__" => "3.36210314311209350626e-4932L",
+
+        // sizes
+        "__SIZEOF_FLOAT80__" => "16",
+        "__SIZE_MAX__" => "0xffffffffffffffffUL",
+        "__SIZEOF_LONG__" => "8",
+        "__SIZEOF_LONG_DOUBLE__" => "16",
+        "__SIZEOF_FLOAT__" => "4",
+        "__SIZEOF_SIZE_T__" => "8",
+        "__SIZEOF_WINT_T__" => "4",
+        "__SIZEOF_POINTER__" => "8",
+        "__SIZE_TYPE__" => "long unsigned int",
+        "__SIZEOF_PTRDIFF_T__" => "8",
+        "__SIZE_WIDTH__" => "64",
+        "__SIZEOF_INT__" => "4",
+        "__SIZEOF_FLOAT128__" => "16",
+        "__SIZEOF_SHORT__" => "2",
+        "__SIZEOF_INT128__" => "16",
+        "__SIZEOF_WCHAR_T__" => "4",
+        "__SIZEOF_DOUBLE__" => "8",
+        "__SIZEOF_LONG_LONG__" => "8",
+    ];
+
+    // defined needed for <stdint.h>
+    const TYPE_DEFINES = [
+        "__UINT_LEAST8_TYPE__" => "unsigned char",
+        "__SIG_ATOMIC_TYPE__" => "int",
+        "__UINTMAX_TYPE__" => "long unsigned int",
+        "__INT_FAST16_TYPE__" => "long int",
+        "__INT_FAST64_TYPE__" => "long int",
+        "__UINT8_TYPE__" => "unsigned char",
+        "__INT_FAST32_TYPE__" => "long int",
+        "__UINT_LEAST16_TYPE__" => "short unsigned int",
+        "__SIZE_TYPE__" => "long unsigned int",
+        "__INT8_TYPE__" => "signed char",
+        "__UINT32_TYPE__" => "unsigned int",
+        "__INT_LEAST16_TYPE__" => "short int",
+        "__UINT_LEAST64_TYPE__" => "long unsigned int",
+        "__UINT_FAST16_TYPE__" => "long unsigned int",
+        "__CHAR16_TYPE__" => "short unsigned int",
+        "__INT_LEAST64_TYPE__" => "long int",
+        "__INT16_TYPE__" => "short int",
+        "__INT_LEAST8_TYPE__" => "signed char",
+        "__INTPTR_TYPE__" => "long int",
+        "__UINT16_TYPE__" => "short unsigned int",
+        "__WCHAR_TYPE__" => "int",
+        "__UINT_FAST64_TYPE__" => "long unsigned int",
+        "__INT64_TYPE__" => "long int",
+        "__WINT_TYPE__" => "unsigned int",
+        "__UINT_LEAST32_TYPE__" => "unsigned int",
+        "__INT_LEAST32_TYPE__" => "int",
+        "__UINT64_TYPE__" => "long unsigned int",
+        "__INT_FAST8_TYPE__" => "signed char",
+        "__UINT_FAST32_TYPE__" => "long unsigned int",
+        "__CHAR32_TYPE__" => "unsigned int",
+        "__INT32_TYPE__" => "int",
+        "__INTMAX_TYPE__" => "long int",
+        "__PTRDIFF_TYPE__" => "long int",
+        "__UINTPTR_TYPE__" => "long unsigned int",
+        "__UINT_FAST8_TYPE__" => "unsigned char",
     ];
 
     public function __construct(array $headerSearchPaths = []) {
@@ -77,6 +138,14 @@ class Context {
         $this->define('__STDC__', new Token(Token::NUMBER, '1', 'built-in'));
         foreach (self::NUMERICAL_DEFINES as $name => $value) {
             $this->define($name, new Token(Token::NUMBER, $value, 'built-in'));
+        }
+        foreach (self::TYPE_DEFINES as $name => $value) {
+            $typeparts = explode(" ", $value);
+            $token = $startToken = new Token(Token::IDENTIFIER, array_shift($typeparts), 'built-in');
+            foreach ($typeparts as $typepart) {
+                $token = $token->next = new Token(Token::IDENTIFIER, $typepart, 'built-in');
+            }
+            $this->define($name, $startToken);
         }
         $this->headerSearchPaths = array_merge($headerSearchPaths, $this->locateGCCHeaderPaths(), self::DEFAULT_HEADER_SEARCH_PATHS);
         $this->scope = new Scope;
