@@ -69,6 +69,7 @@ class Tokenizer {
             } elseif (ctype_digit($char) || ($char === '.' && $pos < $length && ctype_digit($line[$pos]))) {
                 // Numeric literal
                 $buffer = $char;
+                $had_decimal_separator = false;
                 while ($pos < $length) {
                     $char = $line[$pos];
                     if ($char === 'e' || $char === 'E' || $char === 'p' || $char === 'P') {
@@ -78,8 +79,9 @@ class Tokenizer {
                             // emit both
                             $buffer .= $line[$pos++];
                         }
-                    } elseif (ctype_alnum($char) || $char === '.' || $char === '_') {
+                    } elseif (ctype_alnum($char) || (!$had_decimal_separator && $char === '.') || $char === '_') {
                         $buffer .= $char;
+                        $had_decimal_separator = true;
                         $pos++;
                     } else {
                         break;
