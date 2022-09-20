@@ -280,37 +280,6 @@ class PreProcessor {
         echo "\n";
     }
 
-    private function prepareAndDoCall(string $identifier, array $rawargs): ?Token {
-        $args = [];
-        $first = null;
-        $firstTail = null;
-        while (!empty($rawargs)) {
-            $next = array_shift($rawargs);
-restart:
-            if ($next->value === ',') {
-                if ($first === null) {
-                    $args[] = new Token(Token::IDENTIFIER, '', 'internal');
-                } else {
-                    $args[] = $first;
-                }
-                $first = null;
-                $firstTail = null;
-            } elseif (is_null($firstTail)) {
-                $first = $firstTail = new Token($next->type, $next->value, $next->file, $next->line);
-            } else {
-                $firstTail = $firstTail->next = new Token($next->type, $next->value, $next->file, $next->line);
-            }
-            if ($next->next !== null) {
-                $next = $next->next;
-                goto restart;
-            }
-        }
-        if ($first !== null) {
-            $args[] = $first;
-        }
-        return $this->context->doCall($identifier, ...$args);
-    }
-
     private function expandMacros(string $file, int $lineno, ?Token $expr, int $recurseLevel = 0, array $expandedTokens = []): ?Token {
         $result = $head = new Token(0, '', 'internal');
         if ($this->callStack !== null) {
@@ -322,21 +291,24 @@ restart:
         }
         $rerun = false;
         while ($expr !== null) {
+            // prevent token recursion
             if ($expr->type === Token::IDENTIFIER && $this->context->isDefined($expr->value) && !isset($expandedTokens["$expr->file:$expr->line"][$expr->value])) {
                 if ($this->context->isCall($expr->value)) {
                     $next = Token::skipWhitespace($expr->next);
                     if ($next !== null && $next->value === '(') {
-                        $this->callStack = new CallStack($expr->value, $this->callStack);
+                        $this->callStack = new CallStack($expr, $this->callStack);
                         $result = $this->callStack->currentArg;
                         goto next;
                     }
                     // It's not a call, so treat it literally
-                    $result = $result->next = new Token($expr->type, $expr->value, $expr->file, $expr->line);
+                    $result = $result->next = clone $expr;
+                    $result->next = null;
                     goto next;
                 }
                 $result->next = $this->context->expand($expr->value);
                 for ($cur = $result->next; $cur; $cur = $cur->next) {
                     $expandedTokens["$cur->file:$cur->line"][$expr->value] = true;
+                    $cur->origin[] = $expr;
                 }
                 $rerun = true;
                 $result = $result->tail();
@@ -368,9 +340,10 @@ restart:
                     if ($this->callStack->currentArg->next !== null || !empty($this->callStack->args)) {
                         $this->callStack->nextArg();
                     }
-                    $tmp = $this->context->doCall($this->callStack->toCall, ...$this->callStack->args);
+                    $tmp = $this->context->doCall($this->callStack->toCall->value, ...$this->callStack->args);
                     for ($cur = $tmp; $cur; $cur = $cur->next) {
-                        $expandedTokens["$cur->file:$cur->line"][$this->callStack->toCall] = true;
+                        $expandedTokens["$cur->file:$cur->line"][$this->callStack->toCall->value] = true;
+                        $cur->origin[] = $this->callStack->toCall;
                     }
                     $this->callStack = $this->callStack->prior;
                     if (is_null($this->callStack)) {
@@ -383,7 +356,7 @@ restart:
                     goto next;
                 }
             } elseif ($this->callStack === null && $expr->value === '##') {
-                // perform concatonation
+                // perform concatenation
                 $next = Token::skipWhitespace($expr->next);
                 if ($next === null) {
                     throw new \LogicException("Unknown concat between {$result->value} and null");
@@ -393,7 +366,8 @@ restart:
                 continue;
             }
             if ($expr->type !== Token::WHITESPACE) {
-                $result = $result->next = new Token($expr->type, $expr->value, $expr->file, $expr->line);
+                $result = $result->next = clone $expr;
+                $result->next = null;
             }
 next:
             $expr = $expr->next;
@@ -416,14 +390,14 @@ next:
 }
 
 class CallStack {
-    public string $toCall;
+    public Token $toCall;
     public int $openCount = 0;
     /** @var Token[] */
     public array $args = [];
     public Token $currentArg;
     public ?CallStack $prior;
 
-    public function __construct(string $toCall, ?CallStack $prior) {
+    public function __construct(Token $toCall, ?CallStack $prior) {
         $this->toCall = $toCall;
         $this->prior = $prior;
         $this->currentArg = new Token(0, '', 'internal');

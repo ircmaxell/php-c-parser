@@ -226,7 +226,7 @@ class Context {
         $first = $next = new Token(0, '', 'computed');
         while ($token !== null) {
             if ($token->type !== Token::WHITESPACE) {
-               $next = $next->next = new Token($token->type, $token->value, $token->file);
+               $next = $next->next = new Token($token->type, $token->value, $token->file, $token->line);
             }
             $token = $token->next;
         }
@@ -290,7 +290,7 @@ class Context {
         $def = $this->definitions[$identifier];
         $first = $newToken = new Token(0, '', 'internal');
         while ($def !== null) {
-            $newToken = $newToken->next = new Token($def->type, $def->value, $def->file);
+            $newToken = $newToken->next = new Token($def->type, $def->value, $def->file, $def->line);
             $def = $def->next;
         }
         return Token::skipWhitespace($first->next);
@@ -327,7 +327,7 @@ class Context {
         if ($expr === null) {
             return [new Token(Token::NUMBER, '0', 'computed'), null];
         }
-        $negate = false;
+        $negateToken = null;
 restart:
         $expr = Token::skipWhitespace($expr);
         if ($expr === null) {
@@ -342,6 +342,7 @@ restart:
             }
             $expr = Token::skipWhitespace($expr->next);
         } elseif ($expr->type === Token::IDENTIFIER && $expr->value === 'defined') {
+            $definedToken = $expr;
             $expr = Token::skipWhitespace($expr->next);
             if ($expr === null) {
                 throw new \LogicException("Syntax Error for #defined expression: not enough tokens");
@@ -352,18 +353,20 @@ restart:
                     throw new \LogicException("Syntax Error for defined(identifier) expression: identifier not found");
                 }
                 $expr = Token::skipWhitespace($id->next);
-                if ($expr === null || $expr->type !== Token::PUNCTUATOR && $expr->value !== ')') {
+                if ($expr === null || ($expr->type !== Token::PUNCTUATOR && $expr->value !== ')')) {
                     throw new \LogicException("Syntax Error for defined(identifier) expression: ) not found");
                 }
-                $result = new Token(Token::NUMBER, $this->isDefined($id->value) ? '1' : '0', 'computed');
+                $result = new Token(Token::NUMBER, $this->isDefined($id->value) ? '1' : '0', 'computed#' . $definedToken->file, $definedToken->line);
                 $expr = Token::skipWhitespace($expr->next);
             } elseif ($expr->type === Token::IDENTIFIER) {
-                $result = new Token(Token::NUMBER, $this->isDefined($expr->value) ? '1' : '0', 'computed');
+                $result = new Token(Token::NUMBER, $this->isDefined($expr->value) ? '1' : '0', 'computed#' . $definedToken->file, $definedToken->line);
                 $expr = Token::skipWhitespace($expr->next);
             } else {
                 throw new \LogicException("Syntax Error for #defined expression, expecting ( or IDENTIFIER, found " . $expr->value);
             }
+            $result->origin[] = $definedToken->origin;
         } elseif ($expr->type === Token::IDENTIFIER && $expr->value === '__has_include') {
+            $includeToken = $expr;
             $expr = Token::skipWhitespace($expr->next);
             if ($expr === null) {
                 throw new \LogicException("Syntax Error for __has_include() expression: not enough tokens");
@@ -386,11 +389,12 @@ restart:
                     throw new \LogicException("Syntax Error for __has_include() expression, expecting < or LITERAL, found " . $expr->value);
                 }
                 $expr = Token::skipWhitespace($expr->next);
-                if ($expr === null || $expr->type !== Token::PUNCTUATOR && $expr->value !== ')') {
+                if ($expr === null || ($expr->type !== Token::PUNCTUATOR && $expr->value !== ')')) {
                     throw new \LogicException("Syntax Error for __has_include() expression: ) not found");
                 }
                 $contextDir = dirname($expr->file);
-                $result = new Token(Token::NUMBER, $this->findHeaderFile($file, $contextDir, $expr->file, false) !== null ? '1' : '0', 'computed');
+                $result = new Token(Token::NUMBER, $this->findHeaderFile($file, $contextDir, $expr->file, false) !== null ? '1' : '0', 'computed#' . $includeToken->file, $includeToken->line);
+                $result->origin = $includeToken->origin;
                 $expr = Token::skipWhitespace($expr->next);
             } else {
                 throw new \LogicException("Syntax Error for #__has_include expression, expecting (, found " . $expr->value);
@@ -425,19 +429,24 @@ restart:
                 }
                 goto restart;
             } else {
-                $result = new Token(Token::IDENTIFIER, $expr->value, 'computed');
+                $result = clone $expr;
+                $result->next = null;
                 $expr = Token::skipWhitespace($expr->next);
             }
         } elseif ($expr->value === '-') {
+            $minusToken = $expr;
             list ($right, $expr) = $this->evaluateInternal($expr->next, true);
-            $result = new Token(Token::NUMBER, (string) -$this->normalize($right), 'computed');
+            $result = new Token(Token::NUMBER, (string) -$this->normalize($right), 'computed#' . $minusToken->file, $minusToken->line);
+            $result->origin = $minusToken->origin;
             goto result;
         } elseif ($expr->value === '+') {
+            $plusToken = $expr;
             list ($right, $expr) = $this->evaluateInternal($expr->next, true);
-            $result = new Token(Token::NUMBER, (string) +$this->normalize($right), 'computed');
+            $result = new Token(Token::NUMBER, (string) +$this->normalize($right), 'computed#' . $plusToken->file, $plusToken->line);
+            $result->origin = $plusToken->origin;
             goto result;
         } elseif ($expr->type === Token::PUNCTUATOR && $expr->value === '!' && ($expr->next === null || $expr->next->value !== '=')) {
-            $negate = true;
+            $negateToken = $expr;
             $expr = Token::skipWhitespace($expr->next);
             goto restart;
         } elseif ($expr->type === Token::NUMBER) {
@@ -447,9 +456,10 @@ restart:
             var_dump($expr);
             throw new \LogicException('Unknown operator ' . $expr->value);
         }
-        if ($negate) {
+        if ($negateToken) {
             if ($result->type === Token::NUMBER) {
-                $result = new Token(Token::NUMBER, $result->value === '0' ? '1' : '0', 'computed');
+                $result = new Token(Token::NUMBER, $result->value === '0' ? '1' : '0', 'computed#' . $negateToken->file, $negateToken->line);
+                $result->origin = $negateToken->origin;
             } else {
                 throw new \LogicException('Unknown how to negate result type: ' . $result->value);
             }
@@ -656,7 +666,7 @@ result:
                             while ($variadic->next) {
                                 $variadic = $variadic->next;
                             }
-                            $variadic->next = new Token(Token::PUNCTUATOR, ',', 'computed');
+                            $variadic->next = new Token(Token::PUNCTUATOR, ',', 'computed#' . $variadic->file, $variadic->line);
                             $variadic = $variadic->next;
                             $variadic->next = $args[$argIdx++];
                         }
@@ -696,7 +706,8 @@ result:
                     $arg = $argMap[$nextToken->value];
                     $toAdd = $toAddNext = new Token(Token::OTHER, '', 'computed');
                     while ($arg !== null) {
-                        $toAddNext = $toAddNext->next = new Token(Token::LITERAL, $arg->value, $arg->file);
+                        $toAddNext = $toAddNext->next = new Token(Token::LITERAL, $arg->value, $arg->file, $arg->line);
+                        $toAddNext->origin[] = $nextToken;
                         $arg = $arg->next;
                     }
                     $newToken->next = $toAdd->next ?? $toAdd;
@@ -722,7 +733,8 @@ result:
                         $arg = $arg->next;
                     }
                     while ($arg !== null) {
-                        $toAddNext = $toAddNext->next = new Token($arg->type, $arg->value, $arg->file);
+                        $toAddNext = $toAddNext->next = new Token($arg->type, $arg->value, $arg->file, $arg->line);
+                        $toAddNext->origin[] = $token;
                         $arg = $arg->next;
                     }
                     $toAdd = $toAdd->next;
@@ -756,7 +768,7 @@ result:
                 if ($nextToken && $nextToken->type === Token::PUNCTUATOR && $nextToken->value === '##') {
                     if (\count($argMap) > $argIdx) {
                         // preserve the comma
-                        $newToken = $newToken->next = new Token($token->type, $token->value, $token->file);
+                        $newToken = $newToken->next = new Token($token->type, $token->value, $token->file, $token->line);
                     }
                     $nextToken = Token::skipWhitespace($nextToken->next);
                     if ($nextToken && $nextToken->type === Token::IDENTIFIER && array_key_exists($nextToken->value, $argMap)) {
@@ -768,7 +780,8 @@ result:
                 $arg = $argMap[$token->value];
                 $toAdd = $toAddNext = new Token(Token::OTHER, '', 'computed');
                 while ($arg !== null) {
-                    $toAddNext = $toAddNext->next = new Token($arg->type, $arg->value, $arg->file);
+                    $toAddNext = $toAddNext->next = new Token($arg->type, $arg->value, $arg->file, $arg->line);
+                    $toAddNext->origin[] = $token;
                     if ($toAddNext->type !== Token::WHITESPACE && ($toAddNext->type !== Token::OTHER || $toAddNext->value !== '')) {
                         $lastNonWhitespaceToken = $toAddNext;
                     }
@@ -778,7 +791,8 @@ result:
                 $newToken = $newToken->tail();
                 goto nexttoken;
             } else {
-                $newToken->next = new Token($token->type, $token->value, $token->file);
+                $newToken->next = clone $token;
+                $newToken->next->next = null;
                 if ($token->type !== Token::WHITESPACE && ($token->type !== Token::OTHER || $token->value !== '')) {
                     $lastNonWhitespaceToken = $newToken->next;
                 }

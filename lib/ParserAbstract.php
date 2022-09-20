@@ -210,6 +210,9 @@ abstract class ParserAbstract
                         if (-1 === $e->getStartLine() && isset($startAttributes['startLine'])) {
                             $e->setStartLine($startAttributes['startLine']);
                         }
+                        if (-1 === $e->getSourceToken() && isset($startAttributes['sourceToken'])) {
+                            $e->setSourceToken($startAttributes['sourceToken']);
+                        }
                         $this->emitError($e);
                         // Can't recover from this type of error
                         return null;

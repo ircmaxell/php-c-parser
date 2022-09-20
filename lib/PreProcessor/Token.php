@@ -17,6 +17,8 @@ class Token {
     public string $file;
     public int $line;
     public ?Token $next;
+    /** @var Token[] */
+    public array $origin = [];
 
     public function __construct(int $type, string $value, string $file, int $line = 0, ?Token $next = null) {
         $this->type = $type;

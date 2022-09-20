@@ -27,18 +27,21 @@ class Lexer
         while(true) {
             if ($this->currentToken === null) {
                 if (!array_key_exists(++$this->tokenPos, $this->tokens)) {
-                    $token = "\0";
-                } else {
-                    $this->currentToken = $this->tokens[$this->tokenPos];
-                    continue;
+                    $value = "\0";
+                    return 0;
                 }
+
+                $this->currentToken = $this->tokens[$this->tokenPos];
+                continue;
             } else {
+                $currentStartToken = $this->currentToken;
                 $token = $this->extractToken();
                 if ($token === null) {
                     // tells us to go to the next token
                     continue;
                 }
             }
+            $startAttributes['sourceToken'] = $currentStartToken;
             $startAttributes['startLine'] = $this->tokenPos + 1;
 
             if (is_string($token)) {
