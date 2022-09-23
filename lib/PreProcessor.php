@@ -280,7 +280,17 @@ class PreProcessor {
         echo "\n";
     }
 
-    private function expandMacros(string $file, int $lineno, ?Token $expr, int $recurseLevel = 0, array $expandedTokens = []): ?Token {
+    private function isRecursiveExpansionAttempt($token, $value = null) {
+        $value ??= $token->value;
+        foreach ($token->origin as $origin) {
+            if ($value === $origin->value || $this->isRecursiveExpansionAttempt($origin, $value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function expandMacros(string $file, int $lineno, ?Token $expr, int $recurseLevel = 0): ?Token {
         $result = $head = new Token(0, '', 'internal');
         if ($this->callStack !== null) {
             $result = $this->callStack->currentArg->tail();
@@ -292,7 +302,7 @@ class PreProcessor {
         $rerun = false;
         while ($expr !== null) {
             // prevent token recursion
-            if ($expr->type === Token::IDENTIFIER && $this->context->isDefined($expr->value) && !isset($expandedTokens["$expr->file:$expr->line"][$expr->value])) {
+            if ($expr->type === Token::IDENTIFIER && $this->context->isDefined($expr->value) && !$this->isRecursiveExpansionAttempt($expr)) {
                 if ($this->context->isCall($expr->value)) {
                     $next = Token::skipWhitespace($expr->next);
                     if ($next !== null && $next->value === '(') {
@@ -307,7 +317,6 @@ class PreProcessor {
                 }
                 $result->next = $this->context->expand($expr->value);
                 for ($cur = $result->next; $cur; $cur = $cur->next) {
-                    $expandedTokens["$cur->file:$cur->line"][$expr->value] = true;
                     $cur->origin[] = $expr;
                 }
                 $rerun = true;
@@ -342,7 +351,6 @@ class PreProcessor {
                     }
                     $tmp = $this->context->doCall($this->callStack->toCall->value, ...$this->callStack->args);
                     for ($cur = $tmp; $cur; $cur = $cur->next) {
-                        $expandedTokens["$cur->file:$cur->line"][$this->callStack->toCall->value] = true;
                         $cur->origin[] = $this->callStack->toCall;
                     }
                     $this->callStack = $this->callStack->prior;
@@ -381,7 +389,7 @@ next:
                 throw new \LogicException("Too much recurseLevel in $file:$lineno!!!");
                 return $head->next;
             }
-            return $this->expandMacros($file, $lineno, $head->next, $recurseLevel + 1, $expandedTokens);
+            return $this->expandMacros($file, $lineno, $head->next, $recurseLevel + 1);
         }
         return $head->next;
     }
