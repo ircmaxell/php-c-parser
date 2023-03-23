@@ -126,6 +126,9 @@ class PreProcessor {
                                 $this->headers[$pragmaMode->file] = true;
                             }
                             break;
+                        case 'line':
+                            // not interesting, ignore
+                            break;
                         case 'warning':
                             // ignore
                             break;
