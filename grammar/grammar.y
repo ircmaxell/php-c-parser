@@ -554,6 +554,7 @@ translation_unit
 external_declaration
     : function_definition   { $$ = $1; }
     | declaration           { $$ = compileExternalDeclaration[$1]; }
+    | ';'                   { $$ = []; } /* avoid choking on top-level empty commas */
     ;
 
 function_definition
