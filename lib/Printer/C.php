@@ -154,7 +154,7 @@ class C implements Printer
             }
             return $result;
         }
-        var_dump($decl);
+        throw new \LogicException('Unknown ' . get_class($decl) . ': ' . print_r($decl, true));
     }
 
     protected function printCompoundStmt(Stmt\CompoundStmt $stmts, int $level): string {
@@ -252,7 +252,7 @@ class C implements Printer
                 return str_replace('__NAME_PLACEHOLDER__', $name . '[*]', $subType);
             }
         }
-        var_dump($type);
+        throw new \LogicException('Unknown ' . get_class($type) . ': ' . print_r($type, true));
     }
 
     protected function printInitializer(Expr\Initializer\InitializerElement $initializer, int $level): string {
@@ -298,7 +298,7 @@ class C implements Printer
         Expr\BinaryOperator::KIND_SUB_ASSIGN  => '-=',
         Expr\BinaryOperator::KIND_SHL_ASSIGN  => '<<=',
         Expr\BinaryOperator::KIND_SHR_ASSIGN  => '>>=',
-        Expr\BinaryOperator::KIND_AND_ASSIGN  => '&-',
+        Expr\BinaryOperator::KIND_AND_ASSIGN  => '&=',
         Expr\BinaryOperator::KIND_XOR_ASSIGN  => '^=',
         Expr\BinaryOperator::KIND_OR_ASSIGN   => '|=',
     ];
@@ -395,7 +395,7 @@ class C implements Printer
             }
             return $this->printExpr($expr->fn, $level) . '(' . implode(', ', $args) . ')';
         }
-        var_dump($expr);
+        throw new \LogicException('Unknown ' . get_class($expr) . ': ' . print_r($expr, true));
     }
 
     protected function printStmt(Stmt $stmt, int $level): string {
@@ -483,7 +483,7 @@ class C implements Printer
         if ($stmt instanceof Stmt\EmptyStmt) {
             return ';';
         }
-        var_dump($stmt);
+        throw new \LogicException('Unknown ' . get_class($stmt) . ': ' . print_r($stmt, true));
     }
 
 }

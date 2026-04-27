@@ -11,7 +11,10 @@ use PHPUnit\Framework\TestCase;
  */
 class pragma_onceTest extends TestCase {
 
-    const EXPECTED = 'int bar;';
+    const EXPECTED = 'int main() {
+  int x = 42;
+  return 0;
+}';
 
     protected CParser $parser;
     protected Printer $printer;
@@ -24,7 +27,7 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox Test for #elif chains
+     * @textdox #pragma once and #pragma message directives
      */
     public function testCode() {
         $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');

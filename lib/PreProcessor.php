@@ -15,7 +15,7 @@ class PreProcessor {
     private ?CallStack $callStack = null;
     private ?Token $rerun = null;
 
-    public function __construct(Context $context, Parser $parser = null) {
+    public function __construct(Context $context, ?Parser $parser = null) {
         $this->parser = $parser ?? new Parser;
         $this->context = $context;
     }
