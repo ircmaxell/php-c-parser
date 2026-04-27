@@ -4,6 +4,9 @@ This is a library to parse C code into an AST. Using PHP.
 
 Yes, this is an extraordinarily bad idea...
 
+## Requirements
+
+- PHP 8.4 or later
 
 ## Example
 
