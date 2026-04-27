@@ -9,10 +9,20 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class return_stmtTest extends TestCase {
 
-    const EXPECTED = 'int main() {
+    const EXPECTED = 'void doNothing() {
+  return;
+}
+
+int getValue() {
   int x = 42;
+  return x;
+}
+
+int main() {
+  int result = getValue();
+  doNothing();
   return 0;
 }';
 
@@ -27,10 +37,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Return statement with and without values
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/return_stmtTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

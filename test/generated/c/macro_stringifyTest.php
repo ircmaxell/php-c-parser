@@ -9,10 +9,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class macro_stringifyTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  printf("hello world");
   return 0;
 }';
 
@@ -27,10 +27,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Macro with stringification (# operator)
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/macro_stringifyTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

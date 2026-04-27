@@ -9,11 +9,21 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class goto_labelsTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
-  return 0;
+  int result = 0;
+  int i = 0;
+  while ((i < 10)) {
+    if ((i == 5)) {
+      goto end;
+    }
+
+    (i = (i + 1));
+  }
+
+  (result = i);
+  return result;
 }';
 
     protected CParser $parser;
@@ -27,10 +37,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Goto and labeled statements
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/goto_labelsTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

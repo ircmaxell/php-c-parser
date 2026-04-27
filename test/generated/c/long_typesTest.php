@@ -9,10 +9,13 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class long_typesTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  long x = 0;
+  long y = 0L;
+  unsigned int z = 0;
+  long long w = 0;
   return 0;
 }';
 
@@ -27,10 +30,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox long and unsigned type qualifiers
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/long_typesTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

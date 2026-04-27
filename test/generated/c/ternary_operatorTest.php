@@ -9,10 +9,12 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class ternary_operatorTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int a = (1 ? 2 : 3);
+  int b = ((a > 0) ? 10 : 20);
+  int c = ((a > 0) ? ((b > 0) ? 1 : 2) : 3);
   return 0;
 }';
 
@@ -27,10 +29,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Ternary (conditional) operator
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/ternary_operatorTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

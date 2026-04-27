@@ -9,10 +9,14 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class pointer_arithmeticTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int a = 42;
+  int *ptr = (& a);
+  int b = (* ptr);
+  int arr[10];
+  int *ptr2 = (arr + 1);
   return 0;
 }';
 
@@ -27,10 +31,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Pointer arithmetic (address-of, dereference, pointer addition/subtraction)
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/pointer_arithmeticTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

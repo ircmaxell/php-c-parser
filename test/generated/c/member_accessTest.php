@@ -9,10 +9,24 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class member_accessTest extends TestCase {
 
-    const EXPECTED = 'int main() {
-  int x = 42;
+    const EXPECTED = 'struct Point {
+  int x;
+  int y;
+};
+int main() {
+  struct Point p;
+  int a;
+  (a = (p.x));
+  int b;
+  (b = (p.y));
+  struct Point *ptr;
+  int c;
+  (c = (ptr->x));
+  struct Point arr[5];
+  int d;
+  (d = ((arr)[0].x));
   return 0;
 }';
 
@@ -27,10 +41,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Member access (struct dot and arrow)
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/member_accessTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

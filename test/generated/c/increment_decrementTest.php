@@ -9,10 +9,21 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class increment_decrementTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int a;
+  (a = 0);
+  int b;
+  (b = 0);
+  int c;
+  (c = 0);
+  int d;
+  (d = 0);
+  (a++);
+  (b--);
+  (++ c);
+  (-- d);
   return 0;
 }';
 
@@ -27,10 +38,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Increment and decrement operators
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/increment_decrementTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

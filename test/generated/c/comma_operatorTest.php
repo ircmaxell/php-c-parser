@@ -9,10 +9,12 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class comma_operatorTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int a = 0;\\n int b = 0;
+  int c = (a , b);
+  int d = (((a = 1) , (b = 2)) , (a + b));
   return 0;
 }';
 
@@ -27,10 +29,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Comma operator
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/comma_operatorTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

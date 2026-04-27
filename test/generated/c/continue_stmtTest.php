@@ -9,10 +9,19 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class continue_stmtTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int i;
+  int sum = 0;
+  for ((i = 0); (i < 10); (i++)) {
+    if (((i % 2) == 0)) {
+      continue;
+    }
+
+    (sum = (sum + i));
+  }
+
   return 0;
 }';
 
@@ -27,10 +36,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Continue statement in loop
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/continue_stmtTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

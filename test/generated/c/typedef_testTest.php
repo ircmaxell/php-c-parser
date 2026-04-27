@@ -9,10 +9,15 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class typedef_testTest extends TestCase {
 
-    const EXPECTED = 'int main() {
-  int x = 42;
+    const EXPECTED = 'typedef int Integer;
+typedef struct {
+  int x;
+  int y;
+} Point;
+Integer main() {
+  Point p;
   return 0;
 }';
 
@@ -27,10 +32,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox typedef declarations
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/typedef_testTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

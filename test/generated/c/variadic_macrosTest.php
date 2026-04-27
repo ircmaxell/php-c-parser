@@ -9,10 +9,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class variadic_macrosTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  printf("%d %s %d", 1, "hello", 2);
   return 0;
 }';
 
@@ -27,10 +27,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Variadic macros with __VA_ARGS__
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/variadic_macrosTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

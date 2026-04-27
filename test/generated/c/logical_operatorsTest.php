@@ -9,10 +9,14 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class logical_operatorsTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int a = 0;\\n int b = 0;\\n int c = 0;\\n int d = 0;
+  int e = (a && b);
+  int f = (a || b);
+  int g = (! a);
+  int h = ((a && b) || (! c));
   return 0;
 }';
 
@@ -27,10 +31,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Logical operators
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/logical_operatorsTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

@@ -9,10 +9,17 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class cast_expressionsTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int a;
+  (a = ((int)3.14));
+  double b;
+  (b = ((double)42));
+  int *c;
+  (c = ((int *)0));
+  int d;
+  (d = ((int)(3 + 4)));
   return 0;
 }';
 
@@ -27,10 +34,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Cast expressions
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/cast_expressionsTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

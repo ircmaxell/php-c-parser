@@ -9,10 +9,19 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class infinite_whileTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int running = 1;
+  while (1) {
+    int result = 1;
+    if (result) {
+      (running = 0);
+      break;
+    }
+
+  }
+
   return 0;
 }';
 
@@ -27,10 +36,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Infinite while loop (while(1))
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/infinite_whileTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

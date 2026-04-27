@@ -9,11 +9,17 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class bit_fieldsTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
-  return 0;
+  int flags;
+  (flags = 0);
+  (flags = (flags | (1 << 0)));
+  (flags = (flags | (1 << 3)));
+  (flags = (flags & (~ (1 << 0))));
+  int result;
+  (result = (flags & (1 << 3)));
+  return result;
 }';
 
     protected CParser $parser;
@@ -27,10 +33,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Bit field manipulation with bitwise operators
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/bit_fieldsTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

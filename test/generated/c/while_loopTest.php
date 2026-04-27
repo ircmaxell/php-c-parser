@@ -9,10 +9,16 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class while_loopTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int i = 0;
+  int sum = 0;
+  while ((i < 10)) {
+    (sum = (sum + i));
+    (i = (i + 1));
+  }
+
   return 0;
 }';
 
@@ -27,10 +33,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox While loop statement
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/while_loopTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

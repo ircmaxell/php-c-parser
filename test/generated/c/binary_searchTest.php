@@ -9,11 +9,29 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class binary_searchTest extends TestCase {
 
-    const EXPECTED = 'int main() {
-  int x = 42;
-  return 0;
+    const EXPECTED = 'int binarySearch(int arr[], int size, int target) {
+  int left;
+  (left = 0);
+  int right;
+  (right = (size - 1));
+  while ((left <= right)) {
+    int mid;
+    (mid = ((left + right) / 2));
+    if (((arr)[mid] == target)) {
+      return mid;
+    }
+ else if (((arr)[mid] < target)) {
+      (left = (mid + 1));
+    }
+ else {
+      (right = (mid - 1));
+    }
+
+  }
+
+  return (- 1);
 }';
 
     protected CParser $parser;
@@ -27,10 +45,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Binary search algorithm with for loop and ternary
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/binary_searchTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

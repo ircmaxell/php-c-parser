@@ -9,10 +9,11 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class macro_token_pastingTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int myValue = 42;
+  int x = myValue;
   return 0;
 }';
 
@@ -27,10 +28,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Macro with token pasting (## operator)
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/macro_token_pastingTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

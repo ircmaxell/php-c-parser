@@ -9,11 +9,41 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class string_utilsTest extends TestCase {
 
-    const EXPECTED = 'int main() {
-  int x = 42;
-  return 0;
+    const EXPECTED = 'int myStrlen(char *s) {
+  int len;
+  (len = 0);
+  while ((s)[len]) {
+    (len = (len + 1));
+  }
+
+  return len;
+}
+
+int myStrcmp(char *a, char *b) {
+  int i;
+  (i = 0);
+  while (((a)[i] && ((a)[i] == (b)[i]))) {
+    if (((a)[i] == 0)) {
+      return 0;
+    }
+
+    (i = (i + 1));
+  }
+
+  return ((a)[i] - (b)[i]);
+}
+
+void myStrcpy(char *dest, char *src) {
+  int i;
+  (i = 0);
+  while ((src)[i]) {
+    ((dest)[i] = (src)[i]);
+    (i = (i + 1));
+  }
+
+  ((dest)[i] = 0);
 }';
 
     protected CParser $parser;
@@ -27,10 +57,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox String utility functions (strlen, strcmp, strcpy)
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/string_utilsTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

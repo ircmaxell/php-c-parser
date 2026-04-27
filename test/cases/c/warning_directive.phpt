@@ -1,9 +1,11 @@
 --TEST--
-#pragma once and #pragma message directives
+#warning directive
 --FILE--
 
-#pragma once
-#pragma message("Building main module")
+#define ENABLE_FEATURE 1
+#if ENABLE_FEATURE
+#warning "Feature is enabled"
+#endif
 
 int main() {
   int x = 42;

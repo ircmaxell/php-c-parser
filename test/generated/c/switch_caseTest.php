@@ -9,10 +9,22 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class switch_caseTest extends TestCase {
 
     const EXPECTED = 'int main() {
-  int x = 42;
+  int value = 2;
+  int result = 0;
+  switch (value) {
+    (result = 10);
+    break;
+    (result = 20);
+    break;
+    (result = 30);
+    break;
+    (result = (- 1));
+    break;
+  }
+
   return 0;
 }';
 
@@ -27,10 +39,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox Switch and case statements
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/switch_caseTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

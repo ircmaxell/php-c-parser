@@ -9,10 +9,16 @@ use PHPUnit\Framework\TestCase;
 /**
  * Note: this is a generated file, do not edit this!!!
  */
-class pragma_onceTest extends TestCase {
+class static_externTest extends TestCase {
 
-    const EXPECTED = 'int main() {
-  int x = 42;
+    const EXPECTED = 'static int counter;
+int getValue();
+static void initCounter() {
+  (counter = 0);
+}
+
+int main() {
+  initCounter();
   return 0;
 }';
 
@@ -27,10 +33,10 @@ class pragma_onceTest extends TestCase {
     }
 
     /**
-     * @textdox #pragma once and #pragma message directives
+     * @textdox static and extern storage class specifiers
      */
     public function testCode() {
-        $translationUnit = $this->parser->parse(__DIR__ . '/pragma_onceTest.c');
+        $translationUnit = $this->parser->parse(__DIR__ . '/static_externTest.c');
         $actual = $this->printer->print($translationUnit);
         $this->assertEquals(self::EXPECTED, trim($actual));
     }

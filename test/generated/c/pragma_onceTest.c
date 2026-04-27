@@ -1,6 +1,8 @@
 
-#include "pragma_once.h"
-#include "pragma_once.h"
+#pragma once
+#pragma message("Building main module")
 
-int TEST;
-
+int main() {
+  int x = 42;
+  return 0;
+}
